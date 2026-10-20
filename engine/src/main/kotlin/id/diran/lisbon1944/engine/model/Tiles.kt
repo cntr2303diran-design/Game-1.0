@@ -1,9 +1,9 @@
 package id.diran.lisbon1944.engine.model
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-
-@Serializable
+/**
+ * Petak papan. Bagian dari konten statis (board.json), dibaca manual oleh ContentLoader —
+ * tidak pernah diserialisasi ke dalam GameState.
+ */
 sealed interface Tile {
     val index: Int
     val name: String
@@ -15,8 +15,6 @@ sealed interface OwnableTile : Tile {
     val price: Int
 }
 
-@Serializable
-@SerialName("property")
 data class PropertyTile(
     override val index: Int,
     override val name: String,
@@ -27,8 +25,6 @@ data class PropertyTile(
     val hqRent: Int,
 ) : OwnableTile
 
-@Serializable
-@SerialName("escape")
 data class EscapeRouteTile(
     override val index: Int,
     override val name: String,
@@ -36,8 +32,6 @@ data class EscapeRouteTile(
     override val price: Int = 200,
 ) : OwnableTile
 
-@Serializable
-@SerialName("special")
 data class SpecialTile(
     override val index: Int,
     override val name: String,

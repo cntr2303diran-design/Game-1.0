@@ -26,6 +26,7 @@ sealed interface Action {
     @Serializable @SerialName("payRentInfo") data class PayRentInfo(override val actorId: PlayerId, val cardId: CardId) : Action
 
     // --- Misteri ---------------------------------------------------------------------
+    /** [suspects] berisi 1 kartu, atau 2 untuk kemampuan NKVD (urutan id naik). */
     @Serializable @SerialName("suggest")
     data class Suggest(
         override val actorId: PlayerId,
@@ -35,7 +36,6 @@ sealed interface Action {
     ) : Action
     @Serializable @SerialName("skipSuggestion") data class SkipSuggestion(override val actorId: PlayerId) : Action
     @Serializable @SerialName("revealCard") data class RevealCard(override val actorId: PlayerId, val cardId: CardId) : Action
-    @Serializable @SerialName("declareNoCard") data class DeclareNoCard(override val actorId: PlayerId) : Action
 
     // --- Dekode ----------------------------------------------------------------------
     @Serializable @SerialName("decodePickNumber") data class DecodePickNumber(override val actorId: PlayerId, val n: Int) : Action
@@ -50,10 +50,10 @@ sealed interface Action {
     @Serializable @SerialName("blackMarketSkip") data class BlackMarketSkip(override val actorId: PlayerId) : Action
 
     // --- Tuduhan ---------------------------------------------------------------------
+    /** Biaya (0 / 100 melintas Kedutaan / 300 April 1945) dipotong otomatis sesuai keputusan yang sedang berjalan. */
     @Serializable @SerialName("accuse")
     data class Accuse(override val actorId: PlayerId, val suspect: CardId, val location: CardId, val item: CardId) : Action
     @Serializable @SerialName("declineAccuse") data class DeclineAccuse(override val actorId: PlayerId) : Action
-    @Serializable @SerialName("payToAccuseWhilePassing") data class PayToAccuseWhilePassing(override val actorId: PlayerId) : Action
 
     // --- Bisnis ----------------------------------------------------------------------
     @Serializable @SerialName("build") data class Build(override val actorId: PlayerId, val tile: Int) : Action
@@ -62,13 +62,13 @@ sealed interface Action {
     @Serializable @SerialName("unmortgage") data class Unmortgage(override val actorId: PlayerId, val tile: Int) : Action
     @Serializable @SerialName("proposeTrade") data class ProposeTrade(override val actorId: PlayerId, val offer: TradeOffer) : Action
     @Serializable @SerialName("respondTrade") data class RespondTrade(override val actorId: PlayerId, val accept: Boolean) : Action
-    @Serializable @SerialName("cancelTrade") data class CancelTrade(override val actorId: PlayerId) : Action
 
     // --- Kemampuan & kartu -----------------------------------------------------------
     @Serializable @SerialName("useMi6Ability") data class UseMi6Ability(override val actorId: PlayerId, val targetPlayer: PlayerId) : Action
     @Serializable @SerialName("chooseTelegram") data class ChooseTelegram(override val actorId: PlayerId, val keepCardId: Int) : Action
     /** Konferensi Rahasia, Kurir, Telegram Terbuka, Laporan Intelijen, Peta Kota. */
     @Serializable @SerialName("chooseCardToShow") data class ChooseCardToShow(override val actorId: PlayerId, val cardId: CardId) : Action
+    @Serializable @SerialName("chooseWiretapTarget") data class ChooseWiretapTarget(override val actorId: PlayerId, val target: PlayerId) : Action
 
     // --- Akhir -----------------------------------------------------------------------
     @Serializable @SerialName("submitFinalGuess")

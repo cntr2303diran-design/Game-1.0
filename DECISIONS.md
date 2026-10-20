@@ -22,3 +22,22 @@ nilai konfigurasi.
 | D12 | Game tanpa manusia | `GameConfig.validate()` mengizinkan semua pemain bot (untuk `:sim`). Layar Setup di `:app` yang mewajibkan ≥ 1 manusia. | Simulasi ribuan game membutuhkan meja penuh bot. |
 | D13 | `PlayerView` | Didefinisikan di Tahap 1: lawan hanya terlihat sebagai `OpponentView` (jumlah kartu, bukan isinya; tangan publik hanya bila bangkrut); `myDecision` hanya untuk decider; amplop hanya terlihat setelah game selesai atau viewer Terbakar. | Antarmuka `Bot` (`:bot`) bergantung pada tipe ini; kontrak kerahasiaan ditetapkan sejak awal. |
 | D14 | Versi toolchain | Kotlin 2.1.0, AGP 8.7.3, Gradle 8.14.3, compile/targetSdk 35, JVM target 17. | Kombinasi stabil yang saling kompatibel; dapat dinaikkan di `gradle/libs.versions.toml`. |
+
+## Tahap 2 — Mesin aturan
+
+| # | Topik | Keputusan | Alasan |
+|---|-------|-----------|--------|
+| D15 | Efek bersarang | Engine memakai **tumpukan tugas** (`GameState.tasks`, sealed `Task`) yang ikut tersimpan. `reduce` menerapkan aksi lalu menjalankan tugas sampai ada `PendingDecision` baru atau permainan selesai. | Efek berantai (kartu → gerak → melintas Kedutaan → sewa → utang → lelang kebangkrutan) bisa berhenti di keputusan mana pun dan tetap bisa disimpan/dilanjutkan. |
+| D16 | Gerak per petak | Gerak dijalankan satu petak per langkah tugas. | START dan Kedutaan yang **dilewati** (bukan hanya tempat berhenti) bisa diproses; tawaran Tuduhan 100 muncul tepat saat melintas, lalu gerak berlanjut. |
+| D17 | Urutan START | Saat melewati START: **Jam Perang maju lebih dulu, lalu gaji**. Gaji ditolak bila Front aktif (yang baru dibalik) melarangnya atau perang sudah usai. | Front baru "langsung berlaku" (6.6). Konsekuensi: Razia Okt 1944 menilai uang sebelum gaji pemain yang menggerakkan Jam. |
+| D18 | Perang usai | Begitu Front #12 dibalik, sisa gerak/efek dibatalkan; kartu yang sedang dijalankan kembali ke tumpukan; tiap pemain aktif yang belum Terbakar memasukkan Tebakan Akhir (mulai pemain aktif, searah jarum jam), lalu skor. | "Permainan langsung berakhir" (Front #12). |
+| D19 | Pemenang skor seri | Seri skor → petunjuk benar terbanyak → uang tunai terbanyak → sama-sama menang. | 6.9. |
+| D20 | Agen Ganda | Saat `RevealForSuggestion`, Agen Ganda boleh sekali menunjukkan kartu tangan **mana pun** (bohong); tercatat privat dan dibuka di akhir. Kartu "diarahkan" = kartu yang ia sebut dalam Dugaannya sendiri yang tidak ia pegang. Ia menang bila ada pemain lain Terbakar dengan tuduhan memuat kartu yang diarahkan, atau bila perang usai tanpa ia ketahuan. | BAGIAN 7 Agen Ganda; rumusan "diarahkan" dibuat terukur. |
+| D21 | ProposeTrade | Tidak dienumerasi di `legalActions` (parametrik tak hingga); legalitasnya lewat `checkAction`. Perdagangan hanya di fase Bisnis pemain aktif, mitra menjawab langsung. | Daftar aksi tetap terbatas; UI membangun tawaran lalu memvalidasinya. |
+| D22 | Dekode | Uang lemparan tambahan ditahan; gagal → ke operator, berhasil → ke bank. Operator bertangan kosong → +50 dari bank. Operator = pemain aktif di kanan. | 6.4. |
+| D23 | Kartu dilihat acak | Mata Rahasia MI6: target tidak tahu kartu mana. Informan/Penyadapan/Dekode: pemilik kartu tahu kartu mana yang terlihat (secara fisik kartu diambil). Penyadapan seri terkaya → penarik memilih. | Konsisten dengan teks kemampuan MI6 ("pemain lain hanya tahu…"). |
+| D24 | Rekrut Informan | Hak 1 Dugaan Lokasi bebas berlaku pada giliran ini dan 3 giliran berikutnya; hangus setelah dipakai. | "dalam 3 giliranmu berikutnya". |
+| D25 | Terbakar | Pemain Terbakar tetap bermain ekonomi, wajib menjawab Dugaan, boleh mengajukan Dugaan, tidak bisa menuduh lagi, tidak memberi Tebakan Akhir; skornya ×0,5. | 6.7–6.9. |
+| D26 | Kebangkrutan | Bangunan dijual ke bank setengah harga dasar; uang & properti (status gadai tetap) & Surat Bebas pindah ke kreditur pemain; kreditur bank/Brankas → properti dilelang (Surat Bebas kembali ke tumpukan). Kartu Bukti terbuka untuk semua. Tersisa 1 pemain aktif → kemenangan ekonomi. | 6.8. |
+| D27 | Kasino & tuduhan keluarga | Kasino/Pasar Gelap tidak muncul di Mode Keluarga; tuduhan salah di Mode Keluarga: denda min(uang, 200) ke Brankas tanpa Terbakar. | BAGIAN 7 Mode Keluarga. |
+| D28 | Keluar Penjara dengan kembar | Langsung jalan sesuai dadu, tanpa giliran tambahan. Gagal kembar ke-3 → wajib bayar 50 lalu jalan. | Aturan Monopoli klasik yang dirujuk 6.3. |

@@ -12,8 +12,8 @@ Desain asli: **@DIRAN**.
 | Tahap | Isi | Status |
 |-------|-----|--------|
 | 1 | Proyek 4 modul, model data, konten JSON, loader + validator | ✅ selesai |
-| 2 | Mesin aturan (`reduce`, `legalActions`, `viewFor`, skor) | ⏳ berikutnya |
-| 3 | Bot Easy / Normal / Hard + DeductionTracker | — |
+| 2 | Mesin aturan (`reduce`, `legalActions`, `viewFor`, skor) | ✅ selesai |
+| 3 | Bot Easy / Normal / Hard + DeductionTracker | ⏳ berikutnya |
 | 4 | Simulasi keseimbangan (`:sim`) | — |
 | 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | — |
 | 6 | UI lengkap, audio, aksesibilitas, tutorial | — |
@@ -33,7 +33,12 @@ engine/src/main/kotlin/id/diran/lisbon1944/engine/
 ├── model/      Ids, Enums, Tiles, Cards (efek Front/Sandi/Telegram), Balance,
 │               GameConfig, GameState, Actions, PendingDecision, PlayerView
 ├── content/    GameContent, ContentLoader, ContentValidator, JsonReader
-└── rng/        GameRng + SplitMix64Rng (deterministik, status bisa disimpan)
+├── rng/        GameRng + SplitMix64Rng (deterministik, status bisa disimpan)
+├── internal/   Setup, Flow (giliran/gerak/Front), Cards, Mystery, Market,
+│               Economy (sewa/bangun/gadai), Handlers, Legality, Views, Scoring
+├── GameEngine.kt   API publik: newGame, reduce, legalActions, viewFor, computeRent, computeScores
+├── Invariants.kt   pemeriksaan invariant BAGIAN 9
+└── GameEvents.kt   kunci event stabil untuk UI
 engine/src/main/resources/content/
 ├── board.json  factions.json  evidence.json  front.json
 └── cipher.json telegram.json  balance.json
@@ -52,6 +57,21 @@ Butuh JDK 17+ dan Android SDK (untuk `:app`).
 Setiap push ke `main` menjalankan GitHub Actions (`.github/workflows/ci.yml`): test, validasi
 konten, dan build APK debug. APK bisa diunduh dari tab **Actions → artifact
 `lisbon1944-debug-apk`**.
+
+## Memakai mesin aturan
+
+```kotlin
+val engine = GameEngine()                       // memuat konten bawaan
+var state = engine.newGame(config, seed = 42L)
+val me = PlayerId(0)
+val view = engine.viewFor(state, me)            // satu-satunya yang boleh dibaca UI/bot
+val legal = engine.legalActions(state, me)
+when (val r = engine.reduce(state, legal.first())) {
+    is ReduceResult.Ok -> state = r.state       // r.events untuk animasi
+    is ReduceResult.Rejected -> println(r.reason)
+}
+val save = GameJson.encode(state)               // save/replay deterministik
+```
 
 ## Mengubah keseimbangan & kartu
 

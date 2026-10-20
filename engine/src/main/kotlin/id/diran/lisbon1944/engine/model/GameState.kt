@@ -53,9 +53,13 @@ data class PlayerState(
     val abilityUsed: Boolean = false,
     val infoPaymentsThisStep: Int = 0,
     val heldCards: List<HeldCard> = emptyList(),
+    /** Kartu "Kode Dibakar": larangan Dugaan pada giliran berikutnya. */
     val skipNextSuggestion: Boolean = false,
+    /** Larangan Dugaan yang berlaku pada giliran ini (dipindahkan dari skipNextSuggestion saat giliran mulai). */
+    val suggestionBlockedThisTurn: Boolean = false,
+    /** Hak Dugaan gratis dari Front Agu 1944. */
     val freeSuggestions: Int = 0,
-    /** >0 berarti punya 1 Dugaan tambahan (Rekrut Informan) yang hangus setelah sekian giliran. */
+    /** >0 = punya 1 Dugaan tambahan (Rekrut Informan); berkurang 1 setiap awal giliran pemain ini. */
     val extraSuggestionTurnsLeft: Int = 0,
     val isDoubleAgent: Boolean = false,
     val doubleAgentLieUsed: Boolean = false,
@@ -103,7 +107,7 @@ sealed interface Visibility {
 }
 
 /**
- * Event log. [type] adalah kunci stabil (mis. "dice_rolled") yang dipakai UI untuk animasi & teks terlokalisasi;
+ * Event log. [type] adalah kunci stabil (lihat GameEvents) yang dipakai UI untuk animasi & teks terlokalisasi;
  * [payload] berisi parameter. Event privat tidak pernah dikirim ke pemain di luar [visibility].
  */
 @Serializable
@@ -120,6 +124,7 @@ data class AuctionState(
     /** Urutan penawar (searah jarum jam mulai setelah pemain yang menolak; penolak terakhir). */
     val order: List<PlayerId>,
     val stillIn: List<PlayerId>,
+    /** Indeks di [order] dari penawar yang sedang ditanya. */
     val turnIdx: Int,
     val highBid: Int = 0,
     val highBidder: PlayerId? = null,
@@ -142,10 +147,42 @@ data class TradeOffer(
 @Serializable
 data class TradeState(val offer: TradeOffer)
 
+/** Mini-game Dekode yang sedang berjalan. [number] rahasia milik operator — tidak pernah masuk PlayerView. */
+@Serializable
+data class DecodeState(
+    val asker: PlayerId,
+    val operator: PlayerId,
+    val number: Int? = null,
+    val extraRolls: Int = 0,
+    /** Uang lemparan tambahan yang ditahan sampai hasil diketahui. */
+    val paid: Int = 0,
+)
+
+/** Kebohongan Agen Ganda — event privat sampai layar akhir. */
+@Serializable
+data class LieRecord(
+    val liar: PlayerId,
+    val asker: PlayerId,
+    val shown: CardId,
+    val named: List<CardId>,
+    val actionIndex: Int,
+)
+
 @Serializable
 data class WinResult(
     val type: WinType,
     val winners: List<PlayerId>,
+)
+
+@Serializable
+data class ScoreBreakdown(
+    val player: PlayerId,
+    val cash: Int,
+    val property: Int,
+    val buildings: Int,
+    val clues: Int,
+    val burned: Boolean,
+    val total: Int,
 )
 
 @Serializable
@@ -161,24 +198,35 @@ data class GameState(
     val warStep: Int = 1,
     val warClockAdvancedThisRound: Boolean = false,
     val activeFront: FrontId = FrontId(1),
+    /** Front #12 sudah dibalik; permainan berakhir setelah aksi yang sedang berjalan selesai. */
+    val warEnded: Boolean = false,
+    /** Urutan tumpukan Sandi/Telegram; indeks 0 = kartu teratas. Kartu terpakai kembali ke bawah. */
     val cipherDeck: List<Int>,
     val telegramDeck: List<Int>,
-    val cipherDiscard: List<Int> = emptyList(),
-    val telegramDiscard: List<Int> = emptyList(),
     val casinoVault: Int = 0,
     /** Stok Rumah Aman tersisa di bank. */
     val houseStock: Int,
     /** Stok Markas tersisa di bank. */
     val hqStock: Int,
+    val firstPlayerIdx: Int = 0,
     val currentPlayerIdx: Int = 0,
     val roundNumber: Int = 1,
     val phase: TurnPhase = TurnPhase.MOVE,
     val doublesCount: Int = 0,
+    /** Hak Dugaan dari properti sendiri sudah dipakai pada giliran ini. */
+    val propertySuggestionUsed: Boolean = false,
     val pending: PendingDecision? = null,
+    /** Tumpukan kelanjutan engine (indeks 0 dijalankan lebih dulu). Lihat DECISIONS.md D15. */
+    val tasks: List<Task> = emptyList(),
     val auction: AuctionState? = null,
     val trade: TradeState? = null,
+    val decode: DecodeState? = null,
     val winner: WinResult? = null,
-    val knowledge: Map<PlayerId, Set<KnownFact>> = emptyMap(),
+    /** Pengetahuan per kursi pemain (indeks = PlayerId.value). */
+    val knowledge: List<Set<KnownFact>> = emptyList(),
+    /** Kartu yang "diarahkan" Agen Ganda (rahasia). */
+    val doubleAgentSteered: Set<CardId> = emptySet(),
+    val doubleAgentLies: List<LieRecord> = emptyList(),
     val eventLog: List<GameEvent> = emptyList(),
     val actionCount: Int = 0,
 ) {

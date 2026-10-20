@@ -19,6 +19,8 @@ data class GameConfig(
     val warClockMode: WarClockMode = WarClockMode.FIRST_PASS_PER_ROUND,
     /** Jika diisi, menimpa balance.infoPaymentQuota (house rule = 1). */
     val infoPaymentQuotaOverride: Int? = null,
+    /** Mode Kampanye: properti yang dimulai sebagai milik pemain (indeks petak → kursi). */
+    val presetOwnership: Map<Int, Int> = emptyMap(),
 ) {
     val infoPaymentQuota: Int get() = infoPaymentQuotaOverride ?: balance.infoPaymentQuota
 
@@ -37,6 +39,9 @@ data class GameConfig(
         if (doubleAgentVariant && players.size < 5) add("Varian Agen Ganda hanya untuk 5–6 pemain")
         // Game tanpa manusia sah (dipakai :sim); layar Setup di :app sendiri mewajibkan ≥1 manusia.
         infoPaymentQuotaOverride?.let { if (it < 0) add("infoPaymentQuotaOverride tidak boleh negatif") }
+        presetOwnership.forEach { (tile, seat) ->
+            if (seat !in players.indices) add("presetOwnership: petak $tile menunjuk kursi $seat yang tidak ada")
+        }
     }
 
     companion object {

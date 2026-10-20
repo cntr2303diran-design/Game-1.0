@@ -27,8 +27,12 @@ sealed interface Creditor {
 @Serializable
 enum class ShowReason { SECRET_CONFERENCE, COURIER, OPEN_TELEGRAM, INTELLIGENCE_REPORT, CITY_MAP }
 
+/** Asal hak Dugaan: fase Penyelidikan (properti sendiri / hak gratis) atau petak Ruang Interogasi. */
+@Serializable
+enum class SuggestionSource { INVESTIGATE, INTERROGATION }
+
 /**
- * Siapa yang harus memutuskan sekarang. Hanya satu PendingDecision aktif kecuali game berakhir.
+ * Siapa yang harus memutuskan sekarang. Tepat satu PendingDecision aktif kecuali game berakhir.
  * Data di dalamnya (mis. allowedCards) bersifat privat untuk [decider] — PlayerView hanya
  * menyertakannya utuh bagi decider itu sendiri.
  */
@@ -46,16 +50,19 @@ sealed interface PendingDecision {
         val quote: RentQuote,
         val allowedInfoCards: List<CardId>,
     ) : PendingDecision
-    /** Fase Penyelidikan atau hak Dugaan dari petak/kartu. [freeLocation] = Lokasi bebas. */
+    /** [freeLocation] = Lokasi bebas; [fixedLocation] = Lokasi dari properti sendiri. */
     @Serializable @SerialName("suggestionOffer") data class SuggestionOffer(
         override val decider: PlayerId,
         val freeLocation: Boolean,
         val fixedLocation: CardId? = null,
+        val source: SuggestionSource = SuggestionSource.INVESTIGATE,
     ) : PendingDecision
     @Serializable @SerialName("revealForSuggestion") data class RevealForSuggestion(
         override val decider: PlayerId,
         val asker: PlayerId,
         val allowedCards: List<CardId>,
+        /** Kartu yang disebut dalam Dugaan (publik). */
+        val named: List<CardId>,
     ) : PendingDecision
     @Serializable @SerialName("decodeOperatorPick") data class DecodeOperatorPick(override val decider: PlayerId, val asker: PlayerId) : PendingDecision
     @Serializable @SerialName("decodeContinue") data class DecodeContinue(override val decider: PlayerId, val extraRollsUsed: Int, val paid: Int) : PendingDecision
@@ -71,6 +78,8 @@ sealed interface PendingDecision {
         val allowedCards: List<CardId>,
         val reason: ShowReason,
     ) : PendingDecision
+    /** Penyadapan Telepon: beberapa pemain seri terkaya — penarik kartu memilih. */
+    @Serializable @SerialName("chooseWiretapTarget") data class ChooseWiretapTarget(override val decider: PlayerId, val candidates: List<PlayerId>) : PendingDecision
     @Serializable @SerialName("raiseFunds") data class RaiseFunds(override val decider: PlayerId, val amountOwed: Int, val creditor: Creditor) : PendingDecision
     @Serializable @SerialName("finalGuess") data class FinalGuess(override val decider: PlayerId) : PendingDecision
     @Serializable @SerialName("businessPhase") data class BusinessPhase(override val decider: PlayerId) : PendingDecision
