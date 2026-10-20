@@ -48,6 +48,7 @@ kotlin {
 dependencies {
     implementation(project(":engine"))
     implementation(project(":bot"))
+    implementation(project(":session"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

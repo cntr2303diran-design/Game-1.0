@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import id.diran.lisbon1944.ui.dossier.ContentDossierScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import id.diran.lisbon1944.ui.AppViewModel
+import id.diran.lisbon1944.ui.LisbonApp
 import id.diran.lisbon1944.ui.theme.LisbonTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +15,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LisbonTheme {
-                ContentDossierScreen()
+                val vm: AppViewModel = viewModel()
+                LisbonApp(vm)
             }
         }
     }
