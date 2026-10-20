@@ -88,3 +88,30 @@ Hasil simulasi balance aktif (200 game per meja, bot 2 Hard + 2 Normal kecuali d
 | 6 pemain (2H 2N 2E) | 261 mnt | 237–279 | 24% | 72% | 4% |
 
 Catatan: proporsi cara menang masih bergeser menurut jumlah pemain — dianalisis menyeluruh di Tahap 4.
+
+## Tahap 4 — Simulasi keseimbangan
+
+| # | Topik | Keputusan | Alasan |
+|---|-------|-----------|--------|
+| D51 | **Dominasi Ekonomi** (meja 5–6 pemain) | Saat Front dibalik sejak langkah 6, pemain aktif yang kekayaan bersihnya (uang + harga properti + biaya bangun dasar) ≥ 65% total meja langsung menang Ekonomi. Hanya untuk ≥ 5 pemain (`dominanceMinPlayers`). | Membangkrutkan 4–5 lawan hampir mustahil dalam 4 jam; tanpa aturan ini Ekonomi hanya 3–9% di meja besar. |
+| D52 | OSS | Gaji START OSS 250 → 225. | OSS menang 31% di meja 4 pemain (1,26× rata-rata) dan 30% di meja 5 pemain. |
+| D53 | Target keseimbangan | Durasi median 210–270 menit (menggantikan 60–120 karena target baru 4 jam); faksi ≤ 1,3× rata-rata; tiap cara menang ≥ 10%; tanpa anomali. | Sesuai permintaan pemilik proyek. |
+| D54 | Batas anomali | 4.000 aksi (bukan 2.000). | Permainan 4 jam wajar berisi 1.100–1.500 aksi; 2.000 akan salah menandai meja 6 pemain. |
+| D55 | Faksi per permainan | Dirotasi deterministik (`(game + kursi×3) mod 8`) sehingga tiap faksi duduk di setiap kursi sama sering. | Win rate faksi tidak tercampur efek posisi duduk. |
+| D56 | Sewa dibayar uang | Dihitung dari transfer ber-alasan `rent` (termasuk setelah mengumpulkan dana). | Pembanding langsung untuk bayar-informasi. |
+
+Hasil (balance aktif, seed 42; laporan lengkap di `docs/sim/`):
+
+| Meja | Game | Median | P10–P90 | Detektif | Ekonomi | Skor Mei 1945 | Faksi maks | Target |
+|------|------|--------|---------|----------|---------|---------------|------------|--------|
+| 3 (H N N) | 300 | 224 mnt | 155–255 | 38% | 44% | 17% | 1,12× | ✓ |
+| 4 (H H N N) | 1000 | 242 mnt | 203–268 | 48% | 19% | 33% | 1,11× | ✓ |
+| 5 (H H N N E) | 300 | 255 mnt | 195–276 | 13% | 25% | 61% | 1,17× | ✓ |
+| 6 (H H N N E E) | 300 | 259 mnt | 215–277 | 17% | 19% | 64% | 1,33× | ✗ (OSS 22% vs 16,7%; 300 game → galat ±0,15×) |
+
+A/B `infoPaymentQuota = 1` (4 pemain, 1000 game): bayar-informasi turun 53 → 30 per game, bayar-uang naik 48 → 69;
+durasi dan cara menang hampir tidak berubah (Detektif +3 poin, Skor −4 poin). Korelasi porsi bayar-informasi dengan
+menang lemah (+0,13): bayar-informasi bukan strategi dominan. Kuota 2 dipertahankan.
+
+Catatan: Kecurigaan tidak pernah memicu penangkapan pada bot (bot menghindarinya); elemen ini bekerja sebagai
+pencegah, bukan hukuman yang sering terjadi.

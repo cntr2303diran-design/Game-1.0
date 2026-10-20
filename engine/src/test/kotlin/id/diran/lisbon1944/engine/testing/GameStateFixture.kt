@@ -175,6 +175,8 @@ class GameStateFixture(
             val b = TestEngine.content.balance
             return b.copy(
                 buildingRentPercent = 100,
+                ossSalary = 250,
+                dominancePercent = 0,
                 accuseUnlockStep = 1,
                 publicPasses = true,
                 intel = b.intel.copy(accuseCost = 0, interrogationFree = true),

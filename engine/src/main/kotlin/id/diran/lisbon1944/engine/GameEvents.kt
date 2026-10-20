@@ -90,6 +90,7 @@ object GameEvents {
     const val MISSION_ASSIGNED = "mission_assigned"
     const val MISSION_COMPLETED = "mission_completed"
     const val WAR_CLOCK = "war_clock"
+    const val ECONOMIC_DOMINANCE = "economic_dominance"
     /** Publik: kategori kartu Bukti yang dibagi ulang (Map Merah berpindah). */
     const val EVIDENCE_RESHUFFLED = "evidence_reshuffled"
 }

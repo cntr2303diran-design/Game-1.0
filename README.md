@@ -14,8 +14,8 @@ Desain asli: **@DIRAN**.
 | 1 | Proyek 4 modul, model data, konten JSON, loader + validator | ✅ selesai |
 | 2 | Mesin aturan (`reduce`, `legalActions`, `viewFor`, skor) | ✅ selesai |
 | 3 | Bot Easy / Normal / Hard + DeductionTracker | ✅ selesai |
-| 4 | Simulasi keseimbangan (`:sim`) | ⏳ berikutnya |
-| 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | — |
+| 4 | Simulasi keseimbangan (`:sim`) | ✅ selesai |
+| 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | ⏳ berikutnya |
 | 6 | UI lengkap, audio, aksesibilitas, tutorial | — |
 | 7 | Poles & rilis | — |
 
@@ -29,6 +29,7 @@ Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), ver
 - **Misi Rahasia** — 14 tujuan pribadi bernilai 30–55 poin di Akhir Perang.
 - **Map Merah berpindah** — pada 4 Front, satu kategori kartu Bukti dibagi ulang (jawaban bisa berubah).
 - **Tuduhan Akhir** baru dibuka sejak langkah Jam Perang 10; Jam maju tiap ±5 lintasan START.
+- **Dominasi Ekonomi** (5–6 pemain) — kekayaan ≥ 65% meja saat Front dibalik = menang Ekonomi.
 - **8 faksi** (baru: Penyelundup Spanyol, Pembelot Abwehr) dan **48 kartu Sandi/Telegram**.
 
 Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D50).
@@ -65,6 +66,7 @@ Butuh JDK 17+ dan Android SDK (untuk `:app`).
 ```bash
 ./gradlew :engine:test :bot:test :sim:test   # semua test JVM
 ./gradlew :sim:run --args="--validate"       # validasi konten & ringkasan
+./gradlew :sim:run --args="--games 1000 --players 4 --bots hard,hard,normal,normal --seed 42 --out report.csv"
 ./gradlew :app:assembleDebug                 # APK debug
 ```
 
@@ -86,6 +88,18 @@ when (val r = engine.reduce(state, legal.first())) {
 }
 val save = GameJson.encode(state)               // save/replay deterministik
 ```
+
+## Simulasi keseimbangan
+
+```bash
+./gradlew :sim:run --args="--games 1000 --players 4 --bots hard,hard,normal,normal \
+    --seed 42 --balance path/balance.json --mode standard --out report.csv"
+```
+
+Laporan konsol + CSV: durasi (45 detik/giliran), cara menang, win rate per faksi & kursi, bayar-informasi vs
+bayar-uang dan korelasinya dengan menang, tuduhan salah, langkah Jam saat misteri terpecahkan, A/B otomatis
+`infoPaymentQuota = 1`, anomali (> 4.000 aksi) beserta seed, dan cek target keseimbangan. Hasil terbaru ada di
+[`docs/sim/`](docs/sim) — ringkasannya di DECISIONS.md (D51–D56).
 
 ## Bot
 

@@ -349,6 +349,9 @@ object ContentLoader {
             ),
             smugglerBlackMarketPrice = n.int("smugglerBlackMarketPrice"),
             buildingRentPercent = n.int("buildingRentPercent"),
+            dominancePercent = n.int("dominancePercent"),
+            dominanceFromStep = n.int("dominanceFromStep"),
+            dominanceMinPlayers = n.int("dominanceMinPlayers"),
         )
     }
 }

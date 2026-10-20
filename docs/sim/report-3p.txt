@@ -1,0 +1,44 @@
+LISBON 1944 — simulasi 300 permainan, 3 pemain, bot hard,normal,normal, mode standard, seed 42
+
+Durasi
+  Giliran/game     : rata-rata 285.7 (sd 51.9), P10 207 · median 299 · P90 340
+  Perkiraan menit  : rata-rata 214, P10 155 · median 224 · P90 255 (45 detik/giliran)
+  Aksi/game        : 1011
+
+Cara menang
+  Detektif         :  38.3%  ███████████████
+  Ekonomi          :  44.3%  █████████████████
+  Skor Mei 1945    :  17.3%  ██████
+
+Win rate per faksi (rata-rata 33.3%, maks 1.12× rata-rata)
+  ABWEHR_DEFECTOR    :  37.5%  (112 kursi)
+  SWISS_JOURNALIST   :  37.5%  (112 kursi)
+  RESISTANCE         :  36.3%  (113 kursi)
+  OSS                :  34.5%  (113 kursi)
+  PORTUGAL_TRADER    :  33.9%  (112 kursi)
+  SPANISH_SMUGGLER   :  33.6%  (113 kursi)
+  NKVD               :  26.8%  (112 kursi)
+  MI6                :  26.5%  (113 kursi)
+
+Win rate per posisi duduk
+  Kursi 1          :  34.7%
+  Kursi 2          :  32.0%
+  Kursi 3          :  33.3%
+
+Bayar sewa
+  Informasi/game   : 36.5   Uang/game: 39.0
+  Porsi informasi  : pemenang 51.4% vs lainnya 50.5%; korelasi dengan menang 0.03
+
+Misteri & lainnya
+  Tuduhan/game     : 0.38, salah 0.0%
+  Jam Perang saat misteri terpecahkan (menang Detektif): 10.2
+  Bangkrut/game 1.20 · ditangkap/game 0.00 · misi selesai/game 0.18
+
+Target keseimbangan
+  [✓] Durasi median 210–270 menit (hasil 224)
+  [✓] Tidak ada faksi dengan win rate > 1.3× rata-rata (maks 1.12×)
+  [✓] Ketiga cara menang ≥ 10.0% (Detektif 38.3%, Ekonomi 44.3%, Akhir Perang 17.3%)
+  [✓] Tidak ada anomali (> batas aksi): 0
+
+Waktu simulasi: 21.9 detik
+CSV: docs/sim/report-3p.csv (+ ringkasan report-3p-summary.csv)

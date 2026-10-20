@@ -323,5 +323,8 @@ object ContentValidator {
         nonNegative("suspicion.bribeRelief", b.suspicion.bribeRelief)
         positive("smugglerBlackMarketPrice", b.smugglerBlackMarketPrice)
         positive("buildingRentPercent", b.buildingRentPercent)
+        if (b.dominancePercent !in 0..100) add("balance.json: dominancePercent harus 0..100")
+        if (b.dominanceFromStep !in 1..FRONT_COUNT) add("balance.json: dominanceFromStep harus 1..$FRONT_COUNT")
+        if (b.dominanceMinPlayers !in 3..6) add("balance.json: dominanceMinPlayers harus 3..6")
     }
 }

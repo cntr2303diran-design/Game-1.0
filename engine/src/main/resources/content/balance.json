@@ -2,7 +2,7 @@
   "version": 1,
   "startingMoney": 1500,
   "startSalary": 200,
-  "ossSalary": 250,
+  "ossSalary": 225,
   "buildCost": {
     "PELABUHAN": 50,
     "ALFAMA": 50,
@@ -95,5 +95,8 @@
     "bribeRelief": 2
   },
   "smugglerBlackMarketPrice": 100,
-  "buildingRentPercent": 48
+  "buildingRentPercent": 48,
+  "dominancePercent": 65,
+  "dominanceFromStep": 6,
+  "dominanceMinPlayers": 5
 }

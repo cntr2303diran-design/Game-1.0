@@ -361,6 +361,21 @@ internal fun Tx.revealFront(step: Int) {
         }
     }
     pushAll(tasks)
+    checkDominance()
+}
+
+/** Dominasi Ekonomi saat Front dibalik. */
+internal fun Tx.checkDominance() {
+    val pct = b.dominancePercent
+    if (pct <= 0 || n < b.dominanceMinPlayers || s.warStep < b.dominanceFromStep || s.warEnded || s.winner != null) return
+    val worth = activeIds().associateWith { Economy.netWorth(s, c, it) }
+    val total = worth.values.sum()
+    if (total <= 0) return
+    val (top, value) = worth.maxBy { it.value }
+    if (value * 100 >= total * pct) {
+        emit(E.ECONOMIC_DOMINANCE, "player" to top, "worth" to value, "total" to total)
+        win(id.diran.lisbon1944.engine.model.WinType.ECONOMIC, listOf(top))
+    }
 }
 
 /**

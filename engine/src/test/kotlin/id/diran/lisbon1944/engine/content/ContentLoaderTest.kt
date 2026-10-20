@@ -161,7 +161,7 @@ class ContentLoaderTest {
         val b = content.balance
         assertEquals(1500, b.startingMoney)
         assertEquals(200, b.startSalary)
-        assertEquals(250, b.ossSalary)
+        assertEquals(225, b.ossSalary, "diturunkan dari 250 (DECISIONS D52)")
         assertEquals(
             mapOf(
                 District.PELABUHAN to 50, District.ALFAMA to 50, District.BAIXA to 100,

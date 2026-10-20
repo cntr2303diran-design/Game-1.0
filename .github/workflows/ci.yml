@@ -46,6 +46,9 @@ jobs:
       - name: Validasi konten lewat CLI simulasi
         run: ./gradlew :sim:run --args="--validate"
 
+      - name: Simulasi singkat (smoke test)
+        run: ./gradlew :sim:run --args="--games 20 --players 4 --bots hard,hard,normal,normal --seed 42 --no-ab"
+
       - name: Build APK debug
         run: ./gradlew :app:assembleDebug --stacktrace
 

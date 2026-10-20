@@ -1,5 +1,7 @@
 package id.diran.lisbon1944.sim
 
+import id.diran.lisbon1944.engine.model.BotLevel
+import id.diran.lisbon1944.engine.model.GameMode
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,10 +16,28 @@ class SimArgsTest {
     }
 
     @Test
-    fun `argumen tidak dikenal ditolak`() {
+    fun `perintah simulasi lengkap BAGIAN 11 terbaca`() {
+        val a = SimArgs.parse(
+            "--games 1000 --players 4 --bots hard,hard,normal,normal --seed 42 --balance b.json --mode standard --out report.csv".split(" ").toTypedArray(),
+        )
+        assertEquals(1000, a.games)
+        assertEquals(4, a.players)
+        assertEquals(listOf(BotLevel.HARD, BotLevel.HARD, BotLevel.NORMAL, BotLevel.NORMAL), a.seatLevels)
+        assertEquals(42L, a.seed)
+        assertEquals("b.json", a.balancePath)
+        assertEquals(GameMode.STANDARD, a.mode)
+        assertEquals("report.csv", a.out)
+        assertTrue(a.abTest)
+    }
+
+    @Test
+    fun `argumen tidak dikenal atau tidak konsisten ditolak`() {
         assertFailsWith<IllegalArgumentException> { SimArgs.parse(arrayOf("--terbang")) }
         assertFailsWith<IllegalArgumentException> { SimArgs.parse(arrayOf("--validate", "--balance")) }
         assertFailsWith<IllegalArgumentException> { SimArgs.parse(emptyArray()) }
+        assertFailsWith<IllegalArgumentException> { SimArgs.parse(arrayOf("--players", "7")) }
+        assertFailsWith<IllegalArgumentException> { SimArgs.parse(arrayOf("--players", "4", "--bots", "hard,easy")) }
+        assertFailsWith<IllegalArgumentException> { SimArgs.parse(arrayOf("--bots", "jenius,hard,hard,hard")) }
     }
 
     @Test

@@ -215,6 +215,25 @@ class NewRulesTest {
         f.state.players.forEach { pl -> pl.hand.forEach { c -> assertTrue(f.state.knowledge[pl.id.value].any { it.cardId == c && it.holder == Holder.Player(pl.id) }) } }
     }
 
+    // --- Dominasi Ekonomi ------------------------------------------------------------------
+
+    @Test
+    fun `Dominasi Ekonomi di meja 5 pemain saat Front dibalik`() {
+        val f = GameStateFixture(players = 5, classic = false)
+        val bal = f.content.balance
+        f.front(bal.dominanceFromStep).set { copy(startPasses = config.passesNeededFor(bal.dominanceFromStep + 1) - 1) }
+            .money(0, 20_000).at(0, 39).turn(0)
+        f.act(Action.RollDice(p0), ScriptedRng(1, 1))
+        assertEquals(WinType.ECONOMIC, f.state.winner!!.type)
+        assertEquals(listOf(p0), f.state.winner!!.winners)
+        // Meja 4 pemain tidak memakai Dominasi.
+        val g = GameStateFixture(players = 4, classic = false)
+        g.front(bal.dominanceFromStep).set { copy(startPasses = config.passesNeededFor(bal.dominanceFromStep + 1) - 1) }
+            .money(0, 20_000).at(0, 39).turn(0)
+        g.act(Action.RollDice(p0), ScriptedRng(1, 1))
+        assertNull(g.state.winner)
+    }
+
     // --- Misi Rahasia ----------------------------------------------------------------------
 
     @Test

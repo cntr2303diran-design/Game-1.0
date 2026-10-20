@@ -51,6 +51,12 @@ data class Balance(
     val smugglerBlackMarketPrice: Int,
     /** Skala global sewa bangunan distrik (persen), diterapkan terakhir sebelum pembulatan. */
     val buildingRentPercent: Int,
+    /** Dominasi Ekonomi: saat Front dibalik (sejak langkah [dominanceFromStep]), pemain yang kekayaannya ≥ persen ini dari
+     *  total kekayaan meja menang Ekonomi. 0 = nonaktif (hanya "pemain terakhir yang tersisa"). */
+    val dominancePercent: Int,
+    val dominanceFromStep: Int,
+    /** Dominasi Ekonomi hanya berlaku di meja dengan minimal sekian pemain. */
+    val dominanceMinPlayers: Int,
 )
 
 @Serializable

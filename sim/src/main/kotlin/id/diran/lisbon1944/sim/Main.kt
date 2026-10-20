@@ -20,20 +20,24 @@ fun main(args: Array<String>) {
         System.err.println(e.message)
         exitProcess(2)
     }
-    exitProcess(runValidate(parsed))
+    exitProcess(if (parsed.validateOnly) runValidate(parsed) else runSimulation(parsed))
+}
+
+/** Muat konten (dengan balance alternatif bila diberikan) dan validasi. */
+fun loadContent(args: SimArgs): GameContent {
+    val base = ContentLoader.loadDefault()
+    return args.balancePath?.let { path ->
+        val balance = ContentLoader.parseBalanceOnly(File(path).readText())
+        val errors = ContentValidator.validateBalance(balance)
+        if (errors.isNotEmpty()) throw ContentValidationException(errors)
+        base.copy(balance = balance)
+    } ?: base
 }
 
 /** Mengembalikan kode keluar: 0 sukses, 1 konten tidak valid. */
 fun runValidate(args: SimArgs, out: Appendable = System.out): Int {
     return try {
-        val base = ContentLoader.loadDefault()
-        val content = args.balancePath?.let { path ->
-            val balance = ContentLoader.parseBalanceOnly(File(path).readText())
-            val errors = ContentValidator.validateBalance(balance)
-            if (errors.isNotEmpty()) throw ContentValidationException(errors)
-            base.copy(balance = balance)
-        } ?: base
-        out.append(summary(content))
+        out.append(summary(loadContent(args)))
         0
     } catch (e: ContentFormatException) {
         out.append("GAGAL (format): ${e.message}\n")
@@ -42,6 +46,35 @@ fun runValidate(args: SimArgs, out: Appendable = System.out): Int {
         out.append("GAGAL (validasi): ${e.message}\n")
         1
     }
+}
+
+/** Simulasi + laporan. Kode keluar 0 bila selesai (target tidak tercapai tetap 0 — dilaporkan, bukan galat). */
+fun runSimulation(args: SimArgs, out: Appendable = System.out, err: Appendable = System.err): Int {
+    val content = try {
+        loadContent(args)
+    } catch (e: RuntimeException) {
+        out.append("GAGAL memuat konten: ${e.message}\n")
+        return 1
+    }
+    val sim = Simulation(content)
+    val t0 = System.currentTimeMillis()
+    val step = (args.games / 10).coerceAtLeast(1)
+    val records = sim.run(args) { done -> if (done % step == 0) err.append("  … $done/${args.games} permainan\n") }
+    val abRecords = if (args.abTest) {
+        err.append("A/B: infoPaymentQuota = 1\n")
+        sim.run(args, quotaOverride = 1) { done -> if (done % step == 0) err.append("  … $done/${args.games} permainan (kuota 1)\n") }
+    } else {
+        null
+    }
+    val metrics = Metrics.of(records)
+    val ab = abRecords?.let(Metrics::of)
+    out.append(Report.console(args, metrics, ab))
+    out.append("\nWaktu simulasi: ${fmt1((System.currentTimeMillis() - t0) / 1000.0)} detik\n")
+    args.out?.let {
+        Report.write(it, records, abRecords, metrics, ab)
+        out.append("CSV: $it (+ ringkasan ${File(it).nameWithoutExtension}-summary.csv)\n")
+    }
+    return 0
 }
 
 fun summary(c: GameContent): String = buildString {

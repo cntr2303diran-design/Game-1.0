@@ -135,6 +135,18 @@ internal object Economy {
         return houses to hqs
     }
 
+    /** Kekayaan bersih: uang + harga properti (tergadai setengah) + biaya bangun dasar bangunan terpasang. */
+    fun netWorth(s: GameState, c: GameContent, p: PlayerId): Int {
+        val pl = s.players[p.value]
+        if (pl.bankrupt) return 0
+        return pl.money + s.ownership.filterValues { it.ownerId == p }.entries.sumOf { (tile, o) ->
+            val t = c.tile(tile) as OwnableTile
+            val land = if (o.mortgaged) t.price / 2 else t.price
+            val build = (t as? PropertyTile)?.let { s.config.balance.buildCost.getValue(it.district) * o.level } ?: 0
+            land + build
+        }
+    }
+
     // --- Pemeriksaan aksi bisnis ---------------------------------------------------------
 
     fun buildCheck(s: GameState, c: GameContent, p: PlayerId, tile: Int): RuleViolation? {
