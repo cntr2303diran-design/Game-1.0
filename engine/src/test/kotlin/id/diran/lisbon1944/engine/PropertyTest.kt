@@ -165,7 +165,10 @@ class PropertyTest {
                 // Kartu Bukti lawan tidak muncul kecuali ada di pengetahuan/log yang sah bagi viewer.
                 val allowed = view.knowledge.map { it.cardId.value }.toSet() +
                     view.log.flatMap { it.payload.values }.flatMap { it.split(",") }.toSet() +
-                    me.hand.map { it.value }
+                    me.hand.map { it.value } +
+                    // Kartu Lokasi distrik tempat berdiri & kartu yang disebut dalam Dugaan bersifat publik.
+                    listOfNotNull((view.myDecision as? PendingDecision.SuggestionOffer)?.fixedLocation?.value) +
+                    ((view.myDecision as? PendingDecision.RevealForSuggestion)?.named?.map { it.value } ?: emptyList())
                 state.players.filter { it.id != me.id }.flatMap { it.hand }.forEach { card ->
                     if (card.value !in allowed) assertTrue("\"${card.value}\"" !in json, "kartu ${card.value} bocor ke ${me.id}")
                 }
