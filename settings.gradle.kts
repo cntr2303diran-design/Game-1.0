@@ -19,4 +19,5 @@ rootProject.name = "Lisbon1944"
 include(":engine")
 include(":bot")
 include(":sim")
+include(":session")
 include(":app")

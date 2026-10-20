@@ -337,7 +337,7 @@ internal fun Tx.revealFront(step: Int) {
     s = s.copy(warStep = step, activeFront = front.id)
     val free = front.effects.filterIsInstance<FrontEffect.FreeSuggestionEachPlayer>().sumOf { it.count }
     s = s.copy(players = s.players.map { it.copy(infoPaymentsThisStep = 0, freeSuggestions = if (it.bankrupt) 0 else free) })
-    emit(E.FRONT_REVEALED, "front" to step, "month" to front.month)
+    emit(E.FRONT_REVEALED, "front" to step, "month" to front.month, "card" to front.id.value)
     val tasks = ArrayList<Task>()
     val startSeat = if (isActive(current)) current else leftOf(current) ?: current
     val order = (listOf(startSeat) + othersFromLeft(startSeat)).filter(::isActive)
