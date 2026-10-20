@@ -217,20 +217,26 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 var steps = 0
                 while (true) {
+                    while (true) {
+                        val s = session ?: break
+                        val botTurn = mutex.withLock { s.isBotTurn }
+                        if (!botTurn) break
+                        val d = if (fastForward) 0L else settings.speed.delayMs
+                        if (d > 0) delay(d)
+                        val r = withContext(Dispatchers.Default) { mutex.withLock { s.stepBot() } }
+                        steps++
+                        val events = (r as? StepResult.Ok)?.events.orEmpty()
+                        if (d > 0 || steps % 25 == 0) publish(events)
+                        if (steps % 40 == 0) autosave()
+                    }
+                    fastForward = false
+                    publish(emptyList())
+                    autosave()
+                    // Manusia bisa bertindak saat publish/autosave di atas masih berjalan (pump() lain lalu
+                    // diabaikan karena job ini masih aktif) — periksa lagi sebelum berhenti.
                     val s = session ?: break
-                    val botTurn = mutex.withLock { s.isBotTurn }
-                    if (!botTurn) break
-                    val d = if (fastForward) 0L else settings.speed.delayMs
-                    if (d > 0) delay(d)
-                    val r = withContext(Dispatchers.Default) { mutex.withLock { s.stepBot() } }
-                    steps++
-                    val events = (r as? StepResult.Ok)?.events.orEmpty()
-                    if (d > 0 || steps % 25 == 0) publish(events)
-                    if (steps % 40 == 0) autosave()
+                    if (!mutex.withLock { s.isBotTurn }) break
                 }
-                fastForward = false
-                publish(emptyList())
-                autosave()
                 if (session?.isOver == true && !endSeen) {
                     endSeen = true
                     screen = Screen.END
