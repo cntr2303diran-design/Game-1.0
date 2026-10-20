@@ -22,6 +22,19 @@ jobs:
       - name: Test engine, bot, sim
         run: ./gradlew :engine:test :bot:test :sim:test --stacktrace
 
+      - name: Ringkasan test
+        if: always()
+        run: |
+          for m in engine bot sim; do
+            d="$m/build/test-results/test"
+            if [ -d "$d" ]; then
+              t=$(grep -ho 'tests="[0-9]*"' $d/*.xml | grep -o '[0-9]*' | paste -sd+ - | bc)
+              f=$(grep -ho 'failures="[0-9]*"' $d/*.xml | grep -o '[0-9]*' | paste -sd+ - | bc)
+              s=$(grep -ho 'skipped="[0-9]*"' $d/*.xml | grep -o '[0-9]*' | paste -sd+ - | bc)
+              echo "::notice title=Test :$m::$t test, $f gagal, $s dilewati"
+            fi
+          done
+
       - name: Validasi konten lewat CLI simulasi
         run: ./gradlew :sim:run --args="--validate"
 
