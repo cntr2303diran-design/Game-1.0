@@ -80,6 +80,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private var slot: Int = 1
     private var botJob: Job? = null
     private var fastForward = false
+    private var snapshotSeq = 0L
+    private var shownSeq = 0L
 
     val names: Names? get() = content?.let { Names(it, lang) }
 
@@ -254,8 +256,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val s = session ?: return
         val c = content ?: return
         val e = engine ?: return
-        val snap = withContext(Dispatchers.Default) {
+        val (seq, snap) = withContext(Dispatchers.Default) {
             mutex.withLock {
+                val seq = ++snapshotSeq
                 val view = s.view()
                 val logText = LogText(Names(c, lang))
                 val names = logText.playerNames(view)
@@ -273,10 +276,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     scores = if (s.isOver) e.computeScores(s.state) else null,
                     playerNames = names,
                     message = message,
-                )
+                ).let { seq to it }
             }
         }
-        ui = snap
+        // Snapshot diambil di dalam mutex; yang lebih lama tidak boleh menimpa yang lebih baru.
+        if (seq > shownSeq) {
+            shownSeq = seq
+            ui = snap
+        }
     }
 
     private suspend fun autosave() {
