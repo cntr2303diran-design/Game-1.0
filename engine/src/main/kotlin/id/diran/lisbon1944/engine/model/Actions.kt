@@ -72,6 +72,15 @@ sealed interface Action {
     @Serializable @SerialName("chooseCardToShow") data class ChooseCardToShow(override val actorId: PlayerId, val cardId: CardId) : Action
     @Serializable @SerialName("chooseWiretapTarget") data class ChooseWiretapTarget(override val actorId: PlayerId, val target: PlayerId) : Action
 
+    /** Mainkan Kartu Taktik dari tangan. [targetPlayer]/[targetTile] diisi sesuai TacticTarget kartu. */
+    @Serializable @SerialName("playTactic")
+    data class PlayTactic(
+        override val actorId: PlayerId,
+        val cardId: Int,
+        val targetPlayer: PlayerId? = null,
+        val targetTile: Int? = null,
+    ) : Action
+
     // --- Akhir -----------------------------------------------------------------------
     @Serializable @SerialName("submitFinalGuess")
     data class SubmitFinalGuess(override val actorId: PlayerId, val suspect: CardId, val location: CardId, val item: CardId) : Action

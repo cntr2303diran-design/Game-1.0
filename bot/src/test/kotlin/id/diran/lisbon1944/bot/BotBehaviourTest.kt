@@ -193,6 +193,25 @@ class BotBehaviourTest {
     }
 
     @Test
+    fun `bot memainkan Kartu Taktik yang menguntungkan dan Penyamaran untuk sewa besar`() {
+        val b0 = base()
+        val allTactics = (b0.tacticDeck + b0.players.flatMap { it.tactics }).sorted()
+        val s = b0.copy(
+            tacticDeck = allTactics - 3,
+            players = b0.players.map { if (it.id == p(0)) it.copy(tactics = listOf(3), intel = 0, abilityUsed = true) else it.copy(tactics = emptyList()) },
+            pending = PendingDecision.BusinessPhase(p(0)),
+        )
+        assertEquals(Action.PlayTactic(p(0), 3), decide(BotLevel.HARD, s), "Jaringan Kurir saat Intel kosong")
+        val quote = RentQuote(37, p(1), 400, infoAllowed = false, forcedLocation = false)
+        val rent = s.copy(
+            tacticDeck = allTactics - 1,
+            players = s.players.map { if (it.id == p(0)) it.copy(tactics = listOf(1)) else it },
+            pending = PendingDecision.RentChoice(p(0), quote, emptyList()),
+        )
+        assertEquals(Action.PlayTactic(p(0), 1), decide(BotLevel.HARD, rent), "Penyamaran untuk sewa 400")
+    }
+
+    @Test
     fun `NKVD memakai dua tersangka saat tersangka belum jelas`() {
         val s = base().copy(
             players = base().players.mapIndexed { i, pl -> if (i == 0) pl.copy(faction = Faction.NKVD) else pl },

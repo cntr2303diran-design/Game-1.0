@@ -70,6 +70,12 @@ data class PlayerState(
     val suspicion: Int = 0,
     /** Misi Rahasia (id missions.json) — hanya diketahui pemiliknya. */
     val missionId: Int? = null,
+    /** Kartu Taktik di tangan (id tactics.json) — rahasia; lawan hanya melihat jumlahnya. */
+    val tactics: List<Int> = emptyList(),
+    /** Prestise (poin kemenangan dari Operasi Kota & kartu). Publik. */
+    val prestige: Int = 0,
+    val operationsClaimed: Int = 0,
+    val tacticsPlayed: Int = 0,
 ) {
     val inJail: Boolean get() = jail != null
     val active: Boolean get() = !bankrupt
@@ -188,6 +194,7 @@ data class ScoreBreakdown(
     val buildings: Int,
     val clues: Int,
     val mission: Int = 0,
+    val prestige: Int = 0,
     val burned: Boolean,
     val total: Int,
 )
@@ -209,6 +216,20 @@ data class GameState(
     val warEnded: Boolean = false,
     /** Total lintasan START sejak awal permainan (mode START_PASSES). */
     val startPasses: Int = 0,
+    /** Kartu Front untuk tiap langkah 1..12 (id front.json) — rahasia sampai dibalik. */
+    val frontPlan: List<Int> = (1..12).toList(),
+    /** Tumpukan Kartu Taktik; indeks 0 = teratas, kartu terpakai kembali ke bawah. */
+    val tacticDeck: List<Int> = emptyList(),
+    val tacticsPlayedThisTurn: Int = 0,
+    /** Operasi Kota: tumpukan tertutup, yang terbuka, dan yang sudah diklaim. */
+    val operationDeck: List<Int> = emptyList(),
+    val openOperations: List<Int> = emptyList(),
+    val claimedOperations: List<Int> = emptyList(),
+    /** Petak yang disegel (tanpa sewa) → putaran terakhir segel berlaku. */
+    val sealedTiles: Map<Int, Int> = emptyMap(),
+    /** Posisi pion Patroli PIDE dan Kontak Netral; -1 = tidak dipakai. */
+    val patrolPos: Int = -1,
+    val contactPos: Int = -1,
     /** Urutan tumpukan Sandi/Telegram; indeks 0 = kartu teratas. Kartu terpakai kembali ke bawah. */
     val cipherDeck: List<Int>,
     val telegramDeck: List<Int>,

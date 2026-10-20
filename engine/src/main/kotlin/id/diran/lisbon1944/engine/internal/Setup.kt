@@ -83,6 +83,23 @@ internal object Setup {
             }
         }
 
+        // Rencana Front: varian A/B per langkah (rahasia sampai dibalik).
+        val frontPlan = (1..12).map { step ->
+            val options = c.frontsAtStep(step).sortedBy { it.id.value }
+            val pick = if (b.frontVariants && options.size > 1) options[rng.nextInt(options.size)] else options.first { it.variant == "A" }
+            pick.id.value
+        }
+
+        // Kartu Taktik & Operasi Kota.
+        var tacticDeck = if (b.tactics.enabled) rng.shuffled(c.tactics.map { it.id }) else emptyList()
+        val tacticHands = (0 until n).map { _ ->
+            val hand = tacticDeck.take(b.tactics.startHand)
+            tacticDeck = tacticDeck.drop(hand.size)
+            hand
+        }
+        val opsDeck = if (b.operationsEnabled) rng.shuffled(c.operations.map { it.id }) else emptyList()
+        val openOps = opsDeck.take(c.openOperations)
+
         // Misi Rahasia: satu per pemain, rahasia.
         val missionIds = if (b.score.missionsEnabled && c.missions.size >= n) rng.shuffled(c.missions.map { it.id }).take(n) else emptyList()
 
@@ -91,7 +108,7 @@ internal object Setup {
             PlayerState(
                 id = PlayerId(i), name = setup.name, faction = setup.faction, isBot = setup.isBot, botLevel = setup.botLevel,
                 money = b.startingMoney, hand = hands[i], isDoubleAgent = i == doubleAgent,
-                intel = intel, missionId = missionIds.getOrNull(i),
+                intel = intel, missionId = missionIds.getOrNull(i), tactics = tacticHands[i],
             )
         }
         val knowledge = (0 until n).map { i ->
@@ -109,7 +126,7 @@ internal object Setup {
             envelope = envelope,
             embassyCards = embassy,
             warStep = startStep,
-            activeFront = FrontId(startStep),
+            activeFront = FrontId(frontPlan[startStep - 1]),
             cipherDeck = cipherDeck,
             telegramDeck = telegramDeck,
             houseStock = b.safeHouseStock,
@@ -117,6 +134,12 @@ internal object Setup {
             firstPlayerIdx = first,
             currentPlayerIdx = first,
             knowledge = knowledge,
+            frontPlan = frontPlan,
+            tacticDeck = tacticDeck,
+            operationDeck = opsDeck.drop(openOps.size),
+            openOperations = openOps,
+            patrolPos = if (b.patrol.enabled) b.patrol.startTile else -1,
+            contactPos = if (b.contact.enabled) b.contact.startTile else -1,
             tasks = listOf(Task.StartTurn(PlayerId(first))),
         )
         val tx = Tx(state, rng, c)

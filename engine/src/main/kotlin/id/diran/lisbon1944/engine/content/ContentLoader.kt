@@ -17,6 +17,13 @@ import id.diran.lisbon1944.engine.model.FrontId
 import id.diran.lisbon1944.engine.model.IntelRules
 import id.diran.lisbon1944.engine.model.MissionCard
 import id.diran.lisbon1944.engine.model.MissionCondition
+import id.diran.lisbon1944.engine.model.OperationCard
+import id.diran.lisbon1944.engine.model.OperationReward
+import id.diran.lisbon1944.engine.model.TacticCard
+import id.diran.lisbon1944.engine.model.TacticRules
+import id.diran.lisbon1944.engine.model.PatrolRules
+import id.diran.lisbon1944.engine.model.ContactRules
+import id.diran.lisbon1944.engine.model.ComebackRules
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.QuickModeRules
 import id.diran.lisbon1944.engine.model.ScoreRules
@@ -36,6 +43,8 @@ data class ContentSources(
     val telegram: String,
     val balance: String,
     val missions: String,
+    val tactics: String = "",
+    val operations: String = "",
 )
 
 /**
@@ -52,6 +61,8 @@ object ContentLoader {
     const val TELEGRAM = "telegram.json"
     const val BALANCE = "balance.json"
     const val MISSIONS = "missions.json"
+    const val TACTICS = "tactics.json"
+    const val OPERATIONS = "operations.json"
 
     private val json = Json { isLenient = false }
 
@@ -67,6 +78,8 @@ object ContentLoader {
         telegram = resource(TELEGRAM),
         balance = resource(BALANCE),
         missions = resource(MISSIONS),
+        tactics = resource(TACTICS),
+        operations = resource(OPERATIONS),
     )
 
     /** Muat dan validasi. */
@@ -86,6 +99,9 @@ object ContentLoader {
         telegram = parseDeck(sources.telegram, TELEGRAM, Deck.TELEGRAM),
         balance = parseBalance(sources.balance),
         missions = parseMissions(sources.missions),
+        tactics = if (sources.tactics.isBlank()) emptyList() else parseTactics(sources.tactics),
+        operations = if (sources.operations.isBlank()) emptyList() else parseOperations(sources.operations),
+        openOperations = if (sources.operations.isBlank()) 3 else root(OPERATIONS, sources.operations).int("open"),
     )
 
     /** Hanya balance.json — dipakai :sim untuk --balance path. */
@@ -167,6 +183,8 @@ object ContentLoader {
         root(FRONT, text).child("fronts").array().map { n ->
             FrontCard(
                 id = FrontId(n.int("id")),
+                step = n.intOr("step", n.int("id")),
+                variant = n.stringOrNull("variant") ?: "A",
                 month = n.string("month"),
                 title = n.string("title"),
                 titleEn = n.string("titleEn"),
@@ -194,6 +212,9 @@ object ContentLoader {
         "accuseFromAnywhere" -> FrontEffect.AccuseFromAnywhere
         "endGame" -> FrontEffect.EndGame
         "reshuffleEvidence" -> FrontEffect.ReshuffleEvidence(n.enum("category"))
+        "onRevealIntelAll" -> FrontEffect.OnRevealIntelAll(n.int("amount"))
+        "onRevealSuspicionAll" -> FrontEffect.OnRevealSuspicionAll(n.int("amount"))
+        "onRevealMoneyAll" -> FrontEffect.OnRevealMoneyAll(n.int("amount"))
         else -> n.child("type").fail("efek Front '$type' tidak dikenal")
     }
 
@@ -243,24 +264,67 @@ object ContentLoader {
         "loseIntel" -> CardEffect.LoseIntel(n.int("amount"))
         "addSuspicion" -> CardEffect.AddSuspicion(n.int("amount"))
         "reduceSuspicion" -> CardEffect.ReduceSuspicion(n.int("amount"))
+        "gainPrestige" -> CardEffect.GainPrestige(n.int("amount"))
+        "cancelRent" -> CardEffect.CancelRent
+        "peekTarget" -> CardEffect.PeekTarget
+        "targetSuspicion" -> CardEffect.TargetSuspicion(n.int("amount"))
+        "stealFromTarget" -> CardEffect.StealFromTarget(n.int("amount"))
+        "sealTargetTile" -> CardEffect.SealTargetTile(n.int("rounds"))
+        "sealTargetDistrict" -> CardEffect.SealTargetDistrict(n.int("rounds"))
         else -> n.child("type").fail("efek kartu '$type' tidak dikenal")
+    }
+
+    private fun parseTactics(text: String): List<TacticCard> {
+        val r = root(TACTICS, text)
+        return r.child("cards").array().map { n ->
+            TacticCard(
+                id = n.int("id"),
+                title = n.string("title"),
+                titleEn = n.string("titleEn"),
+                text = n.string("text"),
+                textEn = n.string("textEn"),
+                target = n.enum("target"),
+                timing = n.enum("timing"),
+                effects = n.child("effects").array().map(::parseCardEffect),
+            )
+        }
+    }
+
+    private fun parseOperations(text: String): List<OperationCard> =
+        root(OPERATIONS, text).child("operations").array().map { n ->
+            val rw = n.child("reward")
+            OperationCard(
+                id = n.int("id"),
+                title = n.string("title"),
+                titleEn = n.string("titleEn"),
+                text = n.string("text"),
+                textEn = n.string("textEn"),
+                condition = parseCondition(n.child("condition")),
+                reward = OperationReward(rw.int("money"), rw.int("intel"), rw.int("prestige")),
+            )
+        }
+
+    private fun parseCondition(c: JsonNode): MissionCondition = when (val type = c.string("type")) {
+        "ownDistrict" -> MissionCondition.OwnDistrict(c.enum("district"))
+        "escapeRoutes" -> MissionCondition.EscapeRoutes(c.int("count"))
+        "cashAtLeast" -> MissionCondition.CashAtLeast(c.int("amount"))
+        "buildingPoints" -> MissionCondition.BuildingPoints(c.int("count"))
+        "knownCards" -> MissionCondition.KnownCards(c.int("count"))
+        "suspicionAtMost" -> MissionCondition.SuspicionAtMost(c.int("max"))
+        "propertyCount" -> MissionCondition.PropertyCount(c.int("count"))
+        "intelAtLeast" -> MissionCondition.IntelAtLeast(c.int("count"))
+        "correctGuesses" -> MissionCondition.CorrectGuesses(c.int("count"))
+        "hqCount" -> MissionCondition.HqCount(c.int("count"))
+        "completeDistricts" -> MissionCondition.CompleteDistricts(c.int("count"))
+        "prestigeAtLeast" -> MissionCondition.PrestigeAtLeast(c.int("count"))
+        "operationsClaimed" -> MissionCondition.OperationsClaimed(c.int("count"))
+        "tacticsPlayed" -> MissionCondition.TacticsPlayed(c.int("count"))
+        else -> c.child("type").fail("syarat '$type' tidak dikenal")
     }
 
     private fun parseMissions(text: String): List<MissionCard> =
         root(MISSIONS, text).child("missions").array().map { n ->
-            val c = n.child("condition")
-            val condition = when (val type = c.string("type")) {
-                "ownDistrict" -> MissionCondition.OwnDistrict(c.enum("district"))
-                "escapeRoutes" -> MissionCondition.EscapeRoutes(c.int("count"))
-                "cashAtLeast" -> MissionCondition.CashAtLeast(c.int("amount"))
-                "buildingPoints" -> MissionCondition.BuildingPoints(c.int("count"))
-                "knownCards" -> MissionCondition.KnownCards(c.int("count"))
-                "suspicionAtMost" -> MissionCondition.SuspicionAtMost(c.int("max"))
-                "propertyCount" -> MissionCondition.PropertyCount(c.int("count"))
-                "intelAtLeast" -> MissionCondition.IntelAtLeast(c.int("count"))
-                "correctGuesses" -> MissionCondition.CorrectGuesses(c.int("count"))
-                else -> c.child("type").fail("syarat misi '$type' tidak dikenal")
-            }
+            val condition = parseCondition(n.child("condition"))
             MissionCard(
                 id = n.int("id"),
                 title = n.string("title"),
@@ -352,6 +416,16 @@ object ContentLoader {
             dominancePercent = n.int("dominancePercent"),
             dominanceFromStep = n.int("dominanceFromStep"),
             dominanceMinPlayers = n.int("dominanceMinPlayers"),
+            frontVariants = n.boolean("frontVariants"),
+            tactics = n.child("tactics").let { t ->
+                TacticRules(t.boolean("enabled"), t.int("handLimit"), t.int("drawPerStartPass"), t.int("maxPerTurn"), t.int("startHand"))
+            },
+            patrol = n.child("patrol").let { t -> PatrolRules(t.boolean("enabled"), t.int("startTile"), t.int("suspicion"), t.int("dice")) },
+            contact = n.child("contact").let { t ->
+                ContactRules(t.boolean("enabled"), t.int("startTile"), t.int("intel"), t.int("money"), t.int("dice"))
+            },
+            comeback = n.child("comeback").let { t -> ComebackRules(t.boolean("enabled"), t.int("money"), t.int("intel")) },
+            operationsEnabled = n.boolean("operationsEnabled"),
         )
     }
 }

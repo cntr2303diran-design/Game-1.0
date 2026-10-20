@@ -160,7 +160,18 @@ internal fun Tx.handle(pend: PD, a: A) {
         is A.DeclareBankruptcy -> goBankrupt(p, (pend as PD.RaiseFunds).creditor)
         is A.EndTurn -> {
             emit(E.TURN_ENDED, "player" to p)
-            push(Task.NextTurn)
+            checkOperations()
+            if (s.winner == null) push(Task.NextTurn)
+        }
+        is A.PlayTactic -> {
+            val card = c.tactic(a.cardId)
+            if (pend is PD.RentChoice) {
+                // Penyamaran: sewa batal, lanjutkan alur.
+                playTactic(p, card, a.targetPlayer, a.targetTile)
+            } else {
+                push(Task.Business(p))
+                playTactic(p, card, a.targetPlayer, a.targetTile)
+            }
         }
     }
 }

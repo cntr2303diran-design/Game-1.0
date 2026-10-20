@@ -168,6 +168,126 @@
         "type": "correctGuesses",
         "count": 2
       }
+    },
+    {
+      "id": 15,
+      "title": "Pahlawan Kota",
+      "titleEn": "City Hero",
+      "text": "Kumpulkan minimal 60 Prestise.",
+      "textEn": "Gather at least 60 Prestige.",
+      "points": 40,
+      "condition": {
+        "type": "prestigeAtLeast",
+        "count": 60
+      }
+    },
+    {
+      "id": 16,
+      "title": "Operator Ulung",
+      "titleEn": "Master Operator",
+      "text": "Selesaikan minimal 3 Operasi Kota.",
+      "textEn": "Complete at least 3 City Operations.",
+      "points": 40,
+      "condition": {
+        "type": "operationsClaimed",
+        "count": 3
+      }
+    },
+    {
+      "id": 17,
+      "title": "Dalang",
+      "titleEn": "Mastermind",
+      "text": "Mainkan minimal 6 Kartu Taktik.",
+      "textEn": "Play at least 6 Tactic cards.",
+      "points": 35,
+      "condition": {
+        "type": "tacticsPlayed",
+        "count": 6
+      }
+    },
+    {
+      "id": 18,
+      "title": "Raja Markas",
+      "titleEn": "HQ King",
+      "text": "Miliki minimal 2 Markas.",
+      "textEn": "Own at least 2 Headquarters.",
+      "points": 45,
+      "condition": {
+        "type": "hqCount",
+        "count": 2
+      }
+    },
+    {
+      "id": 19,
+      "title": "Imperium",
+      "titleEn": "Empire",
+      "text": "Miliki minimal 2 distrik lengkap.",
+      "textEn": "Own at least 2 complete districts.",
+      "points": 50,
+      "condition": {
+        "type": "completeDistricts",
+        "count": 2
+      }
+    },
+    {
+      "id": 20,
+      "title": "Mata di Mana-Mana",
+      "titleEn": "Eyes Everywhere",
+      "text": "Ketahui letak minimal 13 kartu Bukti di luar tanganmu dan Kedutaan.",
+      "textEn": "Know where at least 13 Evidence cards outside your hand and the Embassy are.",
+      "points": 50,
+      "condition": {
+        "type": "knownCards",
+        "count": 13
+      }
+    },
+    {
+      "id": 21,
+      "title": "Saudagar Perang",
+      "titleEn": "War Profiteer",
+      "text": "Akhiri perang dengan minimal 4.000 escudo tunai.",
+      "textEn": "End the war with at least 4,000 escudos in cash.",
+      "points": 60,
+      "condition": {
+        "type": "cashAtLeast",
+        "amount": 4000
+      }
+    },
+    {
+      "id": 22,
+      "title": "Penguasa Jalur",
+      "titleEn": "Lord of Routes",
+      "text": "Miliki keempat Jalur Pelarian.",
+      "textEn": "Own all four Escape Routes.",
+      "points": 60,
+      "condition": {
+        "type": "escapeRoutes",
+        "count": 4
+      }
+    },
+    {
+      "id": 23,
+      "title": "Diplomat",
+      "titleEn": "Diplomat",
+      "text": "Kumpulkan minimal 35 Prestise.",
+      "textEn": "Gather at least 35 Prestige.",
+      "points": 30,
+      "condition": {
+        "type": "prestigeAtLeast",
+        "count": 35
+      }
+    },
+    {
+      "id": 24,
+      "title": "Detektif Sempurna",
+      "titleEn": "Perfect Detective",
+      "text": "Tebakan Akhirmu benar ketiganya.",
+      "textEn": "Your Final Guess is correct on all three.",
+      "points": 70,
+      "condition": {
+        "type": "correctGuesses",
+        "count": 3
+      }
     }
   ]
 }

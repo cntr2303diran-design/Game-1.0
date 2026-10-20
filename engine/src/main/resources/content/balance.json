@@ -95,8 +95,35 @@
     "bribeRelief": 2
   },
   "smugglerBlackMarketPrice": 100,
-  "buildingRentPercent": 48,
+  "buildingRentPercent": 58,
   "dominancePercent": 65,
   "dominanceFromStep": 6,
-  "dominanceMinPlayers": 5
+  "dominanceMinPlayers": 5,
+  "frontVariants": true,
+  "tactics": {
+    "enabled": true,
+    "handLimit": 3,
+    "drawPerStartPass": 1,
+    "maxPerTurn": 1,
+    "startHand": 1
+  },
+  "patrol": {
+    "enabled": true,
+    "startTile": 30,
+    "suspicion": 2,
+    "dice": 2
+  },
+  "contact": {
+    "enabled": true,
+    "startTile": 20,
+    "intel": 1,
+    "money": 50,
+    "dice": 1
+  },
+  "comeback": {
+    "enabled": true,
+    "money": 100,
+    "intel": 1
+  },
+  "operationsEnabled": true
 }

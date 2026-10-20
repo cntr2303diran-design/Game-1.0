@@ -38,8 +38,9 @@ class NewRulesTest {
     fun `Intel awal dari balance dan Pembelot Abwehr mendapat bonus`() {
         val f = GameStateFixture(factions = listOf(Faction.ABWEHR_DEFECTOR, Faction.MI6, Faction.OSS), classic = false)
         val b = f.content.balance.intel
-        assertEquals(b.start + b.defectorBonus, f.p(0).intel)
-        assertEquals(b.start, f.p(1).intel)
+        // Front langkah 1 bisa saja memberi Intel ke semua pemain — bandingkan selisihnya.
+        assertEquals(b.defectorBonus, f.p(0).intel - f.p(1).intel)
+        assertTrue(f.p(1).intel >= b.start)
     }
 
     @Test

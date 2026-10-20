@@ -36,6 +36,9 @@ internal object Views {
                 propertyCount = propertyCount[o.id] ?: 0,
                 intel = o.intel,
                 suspicion = o.suspicion,
+                tacticCount = o.tactics.size,
+                prestige = o.prestige,
+                operationsClaimed = o.operationsClaimed,
             )
         }
         val pend = s.pending
@@ -52,6 +55,12 @@ internal object Views {
             } else {
                 null
             },
+            openOperations = s.openOperations,
+            claimedOperations = s.claimedOperations,
+            sealedTiles = s.sealedTiles.filterValues { it >= s.roundNumber },
+            patrolPos = s.patrolPos,
+            contactPos = s.contactPos,
+            tacticDeckSize = s.tacticDeck.size,
             cipherDeckSize = s.cipherDeck.size,
             telegramDeckSize = s.telegramDeck.size,
             casinoVault = s.casinoVault,

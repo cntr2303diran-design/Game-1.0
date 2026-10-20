@@ -31,8 +31,14 @@ Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), ver
 - **Tuduhan Akhir** baru dibuka sejak langkah Jam Perang 10; Jam maju tiap ±5 lintasan START.
 - **Dominasi Ekonomi** (5–6 pemain) — kekayaan ≥ 65% meja saat Front dibalik = menang Ekonomi.
 - **8 faksi** (baru: Penyelundup Spanyol, Pembelot Abwehr) dan **48 kartu Sandi/Telegram**.
+- **Kartu Taktik** (24) — Penyamaran, Pemerasan, Sabotase, Mogok Buruh, Pengintaian, dan lainnya.
+- **Operasi Kota** (18) — perlombaan tujuan publik berhadiah uang, Intel, dan **Prestise**.
+- **Patroli PIDE & Kontak Netral** — dua pion yang berkeliling papan tiap putaran.
+- **24 Front** — tiap bulan varian A/B acak; **Bantuan Sekutu** untuk pemain tertinggal; **24 Misi Rahasia**.
 
-Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D50).
+Buku aturan lengkap untuk pemain: [docs/ATURAN.md](docs/ATURAN.md).
+
+Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D66).
 
 ## Struktur modul
 
@@ -56,7 +62,7 @@ engine/src/main/kotlin/id/diran/lisbon1944/engine/
 └── GameEvents.kt   kunci event stabil untuk UI
 engine/src/main/resources/content/
 ├── board.json  factions.json  evidence.json  front.json
-└── cipher.json telegram.json  balance.json  missions.json
+└── cipher.json telegram.json  balance.json  missions.json  tactics.json  operations.json
 ```
 
 ## Cara build

@@ -131,6 +131,10 @@ private fun Tx.applyCardEffect(p: PlayerId, card: DeckCard, e: CardEffect) {
         is CardEffect.LoseIntel -> changeIntel(p, -e.amount, "card")
         is CardEffect.AddSuspicion -> changeSuspicion(p, e.amount, "card")
         is CardEffect.ReduceSuspicion -> changeSuspicion(p, -e.amount, "card")
+        is CardEffect.GainPrestige -> gainPrestige(p, e.amount, "card")
+        CardEffect.CancelRent, CardEffect.PeekTarget, is CardEffect.TargetSuspicion, is CardEffect.StealFromTarget,
+        is CardEffect.SealTargetTile, is CardEffect.SealTargetDistrict ->
+            error("Efek Kartu Taktik tidak boleh ada di tumpukan Sandi/Telegram (dicegah validator)")
     }
 }
 

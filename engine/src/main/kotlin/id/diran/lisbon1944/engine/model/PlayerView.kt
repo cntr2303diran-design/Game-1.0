@@ -18,6 +18,12 @@ data class PlayerView(
     val activeFront: FrontId,
     /** Lintasan START yang masih dibutuhkan sebelum Jam Perang maju (mode START_PASSES), null untuk mode lain. */
     val passesToNextStep: Int? = null,
+    val openOperations: List<Int> = emptyList(),
+    val claimedOperations: List<Int> = emptyList(),
+    val sealedTiles: Map<Int, Int> = emptyMap(),
+    val patrolPos: Int = -1,
+    val contactPos: Int = -1,
+    val tacticDeckSize: Int = 0,
     val cipherDeckSize: Int,
     val telegramDeckSize: Int,
     val casinoVault: Int,
@@ -62,4 +68,7 @@ data class OpponentView(
     val propertyCount: Int,
     val intel: Int = 0,
     val suspicion: Int = 0,
+    val tacticCount: Int = 0,
+    val prestige: Int = 0,
+    val operationsClaimed: Int = 0,
 )

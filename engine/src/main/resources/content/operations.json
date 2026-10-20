@@ -1,0 +1,294 @@
+{
+  "version": 1,
+  "open": 3,
+  "operations": [
+    {
+      "id": 1,
+      "title": "Jalur Laut Aman",
+      "titleEn": "Safe Sea Lane",
+      "text": "Pertama memiliki 2 Jalur Pelarian.",
+      "textEn": "First to own 2 Escape Routes.",
+      "condition": {
+        "type": "escapeRoutes",
+        "count": 2
+      },
+      "reward": {
+        "money": 100,
+        "intel": 1,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 2,
+      "title": "Rumah Aman Pertama",
+      "titleEn": "First Safe House",
+      "text": "Pertama membangun Rumah Aman.",
+      "textEn": "First to build a Safe House.",
+      "condition": {
+        "type": "buildingPoints",
+        "count": 1
+      },
+      "reward": {
+        "money": 50,
+        "intel": 0,
+        "prestige": 10
+      }
+    },
+    {
+      "id": 3,
+      "title": "Markas Pertama",
+      "titleEn": "First Headquarters",
+      "text": "Pertama memiliki Markas.",
+      "textEn": "First to own a Headquarters.",
+      "condition": {
+        "type": "hqCount",
+        "count": 1
+      },
+      "reward": {
+        "money": 100,
+        "intel": 0,
+        "prestige": 20
+      }
+    },
+    {
+      "id": 4,
+      "title": "Penguasa Distrik",
+      "titleEn": "District Lord",
+      "text": "Pertama memiliki satu distrik lengkap.",
+      "textEn": "First to own a complete district.",
+      "condition": {
+        "type": "completeDistricts",
+        "count": 1
+      },
+      "reward": {
+        "money": 100,
+        "intel": 0,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 5,
+      "title": "Dua Mahkota",
+      "titleEn": "Two Crowns",
+      "text": "Pertama memiliki dua distrik lengkap.",
+      "textEn": "First to own two complete districts.",
+      "condition": {
+        "type": "completeDistricts",
+        "count": 2
+      },
+      "reward": {
+        "money": 200,
+        "intel": 0,
+        "prestige": 30
+      }
+    },
+    {
+      "id": 6,
+      "title": "Kas Perang",
+      "titleEn": "War Chest",
+      "text": "Pertama memegang 2.500 escudo tunai.",
+      "textEn": "First to hold 2,500 escudos in cash.",
+      "condition": {
+        "type": "cashAtLeast",
+        "amount": 2500
+      },
+      "reward": {
+        "money": 0,
+        "intel": 1,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 7,
+      "title": "Arsip Rahasia",
+      "titleEn": "Secret Archive",
+      "text": "Pertama mengetahui letak 6 kartu Bukti (di luar tangan & Kedutaan).",
+      "textEn": "First to know where 6 Evidence cards are (outside hand & Embassy).",
+      "condition": {
+        "type": "knownCards",
+        "count": 6
+      },
+      "reward": {
+        "money": 0,
+        "intel": 1,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 8,
+      "title": "Arsip Besar",
+      "titleEn": "Grand Archive",
+      "text": "Pertama mengetahui letak 10 kartu Bukti.",
+      "textEn": "First to know where 10 Evidence cards are.",
+      "condition": {
+        "type": "knownCards",
+        "count": 10
+      },
+      "reward": {
+        "money": 0,
+        "intel": 2,
+        "prestige": 25
+      }
+    },
+    {
+      "id": 9,
+      "title": "Tuan Tanah",
+      "titleEn": "Landlord",
+      "text": "Pertama memiliki 6 properti/jalur.",
+      "textEn": "First to own 6 properties/routes.",
+      "condition": {
+        "type": "propertyCount",
+        "count": 6
+      },
+      "reward": {
+        "money": 100,
+        "intel": 0,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 10,
+      "title": "Jaringan Kota",
+      "titleEn": "City Network",
+      "text": "Pertama memiliki 9 properti/jalur.",
+      "textEn": "First to own 9 properties/routes.",
+      "condition": {
+        "type": "propertyCount",
+        "count": 9
+      },
+      "reward": {
+        "money": 150,
+        "intel": 0,
+        "prestige": 25
+      }
+    },
+    {
+      "id": 11,
+      "title": "Gudang Intel",
+      "titleEn": "Intel Cache",
+      "text": "Pertama memegang 4 Intel.",
+      "textEn": "First to hold 4 Intel.",
+      "condition": {
+        "type": "intelAtLeast",
+        "count": 4
+      },
+      "reward": {
+        "money": 100,
+        "intel": 0,
+        "prestige": 10
+      }
+    },
+    {
+      "id": 12,
+      "title": "Pembangun Kota",
+      "titleEn": "City Builder",
+      "text": "Pertama memiliki bangunan senilai 8 Rumah Aman.",
+      "textEn": "First to own buildings worth 8 Safe Houses.",
+      "condition": {
+        "type": "buildingPoints",
+        "count": 8
+      },
+      "reward": {
+        "money": 150,
+        "intel": 0,
+        "prestige": 25
+      }
+    },
+    {
+      "id": 13,
+      "title": "Ahli Taktik",
+      "titleEn": "Tactician",
+      "text": "Pertama memainkan 3 Kartu Taktik.",
+      "textEn": "First to play 3 Tactic cards.",
+      "condition": {
+        "type": "tacticsPlayed",
+        "count": 3
+      },
+      "reward": {
+        "money": 100,
+        "intel": 1,
+        "prestige": 15
+      }
+    },
+    {
+      "id": 14,
+      "title": "Raja Markas",
+      "titleEn": "HQ King",
+      "text": "Pertama memiliki 3 Markas.",
+      "textEn": "First to own 3 Headquarters.",
+      "condition": {
+        "type": "hqCount",
+        "count": 3
+      },
+      "reward": {
+        "money": 200,
+        "intel": 0,
+        "prestige": 35
+      }
+    },
+    {
+      "id": 15,
+      "title": "Rute Lengkap",
+      "titleEn": "Complete Routes",
+      "text": "Pertama memiliki 3 Jalur Pelarian.",
+      "textEn": "First to own 3 Escape Routes.",
+      "condition": {
+        "type": "escapeRoutes",
+        "count": 3
+      },
+      "reward": {
+        "money": 150,
+        "intel": 0,
+        "prestige": 25
+      }
+    },
+    {
+      "id": 16,
+      "title": "Analis",
+      "titleEn": "Analyst",
+      "text": "Pertama mengetahui letak 8 kartu Bukti.",
+      "textEn": "First to know where 8 Evidence cards are.",
+      "condition": {
+        "type": "knownCards",
+        "count": 8
+      },
+      "reward": {
+        "money": 0,
+        "intel": 1,
+        "prestige": 20
+      }
+    },
+    {
+      "id": 17,
+      "title": "Saudagar Besar",
+      "titleEn": "Great Merchant",
+      "text": "Pertama memegang 3.500 escudo tunai.",
+      "textEn": "First to hold 3,500 escudos in cash.",
+      "condition": {
+        "type": "cashAtLeast",
+        "amount": 3500
+      },
+      "reward": {
+        "money": 0,
+        "intel": 1,
+        "prestige": 25
+      }
+    },
+    {
+      "id": 18,
+      "title": "Penyebar Pengaruh",
+      "titleEn": "Spreading Influence",
+      "text": "Pertama memiliki 12 properti/jalur.",
+      "textEn": "First to own 12 properties/routes.",
+      "condition": {
+        "type": "propertyCount",
+        "count": 12
+      },
+      "reward": {
+        "money": 200,
+        "intel": 0,
+        "prestige": 35
+      }
+    }
+  ]
+}

@@ -67,7 +67,7 @@ internal object Economy {
     /** Sewa final setelah semua pengali (BAGIAN 7): dasar/level → Sel Mata-Mata → kartu → Front, bulat ke bawah. */
     fun rentAmount(s: GameState, c: GameContent, tile: Int, cardMultiplier: Int = 1): Int {
         val o = s.ownership[tile] ?: return 0
-        if (o.mortgaged || isClosed(s, c, tile)) return 0
+        if (o.mortgaged || isClosed(s, c, tile) || isSealed(s, tile)) return 0
         val b = s.config.balance
         val fx = frontEffects(s, c)
         return when (val t = c.tile(tile)) {

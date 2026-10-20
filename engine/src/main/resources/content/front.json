@@ -17,7 +17,9 @@
           "numerator": 2,
           "denominator": 1
         }
-      ]
+      ],
+      "step": 1,
+      "variant": "A"
     },
     {
       "id": 2,
@@ -32,7 +34,9 @@
           "district": "ESTORIL",
           "amount": 50
         }
-      ]
+      ],
+      "step": 2,
+      "variant": "A"
     },
     {
       "id": 3,
@@ -51,7 +55,9 @@
           "type": "freeSuggestionEachPlayer",
           "count": 1
         }
-      ]
+      ],
+      "step": 3,
+      "variant": "A"
     },
     {
       "id": 4,
@@ -65,7 +71,9 @@
           "type": "closeTile",
           "tile": 25
         }
-      ]
+      ],
+      "step": 4,
+      "variant": "A"
     },
     {
       "id": 5,
@@ -83,7 +91,9 @@
           "type": "reshuffleEvidence",
           "category": "LOCATION"
         }
-      ]
+      ],
+      "step": 5,
+      "variant": "A"
     },
     {
       "id": 6,
@@ -98,7 +108,9 @@
           "numerator": 3,
           "denominator": 2
         }
-      ]
+      ],
+      "step": 6,
+      "variant": "A"
     },
     {
       "id": 7,
@@ -111,7 +123,9 @@
         {
           "type": "noStartSalary"
         }
-      ]
+      ],
+      "step": 7,
+      "variant": "A"
     },
     {
       "id": 8,
@@ -128,7 +142,9 @@
           "type": "reshuffleEvidence",
           "category": "SUSPECT"
         }
-      ]
+      ],
+      "step": 8,
+      "variant": "A"
     },
     {
       "id": 9,
@@ -147,7 +163,9 @@
           "numerator": 3,
           "denominator": 2
         }
-      ]
+      ],
+      "step": 9,
+      "variant": "A"
     },
     {
       "id": 10,
@@ -166,7 +184,9 @@
           "type": "reshuffleEvidence",
           "category": "ITEM"
         }
-      ]
+      ],
+      "step": 10,
+      "variant": "A"
     },
     {
       "id": 11,
@@ -183,13 +203,261 @@
           "type": "reshuffleEvidence",
           "category": "LOCATION"
         }
-      ]
+      ],
+      "step": 11,
+      "variant": "A"
     },
     {
       "id": 12,
       "month": "1945-05",
       "title": "Perang di Eropa Usai",
       "titleEn": "War in Europe Ends",
+      "text": "Permainan langsung berakhir — hitung skor.",
+      "textEn": "The game ends immediately — count scores.",
+      "effects": [
+        {
+          "type": "endGame"
+        }
+      ],
+      "step": 12,
+      "variant": "A"
+    },
+    {
+      "id": 13,
+      "step": 1,
+      "variant": "B",
+      "month": "1944-06",
+      "title": "Operasi Fortitude",
+      "titleEn": "Operation Fortitude",
+      "text": "Sekutu menyebar informasi palsu: setiap pemain +1 Intel.",
+      "textEn": "Allied deception: every player gains 1 Intel.",
+      "effects": [
+        {
+          "type": "onRevealIntelAll",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "step": 2,
+      "variant": "B",
+      "month": "1944-07",
+      "title": "Plot 20 Juli",
+      "titleEn": "The 20 July Plot",
+      "text": "Gestapo panik: Kecurigaan semua pemain +1. Sewa Baixa +50%.",
+      "textEn": "The Gestapo panics: everyone's Suspicion +1. Baixa rent +50%.",
+      "effects": [
+        {
+          "type": "onRevealSuspicionAll",
+          "amount": 1
+        },
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "BAIXA"
+          ],
+          "numerator": 3,
+          "denominator": 2
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "step": 3,
+      "variant": "B",
+      "month": "1944-08",
+      "title": "Pemberontakan Warsawa",
+      "titleEn": "Warsaw Uprising",
+      "text": "Sewa Alfama 2×. Setiap pemain boleh 1 Dugaan gratis (Lokasi bebas).",
+      "textEn": "Alfama rent ×2. Each player may make 1 free Suggestion (any Location).",
+      "effects": [
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "ALFAMA"
+          ],
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "type": "freeSuggestionEachPlayer",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "step": 4,
+      "variant": "B",
+      "month": "1944-09",
+      "title": "Jembatan Terlalu Jauh",
+      "titleEn": "A Bridge Too Far",
+      "text": "Jalur Pegunungan ditutup: tanpa sewa, tidak bisa menjadi tujuan pindah jalur.",
+      "textEn": "Mountain Pass closed: no rent, cannot be a route-travel destination.",
+      "effects": [
+        {
+          "type": "closeTile",
+          "tile": 35
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "step": 5,
+      "variant": "B",
+      "month": "1944-10",
+      "title": "Harga Emas Melonjak",
+      "titleEn": "Gold Price Soars",
+      "text": "Saat dibalik: setiap pemain terima 100. Map Merah berpindah: semua kartu Lokasi dibagi ulang.",
+      "textEn": "On reveal: every player receives 100. The Red Folder moves: all Location cards are redealt.",
+      "effects": [
+        {
+          "type": "onRevealMoneyAll",
+          "amount": 100
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "LOCATION"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "step": 6,
+      "variant": "B",
+      "month": "1944-11",
+      "title": "Kelangkaan Semen",
+      "titleEn": "Cement Shortage",
+      "text": "Semua biaya bangun 2×.",
+      "textEn": "All building costs ×2.",
+      "effects": [
+        {
+          "type": "buildCostMultiplier",
+          "numerator": 2,
+          "denominator": 1
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "step": 7,
+      "variant": "B",
+      "month": "1944-12",
+      "title": "Serangan Ardennes",
+      "titleEn": "Ardennes Offensive",
+      "text": "Tidak ada gaji START selama aktif. Sewa Estoril +50%.",
+      "textEn": "No START salary while active. Estoril rent +50%.",
+      "effects": [
+        {
+          "type": "noStartSalary"
+        },
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "ESTORIL"
+          ],
+          "numerator": 3,
+          "denominator": 2
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "step": 8,
+      "variant": "B",
+      "month": "1945-01",
+      "title": "Persiapan Yalta",
+      "titleEn": "Preparing Yalta",
+      "text": "Saat dibalik: setiap pemain +1 Intel. Map Merah berpindah: semua kartu Tersangka dibagi ulang.",
+      "textEn": "On reveal: every player gains 1 Intel. The Red Folder moves: all Suspect cards are redealt.",
+      "effects": [
+        {
+          "type": "onRevealIntelAll",
+          "amount": 1
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "SUSPECT"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "step": 9,
+      "variant": "B",
+      "month": "1945-02",
+      "title": "Kota Dibom",
+      "titleEn": "The City Bombed",
+      "text": "Sewa Baixa & Chiado setengah.",
+      "textEn": "Baixa & Chiado rent halved.",
+      "effects": [
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "BAIXA",
+            "CHIADO"
+          ],
+          "numerator": 1,
+          "denominator": 2
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "step": 10,
+      "variant": "B",
+      "month": "1945-03",
+      "title": "Jembatan Ludendorff",
+      "titleEn": "The Ludendorff Bridge",
+      "text": "Sewa Jalur Pelarian +50%; setiap pemain +1 Intel. Map Merah berpindah: semua kartu Barang dibagi ulang.",
+      "textEn": "Escape Route rent +50%; every player gains 1 Intel. The Red Folder moves: all Item cards are redealt.",
+      "effects": [
+        {
+          "type": "escapeRouteRentMultiplier",
+          "numerator": 3,
+          "denominator": 2
+        },
+        {
+          "type": "onRevealIntelAll",
+          "amount": 1
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "ITEM"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "step": 11,
+      "variant": "B",
+      "month": "1945-04",
+      "title": "Kepanikan Terakhir",
+      "titleEn": "The Last Panic",
+      "text": "Tuduhan Akhir boleh dari petak mana pun dengan membayar 300 (fase Bisnis). Kecurigaan semua pemain −2. Map Merah berpindah lagi: semua kartu Lokasi dibagi ulang.",
+      "textEn": "Final Accusation allowed from any tile for 300 (Business phase). Everyone's Suspicion −2. The Red Folder moves again: all Location cards are redealt.",
+      "effects": [
+        {
+          "type": "accuseFromAnywhere"
+        },
+        {
+          "type": "onRevealSuspicionAll",
+          "amount": -2
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "LOCATION"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "step": 12,
+      "variant": "B",
+      "month": "1945-05",
+      "title": "Berlin Jatuh",
+      "titleEn": "Berlin Falls",
       "text": "Permainan langsung berakhir — hitung skor.",
       "textEn": "The game ends immediately — count scores.",
       "effects": [

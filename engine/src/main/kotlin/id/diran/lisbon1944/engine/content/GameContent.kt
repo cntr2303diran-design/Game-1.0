@@ -13,6 +13,8 @@ import id.diran.lisbon1944.engine.model.FactionDef
 import id.diran.lisbon1944.engine.model.FrontCard
 import id.diran.lisbon1944.engine.model.FrontId
 import id.diran.lisbon1944.engine.model.MissionCard
+import id.diran.lisbon1944.engine.model.OperationCard
+import id.diran.lisbon1944.engine.model.TacticCard
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.SpecialKind
 import id.diran.lisbon1944.engine.model.SpecialTile
@@ -28,6 +30,10 @@ data class GameContent(
     val telegram: List<DeckCard>,
     val balance: Balance,
     val missions: List<MissionCard>,
+    val tactics: List<TacticCard> = emptyList(),
+    val operations: List<OperationCard> = emptyList(),
+    /** Jumlah Operasi Kota yang terbuka bersamaan. */
+    val openOperations: Int = 3,
 ) {
     private val evidenceById: Map<CardId, EvidenceCard> by lazy { evidence.associateBy { it.id } }
 
@@ -63,4 +69,10 @@ data class GameContent(
     fun card(deck: Deck, id: Int): DeckCard = deck(deck).first { it.id == id }
 
     fun mission(id: Int): MissionCard = missions.first { it.id == id }
+
+    fun tactic(id: Int): TacticCard = tactics.first { it.id == id }
+
+    fun operation(id: Int): OperationCard = operations.first { it.id == id }
+
+    fun frontsAtStep(step: Int): List<FrontCard> = fronts.filter { it.step == step }
 }

@@ -1,46 +1,46 @@
 LISBON 1944 — simulasi 300 permainan, 5 pemain, bot hard,hard,normal,normal,easy, mode standard, seed 42
 
 Durasi
-  Giliran/game     : rata-rata 326.8 (sd 43.4), P10 260 · median 340 · P90 368
-  Perkiraan menit  : rata-rata 245, P10 195 · median 255 · P90 276 (45 detik/giliran)
-  Aksi/game        : 1077
+  Giliran/game     : rata-rata 325.7 (sd 44.4), P10 258 · median 339 · P90 365
+  Perkiraan menit  : rata-rata 244, P10 194 · median 254 · P90 274 (45 detik/giliran)
+  Aksi/game        : 1144
 
 Cara menang
-  Detektif         :  13.3%  █████
-  Ekonomi          :  25.3%  ██████████
-  Skor Mei 1945    :  61.3%  ████████████████████████
+  Detektif         :  22.3%  ████████
+  Ekonomi          :  23.3%  █████████
+  Skor Mei 1945    :  54.3%  █████████████████████
 
-Win rate per faksi (rata-rata 20.0%, maks 1.17× rata-rata)
-  OSS                :  23.4%  (188 kursi)
-  PORTUGAL_TRADER    :  22.9%  (188 kursi)
-  RESISTANCE         :  21.3%  (188 kursi)
-  NKVD               :  20.3%  (187 kursi)
-  ABWEHR_DEFECTOR    :  19.8%  (187 kursi)
-  SPANISH_SMUGGLER   :  19.7%  (188 kursi)
-  SWISS_JOURNALIST   :  17.6%  (187 kursi)
-  MI6                :  15.0%  (187 kursi)
+Win rate per faksi (rata-rata 20.0%, maks 1.31× rata-rata)
+  SWISS_JOURNALIST   :  26.2%  (187 kursi)
+  SPANISH_SMUGGLER   :  21.3%  (188 kursi)
+  PORTUGAL_TRADER    :  20.7%  (188 kursi)
+  RESISTANCE         :  19.7%  (188 kursi)
+  OSS                :  18.6%  (188 kursi)
+  ABWEHR_DEFECTOR    :  18.2%  (187 kursi)
+  MI6                :  17.6%  (187 kursi)
+  NKVD               :  17.6%  (187 kursi)
 
 Win rate per posisi duduk
   Kursi 1          :  26.3%
-  Kursi 2          :  24.0%
-  Kursi 3          :  22.3%
-  Kursi 4          :  26.0%
-  Kursi 5          :   1.3%
+  Kursi 2          :  24.7%
+  Kursi 3          :  26.0%
+  Kursi 4          :  21.0%
+  Kursi 5          :   2.0%
 
 Bayar sewa
-  Informasi/game   : 59.8   Uang/game: 60.7
-  Porsi informasi  : pemenang 61.8% vs lainnya 47.8%; korelasi dengan menang 0.30
+  Informasi/game   : 55.0   Uang/game: 60.9
+  Porsi informasi  : pemenang 58.9% vs lainnya 45.6%; korelasi dengan menang 0.27
 
 Misteri & lainnya
-  Tuduhan/game     : 0.17, salah 21.6%
-  Jam Perang saat misteri terpecahkan (menang Detektif): 10.5
-  Bangkrut/game 0.79 · ditangkap/game 0.00 · misi selesai/game 0.65
+  Tuduhan/game     : 0.25, salah 9.5%
+  Jam Perang saat misteri terpecahkan (menang Detektif): 10.3
+  Bangkrut/game 0.78 · ditangkap/game 0.73 · misi selesai/game 0.58
 
 Target keseimbangan
-  [✓] Durasi median 210–270 menit (hasil 255)
-  [✓] Tidak ada faksi dengan win rate > 1.3× rata-rata (maks 1.17×)
-  [✓] Ketiga cara menang ≥ 10.0% (Detektif 13.3%, Ekonomi 25.3%, Akhir Perang 61.3%)
+  [✓] Durasi median 210–270 menit (hasil 254)
+  [✗] Tidak ada faksi dengan win rate > 1.3× rata-rata (maks 1.31×)
+  [✓] Ketiga cara menang ≥ 10.0% (Detektif 22.3%, Ekonomi 23.3%, Akhir Perang 54.3%)
   [✓] Tidak ada anomali (> batas aksi): 0
 
-Waktu simulasi: 52.2 detik
+Waktu simulasi: 80.9 detik
 CSV: docs/sim/report-5p.csv (+ ringkasan report-5p-summary.csv)

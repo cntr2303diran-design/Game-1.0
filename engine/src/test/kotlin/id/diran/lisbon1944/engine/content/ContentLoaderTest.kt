@@ -105,7 +105,9 @@ class ContentLoaderTest {
 
     @Test
     fun `front berurutan dengan efek terstruktur`() {
-        assertEquals((1..12).toList(), content.fronts.map { it.id.value })
+        assertEquals(24, content.fronts.size)
+        assertEquals((1..12).toList(), content.fronts.filter { it.variant == "A" }.map { it.step })
+        assertEquals((1..12).toList(), content.fronts.filter { it.variant == "B" }.map { it.step })
         assertEquals("1944-06", content.fronts.first().month)
         assertEquals("1945-05", content.fronts.last().month)
         assertEquals(

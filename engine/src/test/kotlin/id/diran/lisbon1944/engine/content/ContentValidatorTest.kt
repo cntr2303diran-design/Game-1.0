@@ -75,20 +75,22 @@ class ContentValidatorTest {
     }
 
     @Test
-    fun `front bukan 12 ditolak`() {
-        assertInvalid(good.copy(fronts = good.fronts.dropLast(1)), "harus 12 kartu Front, ditemukan 11")
+    fun `langkah Front yang kosong ditolak`() {
+        assertInvalid(good.copy(fronts = good.fronts.filter { it.step != 12 }), "tidak ada kartu Front untuk langkah 12")
     }
 
     @Test
-    fun `front dikocok ditolak`() {
-        val shuffled = good.fronts.toMutableList().also { val t = it[0]; it[0] = it[1]; it[1] = t }
-        assertInvalid(good.copy(fronts = shuffled), "harus urut 1..12")
+    fun `varian Front berbeda bulan atau tanpa varian A ditolak`() {
+        val wrongMonth = good.fronts.map { if (it.id == FrontId(15)) it.copy(month = "1944-01") else it }
+        assertInvalid(good.copy(fronts = wrongMonth), "kartu langkah 3 berbeda bulan")
+        val noA = good.fronts.filterNot { it.id == FrontId(4) }
+        assertInvalid(good.copy(fronts = noA), "langkah 4 tanpa varian A")
     }
 
     @Test
     fun `endGame selain front 12 ditolak`() {
         val fronts = good.fronts.map { if (it.id == FrontId(7)) it.copy(effects = listOf(FrontEffect.EndGame)) else it }
-        assertInvalid(good.copy(fronts = fronts), "hanya Front #12")
+        assertInvalid(good.copy(fronts = fronts), "hanya kartu langkah 12")
     }
 
     @Test

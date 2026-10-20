@@ -46,6 +46,7 @@ enum class ViolationCode {
     ALREADY_BURNED,
     CAN_STILL_RAISE_FUNDS,
     INVALID_TRADE,
+    TACTIC_NOT_ALLOWED,
 }
 
 data class RuleViolation(val code: ViolationCode, val message: String) {

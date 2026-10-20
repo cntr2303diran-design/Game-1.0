@@ -1,0 +1,394 @@
+{
+  "version": 1,
+  "deck": "TACTIC",
+  "cards": [
+    {
+      "id": 1,
+      "title": "Penyamaran",
+      "titleEn": "Disguise",
+      "text": "Mainkan saat harus membayar sewa: sewa itu batal.",
+      "textEn": "Play when you must pay rent: that rent is cancelled.",
+      "target": "NONE",
+      "timing": "RENT",
+      "effects": [
+        {
+          "type": "cancelRent"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Penyamaran",
+      "titleEn": "Disguise",
+      "text": "Mainkan saat harus membayar sewa: sewa itu batal.",
+      "textEn": "Play when you must pay rent: that rent is cancelled.",
+      "target": "NONE",
+      "timing": "RENT",
+      "effects": [
+        {
+          "type": "cancelRent"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Jaringan Kurir",
+      "titleEn": "Courier Network",
+      "text": "Terima 2 Intel.",
+      "textEn": "Gain 2 Intel.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainIntel",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Jaringan Kurir",
+      "titleEn": "Courier Network",
+      "text": "Terima 2 Intel.",
+      "textEn": "Gain 2 Intel.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainIntel",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Suap Inspektur",
+      "titleEn": "Bribe the Inspector",
+      "text": "Kecurigaan −3.",
+      "textEn": "Suspicion −3.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "reduceSuspicion",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Suap Inspektur",
+      "titleEn": "Bribe the Inspector",
+      "text": "Kecurigaan −3.",
+      "textEn": "Suspicion −3.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "reduceSuspicion",
+          "amount": 3
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Pengintaian",
+      "titleEn": "Surveillance",
+      "text": "Lihat 1 kartu Bukti acak milik pemain pilihanmu (ia tidak tahu kartu mana).",
+      "textEn": "Look at 1 random Evidence card of a chosen player (they do not learn which).",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "peekTarget"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Pengintaian",
+      "titleEn": "Surveillance",
+      "text": "Lihat 1 kartu Bukti acak milik pemain pilihanmu (ia tidak tahu kartu mana).",
+      "textEn": "Look at 1 random Evidence card of a chosen player (they do not learn which).",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "peekTarget"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Tekanan Diplomatik",
+      "titleEn": "Diplomatic Pressure",
+      "text": "Kecurigaan pemain pilihanmu +2.",
+      "textEn": "A chosen player's Suspicion +2.",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "targetSuspicion",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Tekanan Diplomatik",
+      "titleEn": "Diplomatic Pressure",
+      "text": "Kecurigaan pemain pilihanmu +2.",
+      "textEn": "A chosen player's Suspicion +2.",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "targetSuspicion",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Pemerasan",
+      "titleEn": "Blackmail",
+      "text": "Ambil 100 dari pemain pilihanmu; Kecurigaanmu +1.",
+      "textEn": "Take 100 from a chosen player; your Suspicion +1.",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "stealFromTarget",
+          "amount": 100
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Pemerasan",
+      "titleEn": "Blackmail",
+      "text": "Ambil 100 dari pemain pilihanmu; Kecurigaanmu +1.",
+      "textEn": "Take 100 from a chosen player; your Suspicion +1.",
+      "target": "PLAYER",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "stealFromTarget",
+          "amount": 100
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Sabotase",
+      "titleEn": "Sabotage",
+      "text": "Properti lawan pilihanmu disegel: tanpa sewa sampai akhir putaran berikutnya.",
+      "textEn": "A chosen opponent property is sealed: no rent until the end of the next round.",
+      "target": "OPPONENT_PROPERTY",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "sealTargetTile",
+          "rounds": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Sabotase",
+      "titleEn": "Sabotage",
+      "text": "Properti lawan pilihanmu disegel: tanpa sewa sampai akhir putaran berikutnya.",
+      "textEn": "A chosen opponent property is sealed: no rent until the end of the next round.",
+      "target": "OPPONENT_PROPERTY",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "sealTargetTile",
+          "rounds": 1
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Dana Gelap",
+      "titleEn": "Slush Fund",
+      "text": "Terima 150 escudo; Kecurigaan +1.",
+      "textEn": "Receive 150 escudos; Suspicion +1.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 150
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Dana Gelap",
+      "titleEn": "Slush Fund",
+      "text": "Terima 150 escudo; Kecurigaan +1.",
+      "textEn": "Receive 150 escudos; Suspicion +1.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 150
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Informan Bayaran",
+      "titleEn": "Paid Informant",
+      "text": "Dapat 1 Dugaan tambahan (Lokasi bebas) dalam 2 giliranmu berikutnya.",
+      "textEn": "Gain 1 extra Suggestion (any Location) within your next 2 turns.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "extraSuggestion",
+          "turns": 2
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Informan Bayaran",
+      "titleEn": "Paid Informant",
+      "text": "Dapat 1 Dugaan tambahan (Lokasi bebas) dalam 2 giliranmu berikutnya.",
+      "textEn": "Gain 1 extra Suggestion (any Location) within your next 2 turns.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "extraSuggestion",
+          "turns": 2
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Sandi Cadangan",
+      "titleEn": "Backup Cipher",
+      "text": "Terima 1 Intel; Kecurigaan −1.",
+      "textEn": "Gain 1 Intel; Suspicion −1.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainIntel",
+          "amount": 1
+        },
+        {
+          "type": "reduceSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Sandi Cadangan",
+      "titleEn": "Backup Cipher",
+      "text": "Terima 1 Intel; Kecurigaan −1.",
+      "textEn": "Gain 1 Intel; Suspicion −1.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainIntel",
+          "amount": 1
+        },
+        {
+          "type": "reduceSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Mogok Buruh",
+      "titleEn": "Labour Strike",
+      "text": "Seluruh distrik dari properti lawan pilihanmu disegel sampai akhir putaran berikutnya.",
+      "textEn": "The whole district of a chosen opponent property is sealed until the end of the next round.",
+      "target": "OPPONENT_PROPERTY",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "sealTargetDistrict",
+          "rounds": 1
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Mogok Buruh",
+      "titleEn": "Labour Strike",
+      "text": "Seluruh distrik dari properti lawan pilihanmu disegel sampai akhir putaran berikutnya.",
+      "textEn": "The whole district of a chosen opponent property is sealed until the end of the next round.",
+      "target": "OPPONENT_PROPERTY",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "sealTargetDistrict",
+          "rounds": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Medali Sekutu",
+      "titleEn": "Allied Medal",
+      "text": "Terima 100 escudo dan 5 Prestise.",
+      "textEn": "Receive 100 escudos and 5 Prestige.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 100
+        },
+        {
+          "type": "gainPrestige",
+          "amount": 5
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Medali Sekutu",
+      "titleEn": "Allied Medal",
+      "text": "Terima 100 escudo dan 5 Prestise.",
+      "textEn": "Receive 100 escudos and 5 Prestige.",
+      "target": "NONE",
+      "timing": "BUSINESS",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 100
+        },
+        {
+          "type": "gainPrestige",
+          "amount": 5
+        }
+      ]
+    }
+  ]
+}

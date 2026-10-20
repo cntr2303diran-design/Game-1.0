@@ -40,6 +40,10 @@ data class FactionDef(
 @Serializable
 data class FrontCard(
     val id: FrontId,
+    /** Langkah Jam Perang (1..12) tempat kartu ini bisa muncul. */
+    val step: Int,
+    /** "A" = kartu dasar, "B" = varian alternatif (dipilih acak saat persiapan bila frontVariants aktif). */
+    val variant: String,
     /** "YYYY-MM" */
     val month: String,
     val title: String,
@@ -88,6 +92,16 @@ sealed interface FrontEffect {
 
     @Serializable @SerialName("endGame")
     data object EndGame : FrontEffect
+
+    @Serializable @SerialName("onRevealIntelAll")
+    data class OnRevealIntelAll(val amount: Int) : FrontEffect
+
+    /** Bisa negatif (mengurangi Kecurigaan semua pemain). */
+    @Serializable @SerialName("onRevealSuspicionAll")
+    data class OnRevealSuspicionAll(val amount: Int) : FrontEffect
+
+    @Serializable @SerialName("onRevealMoneyAll")
+    data class OnRevealMoneyAll(val amount: Int) : FrontEffect
 
     /** "Map Merah berpindah": kartu kategori ini dari amplop + tangan pemain aktif dikocok dan dibagi ulang. */
     @Serializable @SerialName("reshuffleEvidence")
@@ -186,7 +200,79 @@ sealed interface CardEffect {
 
     @Serializable @SerialName("reduceSuspicion")
     data class ReduceSuspicion(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("gainPrestige")
+    data class GainPrestige(val amount: Int) : CardEffect
+
+    // --- Efek khusus Kartu Taktik (butuh target / momen sewa) -------------------------
+    @Serializable @SerialName("cancelRent")
+    data object CancelRent : CardEffect
+
+    @Serializable @SerialName("peekTarget")
+    data object PeekTarget : CardEffect
+
+    @Serializable @SerialName("targetSuspicion")
+    data class TargetSuspicion(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("stealFromTarget")
+    data class StealFromTarget(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("sealTargetTile")
+    data class SealTargetTile(val rounds: Int) : CardEffect
+
+    @Serializable @SerialName("sealTargetDistrict")
+    data class SealTargetDistrict(val rounds: Int) : CardEffect
+
+    val needsTarget: Boolean
+        get() = this is PeekTarget || this is TargetSuspicion || this is StealFromTarget ||
+            this is SealTargetTile || this is SealTargetDistrict
 }
+
+// ---------------------------------------------------------------------------
+// Kartu Taktik
+// ---------------------------------------------------------------------------
+
+@Serializable
+enum class TacticTarget { NONE, PLAYER, OPPONENT_PROPERTY }
+
+@Serializable
+enum class TacticTiming {
+    /** Dimainkan pada fase Bisnis giliran sendiri. */
+    BUSINESS,
+    /** Dimainkan saat harus membayar sewa. */
+    RENT,
+}
+
+@Serializable
+data class TacticCard(
+    val id: Int,
+    val title: String,
+    val titleEn: String,
+    val text: String,
+    val textEn: String,
+    val target: TacticTarget,
+    val timing: TacticTiming,
+    val effects: List<CardEffect>,
+)
+
+// ---------------------------------------------------------------------------
+// Operasi Kota
+// ---------------------------------------------------------------------------
+
+@Serializable
+data class OperationReward(val money: Int, val intel: Int, val prestige: Int)
+
+/** Tujuan publik: pemain pertama yang memenuhi syarat (dicek tiap akhir giliran) mengklaim hadiahnya. */
+@Serializable
+data class OperationCard(
+    val id: Int,
+    val title: String,
+    val titleEn: String,
+    val text: String,
+    val textEn: String,
+    val condition: MissionCondition,
+    val reward: OperationReward,
+)
 
 // ---------------------------------------------------------------------------
 // Misi Rahasia
@@ -215,4 +301,9 @@ sealed interface MissionCondition {
     @Serializable @SerialName("propertyCount") data class PropertyCount(val count: Int) : MissionCondition
     @Serializable @SerialName("intelAtLeast") data class IntelAtLeast(val count: Int) : MissionCondition
     @Serializable @SerialName("correctGuesses") data class CorrectGuesses(val count: Int) : MissionCondition
+    @Serializable @SerialName("hqCount") data class HqCount(val count: Int) : MissionCondition
+    @Serializable @SerialName("completeDistricts") data class CompleteDistricts(val count: Int) : MissionCondition
+    @Serializable @SerialName("prestigeAtLeast") data class PrestigeAtLeast(val count: Int) : MissionCondition
+    @Serializable @SerialName("operationsClaimed") data class OperationsClaimed(val count: Int) : MissionCondition
+    @Serializable @SerialName("tacticsPlayed") data class TacticsPlayed(val count: Int) : MissionCondition
 }

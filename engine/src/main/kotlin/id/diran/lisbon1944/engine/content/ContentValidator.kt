@@ -10,6 +10,8 @@ import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.FactionAbility
 import id.diran.lisbon1944.engine.model.FrontEffect
 import id.diran.lisbon1944.engine.model.MissionCondition
+import id.diran.lisbon1944.engine.model.TacticTarget
+import id.diran.lisbon1944.engine.model.TacticTiming
 import id.diran.lisbon1944.engine.model.OwnableTile
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.SpecialKind
@@ -31,6 +33,7 @@ object ContentValidator {
     const val DECK_SIZE = 24
     const val FACTION_COUNT = 8
     const val MIN_MISSIONS = 6
+    const val MIN_TACTICS = 12
 
     /** Sudut papan (indeks → jenis). */
     val CORNERS: Map<Int, SpecialKind> = mapOf(
@@ -57,6 +60,8 @@ object ContentValidator {
         addAll(validateDeck("telegram.json", content.telegram, content))
         addAll(validateBalance(content.balance))
         addAll(validateMissions(content))
+        addAll(validateTactics(content))
+        addAll(validateOperations(content))
     }
 
     // ---------------------------------------------------------------------------------
@@ -147,40 +152,105 @@ object ContentValidator {
 
     fun validateFronts(content: GameContent): List<String> = buildList {
         val fronts = content.fronts
-        if (fronts.size != FRONT_COUNT) add("front.json: harus $FRONT_COUNT kartu Front, ditemukan ${fronts.size}")
-        fronts.forEachIndexed { i, f ->
-            if (f.id.value != i + 1) add("front.json: Front ke-${i + 1} ber-id ${f.id.value} (harus urut 1..$FRONT_COUNT, tidak dikocok)")
-            if (!MONTH.matches(f.month)) add("front.json: Front ${f.id.value} bulan '${f.month}' harus YYYY-MM")
-            if (f.effects.isEmpty()) add("front.json: Front ${f.id.value} tanpa efek")
+        val ids = fronts.map { it.id.value }
+        if (ids.toSet().size != ids.size) add("front.json: id Front duplikat")
+        (1..FRONT_COUNT).forEach { step ->
+            val atStep = fronts.filter { it.step == step }
+            if (atStep.isEmpty()) add("front.json: tidak ada kartu Front untuk langkah $step")
+            if (atStep.map { it.month }.toSet().size > 1) add("front.json: kartu langkah $step berbeda bulan")
+            if (atStep.none { it.variant == "A" }) add("front.json: langkah $step tanpa varian A (dipakai bila frontVariants nonaktif)")
+            if (atStep.count { it.variant == "A" } > 1) add("front.json: langkah $step punya lebih dari satu varian A")
+        }
+        fronts.forEach { f ->
+            val name = "Front ${f.id.value}"
+            if (f.step !in 1..FRONT_COUNT) add("front.json: $name langkah ${f.step} di luar 1..$FRONT_COUNT")
+            if (!MONTH.matches(f.month)) add("front.json: $name bulan '${f.month}' harus YYYY-MM")
+            if (f.effects.isEmpty()) add("front.json: $name tanpa efek")
+            val ends = f.effects.any { it is FrontEffect.EndGame }
+            if (ends != (f.step == FRONT_COUNT)) add("front.json: $name — hanya kartu langkah $FRONT_COUNT yang (dan wajib) mengakhiri permainan")
             f.effects.forEach { e ->
                 when (e) {
                     is FrontEffect.DistrictRentMultiplier -> {
-                        if (e.districts.isEmpty()) add("front.json: Front ${f.id.value} pengali sewa tanpa distrik")
-                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: Front ${f.id.value} pengali harus positif")
+                        if (e.districts.isEmpty()) add("front.json: $name pengali sewa tanpa distrik")
+                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: $name pengali harus positif")
                     }
                     is FrontEffect.EscapeRouteRentMultiplier ->
-                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: Front ${f.id.value} pengali harus positif")
+                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: $name pengali harus positif")
                     is FrontEffect.BuildCostMultiplier ->
-                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: Front ${f.id.value} pengali harus positif")
+                        if (e.numerator <= 0 || e.denominator <= 0) add("front.json: $name pengali harus positif")
                     is FrontEffect.CloseTile ->
-                        if (content.board.getOrNull(e.tile) !is OwnableTile) add("front.json: Front ${f.id.value} menutup petak ${e.tile} yang bukan properti/jalur")
-                    is FrontEffect.OnRevealPayIfOwnsInDistrict ->
-                        if (e.amount <= 0) add("front.json: Front ${f.id.value} jumlah harus positif")
-                    is FrontEffect.OnRevealFactionBonus ->
-                        if (e.amount <= 0) add("front.json: Front ${f.id.value} jumlah harus positif")
-                    is FrontEffect.FreeSuggestionEachPlayer ->
-                        if (e.count <= 0) add("front.json: Front ${f.id.value} jumlah Dugaan gratis harus positif")
-                    is FrontEffect.OnRevealJailIfMoneyAbove ->
-                        if (e.threshold < 0) add("front.json: Front ${f.id.value} ambang tidak boleh negatif")
+                        if (content.board.getOrNull(e.tile) !is OwnableTile) add("front.json: $name menutup petak ${e.tile} yang bukan properti/jalur")
+                    is FrontEffect.OnRevealPayIfOwnsInDistrict -> if (e.amount <= 0) add("front.json: $name jumlah harus positif")
+                    is FrontEffect.OnRevealFactionBonus -> if (e.amount <= 0) add("front.json: $name jumlah harus positif")
+                    is FrontEffect.FreeSuggestionEachPlayer -> if (e.count <= 0) add("front.json: $name jumlah Dugaan gratis harus positif")
+                    is FrontEffect.OnRevealJailIfMoneyAbove -> if (e.threshold < 0) add("front.json: $name ambang tidak boleh negatif")
+                    is FrontEffect.OnRevealIntelAll -> if (e.amount <= 0) add("front.json: $name jumlah Intel harus positif")
+                    is FrontEffect.OnRevealSuspicionAll -> if (e.amount == 0) add("front.json: $name perubahan Kecurigaan tidak boleh 0")
+                    is FrontEffect.OnRevealMoneyAll -> if (e.amount <= 0) add("front.json: $name jumlah harus positif")
                     FrontEffect.NoStartSalary, FrontEffect.OnRevealSecretConference,
                     FrontEffect.AccuseFromAnywhere, FrontEffect.EndGame, is FrontEffect.ReshuffleEvidence -> Unit
                 }
             }
         }
-        val months = fronts.map { it.month }
-        if (months != months.sorted() || months.toSet().size != months.size) add("front.json: bulan Front harus naik kronologis tanpa duplikat")
-        val endGameFronts = fronts.filter { f -> f.effects.any { it is FrontEffect.EndGame } }.map { it.id.value }
-        if (endGameFronts != listOf(FRONT_COUNT)) add("front.json: hanya Front #$FRONT_COUNT yang boleh mengakhiri permainan, ditemukan $endGameFronts")
+        val byStep = (1..FRONT_COUNT).mapNotNull { st -> fronts.firstOrNull { it.step == st }?.month }
+        if (byStep != byStep.sorted() || byStep.toSet().size != byStep.size) add("front.json: bulan Front harus naik kronologis per langkah")
+    }
+
+    fun validateTactics(content: GameContent): List<String> = buildList {
+        val t = content.tactics
+        if (t.isEmpty()) return@buildList
+        if (t.size < MIN_TACTICS) add("tactics.json: minimal $MIN_TACTICS kartu, ditemukan ${t.size}")
+        if (t.map { it.id }.sorted() != (1..t.size).toList()) add("tactics.json: id kartu harus 1..${t.size}")
+        t.forEach { c ->
+            val name = "tactics.json: kartu ${c.id}"
+            if (c.effects.isEmpty()) add("$name tanpa efek")
+            val targeted = c.effects.filter { it.needsTarget }
+            if (targeted.isNotEmpty() && c.target == TacticTarget.NONE) add("$name punya efek bertarget tetapi target NONE")
+            if (targeted.isEmpty() && c.target != TacticTarget.NONE) add("$name bertarget ${c.target} tanpa efek bertarget")
+            c.effects.forEach { e ->
+                val okForTarget = when (e) {
+                    CardEffect.PeekTarget, is CardEffect.TargetSuspicion, is CardEffect.StealFromTarget -> c.target == TacticTarget.PLAYER
+                    is CardEffect.SealTargetTile, is CardEffect.SealTargetDistrict -> c.target == TacticTarget.OPPONENT_PROPERTY
+                    else -> true
+                }
+                if (!okForTarget) add("$name efek ${e::class.simpleName} tidak cocok dengan target ${c.target}")
+                if (e is CardEffect.JailPass || e is CardEffect.MoveToTile || e is CardEffect.MoveToNearest || e is CardEffect.MoveBack || e is CardEffect.GoToJail) {
+                    add("$name efek gerak/penjara tidak boleh dipakai Kartu Taktik")
+                }
+            }
+            val cancels = c.effects.any { it is CardEffect.CancelRent }
+            if (cancels != (c.timing == TacticTiming.RENT)) add("$name: cancelRent wajib dan hanya untuk timing RENT")
+        }
+    }
+
+    fun validateOperations(content: GameContent): List<String> = buildList {
+        val ops = content.operations
+        if (ops.isEmpty()) return@buildList
+        if (ops.map { it.id }.toSet().size != ops.size) add("operations.json: id Operasi duplikat")
+        if (content.openOperations !in 1..ops.size) add("operations.json: open harus 1..${ops.size}")
+        ops.forEach { o ->
+            val r = o.reward
+            if (r.money < 0 || r.intel < 0 || r.prestige < 0) add("operations.json: Operasi ${o.id} hadiah negatif")
+            if (r.money + r.intel + r.prestige == 0) add("operations.json: Operasi ${o.id} tanpa hadiah")
+            if (conditionInvalid(o.condition, content)) add("operations.json: Operasi ${o.id} syarat tidak masuk akal")
+        }
+    }
+
+    private fun conditionInvalid(c: MissionCondition, content: GameContent): Boolean = when (c) {
+        is MissionCondition.OwnDistrict -> false
+        is MissionCondition.EscapeRoutes -> c.count !in 1..ESCAPE_ROUTE_COUNT
+        is MissionCondition.CashAtLeast -> c.amount <= 0
+        is MissionCondition.BuildingPoints -> c.count <= 0
+        is MissionCondition.KnownCards -> c.count !in 1..content.evidence.size
+        is MissionCondition.SuspicionAtMost -> c.max < 0
+        is MissionCondition.PropertyCount -> c.count !in 1..(PROPERTY_COUNT + ESCAPE_ROUTE_COUNT)
+        is MissionCondition.IntelAtLeast -> c.count <= 0
+        is MissionCondition.CorrectGuesses -> c.count !in 1..3
+        is MissionCondition.HqCount -> c.count !in 1..content.balance.hqStock
+        is MissionCondition.CompleteDistricts -> c.count !in 1..District.entries.size
+        is MissionCondition.PrestigeAtLeast -> c.count <= 0
+        is MissionCondition.OperationsClaimed -> c.count !in 1..content.operations.size.coerceAtLeast(1)
+        is MissionCondition.TacticsPlayed -> c.count <= 0
     }
 
     fun validateDeck(file: String, cards: List<DeckCard>, content: GameContent): List<String> = buildList {
@@ -216,6 +286,10 @@ object ContentValidator {
                     is CardEffect.LoseIntel -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
                     is CardEffect.AddSuspicion -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
                     is CardEffect.ReduceSuspicion -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
+                    is CardEffect.GainPrestige -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
+                    CardEffect.CancelRent, CardEffect.PeekTarget, is CardEffect.TargetSuspicion, is CardEffect.StealFromTarget,
+                    is CardEffect.SealTargetTile, is CardEffect.SealTargetDistrict ->
+                        add("$file: kartu ${c.id} memakai efek khusus Kartu Taktik")
                     is CardEffect.PeekRandomFromNeighbor, CardEffect.PeekRandomFromRichest,
                     is CardEffect.ShowOwnCardToNeighbor, is CardEffect.ForceShowByType,
                     CardEffect.GoToJail, CardEffect.JailPass, CardEffect.SkipNextSuggestion -> Unit
@@ -230,18 +304,7 @@ object ContentValidator {
         if (m.map { it.id }.toSet().size != m.size) add("missions.json: id misi duplikat")
         m.forEach { mission ->
             if (mission.points <= 0) add("missions.json: misi ${mission.id} poin harus positif")
-            val bad = when (val c = mission.condition) {
-                is MissionCondition.OwnDistrict -> false
-                is MissionCondition.EscapeRoutes -> c.count !in 1..ESCAPE_ROUTE_COUNT
-                is MissionCondition.CashAtLeast -> c.amount <= 0
-                is MissionCondition.BuildingPoints -> c.count <= 0
-                is MissionCondition.KnownCards -> c.count !in 1..content.evidence.size
-                is MissionCondition.SuspicionAtMost -> c.max < 0
-                is MissionCondition.PropertyCount -> c.count !in 1..(PROPERTY_COUNT + ESCAPE_ROUTE_COUNT)
-                is MissionCondition.IntelAtLeast -> c.count <= 0
-                is MissionCondition.CorrectGuesses -> c.count !in 1..3
-            }
-            if (bad) add("missions.json: misi ${mission.id} syarat tidak masuk akal")
+            if (conditionInvalid(mission.condition, content)) add("missions.json: misi ${mission.id} syarat tidak masuk akal")
         }
     }
 
@@ -326,5 +389,18 @@ object ContentValidator {
         if (b.dominancePercent !in 0..100) add("balance.json: dominancePercent harus 0..100")
         if (b.dominanceFromStep !in 1..FRONT_COUNT) add("balance.json: dominanceFromStep harus 1..$FRONT_COUNT")
         if (b.dominanceMinPlayers !in 3..6) add("balance.json: dominanceMinPlayers harus 3..6")
+        positive("tactics.handLimit", b.tactics.handLimit)
+        nonNegative("tactics.drawPerStartPass", b.tactics.drawPerStartPass)
+        positive("tactics.maxPerTurn", b.tactics.maxPerTurn)
+        if (b.tactics.startHand !in 0..b.tactics.handLimit) add("balance.json: tactics.startHand harus 0..handLimit")
+        if (b.patrol.startTile !in 0 until BOARD_SIZE) add("balance.json: patrol.startTile di luar papan")
+        nonNegative("patrol.suspicion", b.patrol.suspicion)
+        if (b.patrol.dice !in 1..3) add("balance.json: patrol.dice harus 1..3")
+        if (b.contact.startTile !in 0 until BOARD_SIZE) add("balance.json: contact.startTile di luar papan")
+        nonNegative("contact.intel", b.contact.intel)
+        nonNegative("contact.money", b.contact.money)
+        if (b.contact.dice !in 1..3) add("balance.json: contact.dice harus 1..3")
+        nonNegative("comeback.money", b.comeback.money)
+        nonNegative("comeback.intel", b.comeback.intel)
     }
 }

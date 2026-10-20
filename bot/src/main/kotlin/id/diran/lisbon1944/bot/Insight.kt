@@ -17,7 +17,14 @@ import id.diran.lisbon1944.engine.model.PlayerView
 import id.diran.lisbon1944.engine.model.PropertyTile
 
 /** Turunan dari satu PlayerView yang dipakai bot. Semua dihitung malas dan hanya dari view. */
-class Insight(val view: PlayerView, private val content: GameContent, private val tracker: DeductionTracker, private val mode: DeductionMode) {
+class Insight(
+    val view: PlayerView,
+    private val content: GameContent,
+    private val tracker: DeductionTracker,
+    private val mode: DeductionMode,
+    /** Aksi legal saat ini (untuk keputusan yang bergantung pada pilihan tersedia, mis. Penyamaran). */
+    val legal: List<id.diran.lisbon1944.engine.model.Action> = emptyList(),
+) {
 
     val me: PlayerId get() = view.viewerId
     val money: Int get() = view.me.money

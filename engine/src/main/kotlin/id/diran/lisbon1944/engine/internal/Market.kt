@@ -237,9 +237,10 @@ internal fun Tx.goBankrupt(p: PlayerId, creditor: Creditor) {
             pl.heldCards.forEach { returnCard(it.deck, it.cardId) }
         }
     }
+    if (pl.tactics.isNotEmpty()) s = s.copy(tacticDeck = s.tacticDeck + pl.tactics)
     upd(p) {
         it.copy(
-            bankrupt = true, money = 0, jail = null, heldCards = emptyList(), freeSuggestions = 0,
+            bankrupt = true, money = 0, jail = null, heldCards = emptyList(), freeSuggestions = 0, tactics = emptyList(),
             extraSuggestionTurnsLeft = 0,
         )
     }

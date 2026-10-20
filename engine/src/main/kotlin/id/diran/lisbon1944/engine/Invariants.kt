@@ -3,6 +3,7 @@ package id.diran.lisbon1944.engine
 import id.diran.lisbon1944.engine.content.GameContent
 import id.diran.lisbon1944.engine.model.Deck
 import id.diran.lisbon1944.engine.model.GameState
+import id.diran.lisbon1944.engine.model.OwnableTile
 import id.diran.lisbon1944.engine.model.Ownership
 import id.diran.lisbon1944.engine.model.PendingDecision
 import id.diran.lisbon1944.engine.model.PropertyTile
@@ -55,7 +56,7 @@ object Invariants {
         }
 
         if (s.warStep !in 1..12) add("warStep di luar 1..12: ${s.warStep}")
-        if (s.activeFront.value != s.warStep) add("Front aktif ${s.activeFront.value} ≠ langkah ${s.warStep}")
+
 
         // Kartu Sandi & Telegram tidak hilang (selama permainan berjalan).
         if (s.winner == null) {
@@ -81,6 +82,27 @@ object Invariants {
         ) {
             add("Jam Perang tertinggal: ${s.startPasses} lintasan tetapi masih langkah ${s.warStep}")
         }
+
+        // Kartu Taktik tidak hilang.
+        if (b.tactics.enabled) {
+            val all = s.tacticDeck + s.players.flatMap { it.tactics }
+            val expected = c.tactics.map { it.id }
+            if (all.sorted() != expected.sorted()) add("Kartu Taktik tidak lengkap/ganda: ${all.size} dari ${expected.size}")
+            s.players.filter { it.tactics.size > b.tactics.handLimit }.forEach { add("Tangan Taktik ${it.name} melebihi batas") }
+        }
+        // Operasi Kota tidak hilang.
+        if (b.operationsEnabled) {
+            val all = s.operationDeck + s.openOperations + s.claimedOperations
+            if (all.sorted() != c.operations.map { it.id }.sorted()) add("Operasi Kota tidak lengkap/ganda")
+            if (s.winner == null && s.openOperations.size > c.openOperations) add("Operasi terbuka melebihi ${c.openOperations}")
+        }
+        if (s.activeFront.value != s.frontPlan.getOrNull(s.warStep - 1)) add("Front aktif ${s.activeFront.value} ≠ rencana langkah ${s.warStep}")
+        if (s.frontPlan.size != 12 || s.frontPlan.withIndex().any { (i, fid) -> c.fronts.firstOrNull { it.id.value == fid }?.step != i + 1 }) {
+            add("Rencana Front tidak valid: ${s.frontPlan}")
+        }
+        if (b.patrol.enabled && s.patrolPos !in 0 until 40) add("Posisi Patroli tidak valid: ${s.patrolPos}")
+        if (b.contact.enabled && s.contactPos !in 0 until 40) add("Posisi Kontak tidak valid: ${s.contactPos}")
+        s.sealedTiles.keys.forEach { if (c.board.getOrNull(it) !is OwnableTile) add("Petak $it disegel padahal bukan properti/jalur") }
 
         val knowledgeSize = s.knowledge.size
         if (knowledgeSize != s.players.size) add("Jumlah catatan pengetahuan $knowledgeSize ≠ jumlah pemain ${s.players.size}")

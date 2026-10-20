@@ -123,7 +123,7 @@ class GameStateFixture(
         )
     }
 
-    fun front(step: Int) = set { copy(warStep = step, activeFront = FrontId(step)) }
+    fun front(step: Int) = set { copy(warStep = step, activeFront = FrontId(frontPlan[step - 1])) }
 
     /** Giliran [i] di fase Gerak. Jam Perang dianggap sudah maju pada putaran ini kecuali [clockReady]. */
     fun turn(i: Int, clockReady: Boolean = false) = set {
@@ -177,6 +177,12 @@ class GameStateFixture(
                 buildingRentPercent = 100,
                 ossSalary = 250,
                 dominancePercent = 0,
+                frontVariants = false,
+                tactics = b.tactics.copy(enabled = false),
+                patrol = b.patrol.copy(enabled = false),
+                contact = b.contact.copy(enabled = false),
+                comeback = b.comeback.copy(enabled = false),
+                operationsEnabled = false,
                 accuseUnlockStep = 1,
                 publicPasses = true,
                 intel = b.intel.copy(accuseCost = 0, interrogationFree = true),

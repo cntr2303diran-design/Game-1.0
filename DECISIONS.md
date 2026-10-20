@@ -115,3 +115,27 @@ menang lemah (+0,13): bayar-informasi bukan strategi dominan. Kuota 2 dipertahan
 
 Catatan: Kecurigaan tidak pernah memicu penangkapan pada bot (bot menghindarinya); elemen ini bekerja sebagai
 pencegah, bukan hukuman yang sering terjadi.
+
+## Ekspansi "Kota Para Mata-Mata" — lebih dramatis & interaktif
+
+| # | Elemen | Isi | Alasan |
+|---|--------|-----|--------|
+| D57 | **Kartu Taktik** (`tactics.json`, 24 kartu, 12 jenis) | Mulai dengan 1, +1 tiap melewati START (maks 3 di tangan). Maksimal 1 dimainkan per giliran pada fase Bisnis; Penyamaran dimainkan saat harus membayar sewa. Jenis: Penyamaran, Jaringan Kurir, Suap Inspektur, Pengintaian, Tekanan Diplomatik, Pemerasan, Sabotase, Dana Gelap, Informan Bayaran, Sandi Cadangan, Mogok Buruh, Medali Sekutu. Kartu terpakai kembali ke bawah tumpukan. | Interaksi langsung antar-pemain dan momen balas dendam; tiap giliran punya pilihan taktis. |
+| D58 | **Segel properti** | Sabotase/Mogok Buruh membuat petak tanpa sewa sampai akhir putaran berikutnya. | Cara menyerang pemimpin ekonomi tanpa menghancurkan permanen. |
+| D59 | **Operasi Kota** (`operations.json`, 18) | 3 Operasi terbuka. Di akhir setiap giliran, pemain pertama (mulai pemain giliran) yang memenuhi syarat mengklaimnya: uang/Intel/Prestise; Operasi baru dibuka. | Perlombaan tujuan publik — semua pemain melihat siapa yang hampir menang. |
+| D60 | **Prestise** | Poin kemenangan dari Operasi & Medali Sekutu, ditambahkan ke skor Mei 1945 (ikut ×0,5 bila Terbakar). | Jalur skor baru selain kekayaan. |
+| D61 | **Patroli PIDE & Kontak Netral** | Dua pion netral bergerak tiap awal putaran (Patroli 2 dadu, Kontak 1 dadu). Berhenti di petak Patroli: Kecurigaan +2 (bisa langsung ditangkap). Berhenti di petak Kontak: +1 Intel & +50. | Papan terasa hidup; Kecurigaan kini benar-benar menimbulkan penangkapan (±0,7 per permainan). |
+| D62 | **Front varian** | 12 Front baru (varian B). Tiap langkah memakai A atau B secara acak, rahasia sampai dibalik. Efek baru: semua +Intel, semua ±Kecurigaan, semua +uang. Map Merah tetap berpindah di langkah 5, 8, 10, 11 pada kedua varian. | 4.096 kombinasi alur perang — tiap sesi berbeda. |
+| D63 | **Bantuan Sekutu** | Setiap Front dibalik (kecuali yang pertama), pemain aktif dengan kekayaan bersih terendah menerima 100 + 1 Intel. | Pemain tertinggal tetap punya harapan dalam permainan 4 jam. |
+| D64 | **10 Misi baru** (24 total) | Syarat baru: Prestise, jumlah Operasi, Taktik dimainkan, jumlah Markas, distrik lengkap. | Selaras dengan elemen baru. |
+| D65 | Sewa bangunan 48% → 58% | Elemen baru (Penyamaran, segel, bantuan) meredam kebangkrutan; Ekonomi turun ke 3,5% sebelum disetel ulang. | Menjaga ketiga cara menang ≥ 10%. |
+| D66 | Bot | Bot menilai tiap Kartu Taktik (Intel, Kecurigaan, uang, Prestise, nilai informasi, target pemimpin, perkiraan sewa yang hilang) dan memainkan yang bernilai ≥ 20; Penyamaran untuk sewa ≥ maks(120, 20% uang). | Agar simulasi mencerminkan permainan dengan elemen baru. |
+
+Hasil simulasi setelah ekspansi (seed 42):
+
+| Meja | Game | Median | Detektif | Ekonomi | Skor Mei 1945 | Faksi maks | Ditangkap/game | Target |
+|------|------|--------|----------|---------|---------------|------------|----------------|--------|
+| 3 pemain | 300 | 222 mnt | 45% | 37% | 19% | 1,22× | 0,63 | ✓ |
+| 4 pemain | 1000 | 238 mnt | 55% | 16% | 29% | 1,12× | 0,68 | ✓ |
+| 5 pemain | 300 | 254 mnt | 22% | 23% | 54% | 1,31× | 0,73 | hampir (faksi) |
+| 6 pemain | 300 | 258 mnt | 19% | 16% | 66% | 1,20× | 0,72 | ✓ |

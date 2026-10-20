@@ -91,6 +91,19 @@ object GameEvents {
     const val MISSION_COMPLETED = "mission_completed"
     const val WAR_CLOCK = "war_clock"
     const val ECONOMIC_DOMINANCE = "economic_dominance"
+    /** Privat: kartu Taktik yang diambil (payload "card"); publik: TACTIC_COUNT. */
+    const val TACTIC_DRAWN = "tactic_drawn"
+    const val TACTIC_PLAYED = "tactic_played"
+    const val RENT_CANCELLED = "rent_cancelled"
+    const val TILE_SEALED = "tile_sealed"
+    const val PRESTIGE = "prestige"
+    const val OPERATION_OPENED = "operation_opened"
+    const val OPERATION_CLAIMED = "operation_claimed"
+    const val PATROL_MOVED = "patrol_moved"
+    const val CONTACT_MOVED = "contact_moved"
+    const val PATROL_CAUGHT = "patrol_caught"
+    const val CONTACT_MET = "contact_met"
+    const val ALLIED_AID = "allied_aid"
     /** Publik: kategori kartu Bukti yang dibagi ulang (Map Merah berpindah). */
     const val EVIDENCE_RESHUFFLED = "evidence_reshuffled"
 }

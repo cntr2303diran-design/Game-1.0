@@ -101,7 +101,7 @@ internal fun Tx.startTurn(p: PlayerId) {
         push(Task.NextTurn)
         return
     }
-    s = s.copy(currentPlayerIdx = p.value, phase = TurnPhase.MOVE, propertySuggestionUsed = false)
+    s = s.copy(currentPlayerIdx = p.value, phase = TurnPhase.MOVE, propertySuggestionUsed = false, tacticsPlayedThisTurn = 0)
     upd(p) {
         it.copy(
             suggestionBlockedThisTurn = it.skipNextSuggestion,
@@ -136,6 +136,7 @@ internal fun Tx.nextTurn() {
     if (newRound) {
         s = s.copy(roundNumber = s.roundNumber + 1, warClockAdvancedThisRound = false)
         emit(E.ROUND_STARTED, "round" to s.roundNumber)
+        movePawns()
         if (s.config.clockMode == WarClockMode.EVERY_ROUND && s.warStep < LAST_FRONT) revealFront(s.warStep + 1)
     }
 }
@@ -218,6 +219,7 @@ internal fun Tx.passStart(p: PlayerId, salary: Boolean) {
     if (s.warEnded || player(p).inJail || player(p).bankrupt) return
     changeIntel(p, b.intel.perStartPass, "start")
     changeSuspicion(p, -b.suspicion.decayPerStartPass, "start")
+    drawTactics(p, b.tactics.drawPerStartPass)
     if (!salary) return
     if (frontEffects().any { it is FrontEffect.NoStartSalary }) {
         emit(E.SALARY_BLOCKED, "player" to p, "front" to s.activeFront.value)
@@ -258,6 +260,7 @@ internal fun Tx.land(p: PlayerId, rentMultiplier: Int) {
     val tile = c.tile(pl.position)
     s = s.copy(phase = TurnPhase.TILE_ACTION)
     emit(E.LANDED, "player" to p, "tile" to tile.index)
+    if (!pawnEncounter(p)) return
     when (tile) {
         is OwnableTile -> landOwnable(p, tile, rentMultiplier)
         is SpecialTile -> landSpecial(p, tile)
@@ -330,7 +333,7 @@ internal fun Tx.payOrRaise(from: PlayerId, to: Creditor, amount: Int, reason: St
 // =====================================================================================
 
 internal fun Tx.revealFront(step: Int) {
-    val front = c.front(FrontId(step))
+    val front = c.front(FrontId(s.frontPlan[step - 1]))
     s = s.copy(warStep = step, activeFront = front.id)
     val free = front.effects.filterIsInstance<FrontEffect.FreeSuggestionEachPlayer>().sumOf { it.count }
     s = s.copy(players = s.players.map { it.copy(infoPaymentsThisStep = 0, freeSuggestions = if (it.bankrupt) 0 else free) })
@@ -355,12 +358,16 @@ internal fun Tx.revealFront(step: Int) {
                 leftOf(id)?.let { tasks += Task.RequestShow(id, it, null, ShowReason.SECRET_CONFERENCE) }
             }
             FrontEffect.EndGame -> s = s.copy(warEnded = true)
+            is FrontEffect.OnRevealIntelAll -> order.forEach { changeIntel(it, e.amount, "front") }
+            is FrontEffect.OnRevealSuspicionAll -> order.forEach { changeSuspicion(it, e.amount, "front") }
+            is FrontEffect.OnRevealMoneyAll -> order.forEach { gainFromBank(it, e.amount, "front") }
             is FrontEffect.DistrictRentMultiplier, is FrontEffect.EscapeRouteRentMultiplier,
             is FrontEffect.FreeSuggestionEachPlayer, is FrontEffect.CloseTile, is FrontEffect.BuildCostMultiplier,
             FrontEffect.NoStartSalary, FrontEffect.AccuseFromAnywhere, is FrontEffect.ReshuffleEvidence -> Unit
         }
     }
     pushAll(tasks)
+    if (step > 1) alliedAid()
     checkDominance()
 }
 

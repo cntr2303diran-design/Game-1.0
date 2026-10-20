@@ -5,7 +5,11 @@ import id.diran.lisbon1944.engine.ViolationCode
 import id.diran.lisbon1944.engine.content.GameContent
 import id.diran.lisbon1944.engine.model.Action as A
 import id.diran.lisbon1944.engine.model.PendingDecision as PD
+import id.diran.lisbon1944.engine.model.CardEffect
 import id.diran.lisbon1944.engine.model.CardId
+import id.diran.lisbon1944.engine.model.PropertyTile
+import id.diran.lisbon1944.engine.model.TacticTarget
+import id.diran.lisbon1944.engine.model.TacticTiming
 import id.diran.lisbon1944.engine.model.EscapeRouteTile
 import id.diran.lisbon1944.engine.model.EvidenceType
 import id.diran.lisbon1944.engine.model.Faction
@@ -72,6 +76,7 @@ internal object Legality {
             }
             is PD.RentChoice -> when (a) {
                 is A.PayRentMoney -> null
+                is A.PlayTactic -> tacticCheck(s, c, me, a, TacticTiming.RENT)
                 is A.PayRentInfo -> when {
                     !pend.quote.infoAllowed -> infoBlocked(pend.quote.infoBlockedReason)
                     a.cardId !in pend.allowedInfoCards ->
@@ -162,6 +167,7 @@ internal object Legality {
             }
             is PD.BusinessPhase -> when (a) {
                 is A.EndTurn -> null
+                is A.PlayTactic -> tacticCheck(s, c, me, a, TacticTiming.BUSINESS)
                 is A.Build -> Economy.buildCheck(s, c, me.id, a.tile)
                 is A.SellBuilding -> Economy.sellCheck(s, c, me.id, a.tile)
                 is A.Mortgage -> Economy.mortgageCheck(s, c, me.id, a.tile)
@@ -185,6 +191,7 @@ internal object Legality {
         a is A.Suggest && me.suggestionBlockedThisTurn -> v(ViolationCode.SUGGESTION_BLOCKED, "Kode Dibakar: tidak boleh Dugaan giliran ini")
         a is A.Accuse && me.burned && s.config.mode != GameMode.FAMILY -> v(ViolationCode.ALREADY_BURNED, "Pemain Terbakar tidak boleh menuduh lagi")
         a is A.Accuse -> v(ViolationCode.ACCUSE_NOT_ALLOWED, "Tuduhan Akhir tidak tersedia sekarang")
+        a is A.PlayTactic -> v(ViolationCode.TACTIC_NOT_ALLOWED, "Kartu Taktik hanya dimainkan saat fase Bisnis atau saat membayar sewa")
         else -> v(ViolationCode.WRONG_DECISION, "Aksi ${a::class.simpleName} tidak sesuai keputusan ${pend::class.simpleName}")
     }
 
@@ -286,6 +293,52 @@ internal object Legality {
         return null
     }
 
+    private fun tacticCheck(s: GameState, c: GameContent, me: PlayerState, a: A.PlayTactic, timing: TacticTiming): RuleViolation? {
+        fun bad(msg: String) = v(ViolationCode.TACTIC_NOT_ALLOWED, msg)
+        if (!s.config.balance.tactics.enabled) return bad("Kartu Taktik tidak dipakai")
+        if (a.cardId !in me.tactics) return bad("Kartu Taktik ${a.cardId} tidak ada di tanganmu")
+        val card = c.tactics.firstOrNull { it.id == a.cardId } ?: return bad("Kartu Taktik tidak dikenal")
+        if (card.timing != timing) return bad("${card.title} tidak bisa dimainkan sekarang")
+        if (s.tacticsPlayedThisTurn >= s.config.balance.tactics.maxPerTurn) return bad("Batas Kartu Taktik per giliran tercapai")
+        return when (card.target) {
+            TacticTarget.NONE -> if (a.targetPlayer != null || a.targetTile != null) bad("${card.title} tidak memakai target") else null
+            TacticTarget.PLAYER -> {
+                val t = a.targetPlayer?.let { s.players.getOrNull(it.value) } ?: return bad("Pilih pemain target")
+                when {
+                    a.targetTile != null -> bad("${card.title} menargetkan pemain, bukan petak")
+                    t.id == me.id || t.bankrupt -> bad("Target harus pemain aktif lain")
+                    card.effects.any { it is CardEffect.PeekTarget } && t.hand.isEmpty() -> bad("${t.name} tidak punya kartu Bukti")
+                    else -> null
+                }
+            }
+            TacticTarget.OPPONENT_PROPERTY -> {
+                val tile = a.targetTile ?: return bad("Pilih properti lawan")
+                val o = s.ownership[tile] ?: return bad("Petak $tile tak bertuan")
+                when {
+                    a.targetPlayer != null -> bad("${card.title} menargetkan petak, bukan pemain")
+                    o.ownerId == me.id || s.players[o.ownerId.value].bankrupt -> bad("Target harus properti lawan aktif")
+                    card.effects.any { it is CardEffect.SealTargetDistrict } && c.board[tile] !is PropertyTile -> bad("Mogok Buruh hanya untuk properti distrik")
+                    else -> null
+                }
+            }
+        }
+    }
+
+    private fun tacticCandidates(s: GameState, c: GameContent, me: PlayerState, timing: TacticTiming): List<A> {
+        if (!s.config.balance.tactics.enabled) return emptyList()
+        val others = s.players.filter { it.id != me.id && !it.bankrupt }
+        val oppTiles = s.ownership.filter { (_, o) -> o.ownerId != me.id }.keys.sorted()
+        return me.tactics.distinct().flatMap { id ->
+            val card = c.tactics.firstOrNull { it.id == id } ?: return@flatMap emptyList()
+            if (card.timing != timing) return@flatMap emptyList()
+            when (card.target) {
+                TacticTarget.NONE -> listOf(A.PlayTactic(me.id, id))
+                TacticTarget.PLAYER -> others.map { A.PlayTactic(me.id, id, targetPlayer = it.id) }
+                TacticTarget.OPPONENT_PROPERTY -> oppTiles.map { A.PlayTactic(me.id, id, targetTile = it) }
+            }
+        }
+    }
+
     private fun <T> containsAll(have: List<T>, want: List<T>): Boolean {
         val pool = have.toMutableList()
         return want.all { pool.remove(it) }
@@ -305,7 +358,8 @@ internal object Legality {
             is PD.JailChoice -> listOf(A.RollDice(p), A.PayJailFine(p), A.UseJailCard(p), A.UseResistanceAbility(p))
             is PD.BuyOrAuction -> listOf(A.BuyProperty(p), A.DeclineBuy(p))
             is PD.AuctionBid -> listOf<A>(A.PassBid(p)) + amounts(pend.minBid, me.money, b.auctionStep).map { A.Bid(p, it) }
-            is PD.RentChoice -> listOf<A>(A.PayRentMoney(p)) + me.hand.map { A.PayRentInfo(p, it) }
+            is PD.RentChoice -> listOf<A>(A.PayRentMoney(p)) + me.hand.map { A.PayRentInfo(p, it) } +
+                tacticCandidates(s, c, me, TacticTiming.RENT)
             is PD.SuggestionOffer -> listOf<A>(A.SkipSuggestion(p)) + suggestions(c, p, me)
             is PD.RevealForSuggestion -> me.hand.map { A.RevealCard(p, it) } + A.StaySilent(p)
             is PD.DecodeOperatorPick -> (1..6).map { A.DecodePickNumber(p, it) }
@@ -322,6 +376,7 @@ internal object Legality {
             is PD.FinalGuess -> combos(c).map { (sus, loc, itm) -> A.SubmitFinalGuess(p, sus, loc, itm) }
             is PD.BusinessPhase -> buildList {
                 add(A.EndTurn(p))
+                addAll(tacticCandidates(s, c, me, TacticTiming.BUSINESS))
                 ownedTiles(s, p).forEach { t ->
                     add(A.Build(p, t)); add(A.SellBuilding(p, t)); add(A.Mortgage(p, t)); add(A.Unmortgage(p, t))
                 }

@@ -57,7 +57,29 @@ data class Balance(
     val dominanceFromStep: Int,
     /** Dominasi Ekonomi hanya berlaku di meja dengan minimal sekian pemain. */
     val dominanceMinPlayers: Int,
+    /** Setiap langkah Jam memakai kartu Front A atau B secara acak (rahasia sampai dibalik). */
+    val frontVariants: Boolean,
+    val tactics: TacticRules,
+    val patrol: PatrolRules,
+    val contact: ContactRules,
+    val comeback: ComebackRules,
+    val operationsEnabled: Boolean,
 )
+
+@Serializable
+data class TacticRules(val enabled: Boolean, val handLimit: Int, val drawPerStartPass: Int, val maxPerTurn: Int, val startHand: Int)
+
+/** Patroli PIDE: pion netral yang bergerak tiap awal putaran; berhenti di petaknya = Kecurigaan naik. */
+@Serializable
+data class PatrolRules(val enabled: Boolean, val startTile: Int, val suspicion: Int, val dice: Int)
+
+/** Kontak Netral: pion netral; berhenti di petaknya = Intel + uang. */
+@Serializable
+data class ContactRules(val enabled: Boolean, val startTile: Int, val intel: Int, val money: Int, val dice: Int)
+
+/** Bantuan Sekutu: saat Front dibalik, pemain dengan kekayaan terendah menerima bantuan. */
+@Serializable
+data class ComebackRules(val enabled: Boolean, val money: Int, val intel: Int)
 
 @Serializable
 data class WarClockRules(

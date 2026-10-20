@@ -42,7 +42,7 @@ class StrategicBot(
         if (params.randomness > 0 && rng.nextInt(1000) < params.randomness * 1000 && decision.allowsRandom()) {
             return weightedRandom(legal, rng)
         }
-        val insight = Insight(view, content, tracker, params.deduction)
+        val insight = Insight(view, content, tracker, params.deduction, legal)
         val wanted = runCatching { choose(decision, insight, legal, rng) }.getOrNull()
         // ProposeTrade tidak dienumerasi engine (parametrik) — disusun sesuai aturan tradeCheck di proposeTrade().
         if (wanted is Action.ProposeTrade && decision is PD.BusinessPhase) return wanted
@@ -125,6 +125,9 @@ class StrategicBot(
     // --- Sewa ----------------------------------------------------------------------------
     private fun rent(i: Insight, d: PD.RentChoice): Action {
         val me = i.me
+        // Penyamaran untuk sewa besar.
+        val disguise = i.legal.filterIsInstance<Action.PlayTactic>().firstOrNull()
+        if (disguise != null && d.quote.amount >= maxOf(120, i.money / 5)) return disguise
         if (!d.quote.infoAllowed || d.allowedInfoCards.isEmpty()) return Action.PayRentMoney(me)
         val card = i.mostKnown(d.allowedInfoCards)
         val cheapLeak = i.knownCount(card) >= params.infoKnownBy
@@ -300,6 +303,64 @@ class StrategicBot(
         }
     }
 
+    /** Nilai Kartu Taktik; null bila sebaiknya disimpan. */
+    private fun playTactic(i: Insight, legal: List<Action>, rng: GameRng): Action? {
+        val plays = legal.filterIsInstance<Action.PlayTactic>()
+        if (plays.isEmpty()) return null
+        if (level == BotLevel.EASY) return if (rng.nextInt(100) < 30) plays[rng.nextInt(plays.size)] else null
+        val bal = i.view.config.balance
+        val cap = bal.intel.max + if (i.view.me.faction == Faction.ABWEHR_DEFECTOR) bal.intel.defectorBonus else 0
+        val unsolved = i.deduction.bestProbability < 0.9
+        val leader = i.leader?.takeIf { it != i.me } ?: i.activeOpponents.maxByOrNull { i.projectedScore(it) }
+        fun score(a: Action.PlayTactic): Double {
+            val card = content.tactic(a.cardId)
+            var v = 0.0
+            for (e in card.effects) v += when (e) {
+                is CardEffect.GainIntel -> if (i.view.me.intel + e.amount <= cap) 30.0 * e.amount else 5.0
+                is CardEffect.ReduceSuspicion -> 12.0 * minOf(e.amount, i.view.me.suspicion)
+                is CardEffect.AddSuspicion -> if (i.suspicionRoom > e.amount) -10.0 * e.amount else -500.0
+                is CardEffect.GainFromBank -> e.amount / 3.0
+                is CardEffect.GainPrestige -> e.amount * 6.0
+                is CardEffect.ExtraSuggestion -> if (unsolved) 40.0 else 0.0
+                CardEffect.PeekTarget -> if (unsolved) 25.0 + (i.deduction.unknownCount[a.targetPlayer] ?: 0) * 8.0 else -1.0
+                is CardEffect.TargetSuspicion -> {
+                    val t = i.view.opponents.first { it.id == a.targetPlayer }
+                    val arrests = t.suspicion + e.amount >= bal.suspicion.limit
+                    (if (a.targetPlayer == leader) 25.0 else 8.0) + if (arrests) 40.0 else 0.0
+                }
+                is CardEffect.StealFromTarget -> {
+                    val t = i.view.opponents.first { it.id == a.targetPlayer }
+                    minOf(e.amount, t.money) / 2.0 + if (a.targetPlayer == leader) 15.0 else 0.0
+                }
+                is CardEffect.SealTargetTile -> sealValue(i, listOf(a.targetTile!!), leader)
+                is CardEffect.SealTargetDistrict -> {
+                    val d = i.districtOf(a.targetTile!!)!!
+                    sealValue(i, content.propertiesIn(d).map { it.index }, leader)
+                }
+                else -> 0.0
+            }
+            return v
+        }
+        val best = plays.maxByOrNull(::score) ?: return null
+        return best.takeIf { score(it) >= 20.0 }
+    }
+
+    /** Nilai menyegel petak lawan: perkiraan sewa yang hilang (lebih tinggi bila milik pemimpin). */
+    private fun sealValue(i: Insight, tiles: List<Int>, leader: PlayerId?): Double = tiles.sumOf { t ->
+        val o = i.view.ownership[t] ?: return@sumOf 0.0
+        if (o.ownerId == i.me || o.mortgaged) return@sumOf 0.0
+        val tile = content.tile(t)
+        val base = when (tile) {
+            is PropertyTile -> when (o.level) {
+                0 -> tile.baseRent.toDouble()
+                Ownership.HQ_LEVEL -> tile.hqRent * 0.5
+                else -> tile.baseRent * i.view.config.balance.levelMultipliers[o.level - 1] * 0.5
+            }
+            else -> 40.0
+        }
+        base / 4.0 * (if (o.ownerId == leader) 1.5 else 1.0)
+    }
+
     private fun proposeTrade(i: Insight): Action? {
         if (params.tradeOfferFactor <= 0.0) return null
         val view = i.view
@@ -344,6 +405,9 @@ class StrategicBot(
             val target = legal.filterIsInstance<Action.UseMi6Ability>().maxBy { i.deduction.unknownCount[it.targetPlayer] ?: 0 }
             return target
         }
+
+        // 2b. Kartu Taktik (maksimal satu per giliran — dijaga engine).
+        playTactic(i, legal, rng)?.let { return it }
 
         // 3. Tawarkan pembelian properti lawan yang melengkapi distrik (maksimal satu tawaran per giliran).
         proposeTrade(i)?.let { return it }
