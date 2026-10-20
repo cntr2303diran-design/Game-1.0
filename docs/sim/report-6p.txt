@@ -1,47 +1,63 @@
-LISBON 1944 — simulasi 300 permainan, 6 pemain, bot hard,hard,normal,normal,easy,easy, mode standard, seed 42
+LISBON 1944 — simulasi 1000 permainan, 6 pemain, bot hard,hard,normal,normal,easy,easy, mode standard, seed 42
+A/B: infoPaymentQuota = 1
 
 Durasi
-  Giliran/game     : rata-rata 335.7 (sd 38.2), P10 292 · median 344 · P90 371
-  Perkiraan menit  : rata-rata 252, P10 219 · median 258 · P90 278 (45 detik/giliran)
-  Aksi/game        : 1159
+  Giliran/game     : rata-rata 337.7 (sd 36.9), P10 295 · median 346 · P90 372
+  Perkiraan menit  : rata-rata 253, P10 221 · median 260 · P90 279 (45 detik/giliran)
+  Aksi/game        : 1162
 
 Cara menang
-  Detektif         :  18.7%  ███████
-  Ekonomi          :  15.7%  ██████
-  Skor Mei 1945    :  65.7%  ██████████████████████████
+  Detektif         :  22.0%  ████████
+  Ekonomi          :  13.9%  █████
+  Skor Mei 1945    :  64.1%  █████████████████████████
 
-Win rate per faksi (rata-rata 16.7%, maks 1.20× rata-rata)
-  MI6                :  20.0%  (225 kursi)
-  SWISS_JOURNALIST   :  18.8%  (224 kursi)
-  ABWEHR_DEFECTOR    :  18.2%  (225 kursi)
-  RESISTANCE         :  17.3%  (225 kursi)
-  PORTUGAL_TRADER    :  16.9%  (225 kursi)
-  SPANISH_SMUGGLER   :  16.0%  (225 kursi)
-  OSS                :  14.6%  (226 kursi)
-  NKVD               :  11.6%  (225 kursi)
+Win rate per faksi (rata-rata 16.7%, maks 1.10× rata-rata)
+  MI6                :  18.4%  (750 kursi)
+  SWISS_JOURNALIST   :  18.4%  (750 kursi)
+  OSS                :  18.3%  (750 kursi)
+  RESISTANCE         :  17.5%  (750 kursi)
+  PORTUGAL_TRADER    :  16.0%  (750 kursi)
+  ABWEHR_DEFECTOR    :  15.7%  (750 kursi)
+  SPANISH_SMUGGLER   :  14.9%  (750 kursi)
+  NKVD               :  14.1%  (750 kursi)
 
 Win rate per posisi duduk
-  Kursi 1          :  26.3%
-  Kursi 2          :  23.7%
-  Kursi 3          :  22.3%
-  Kursi 4          :  25.0%
-  Kursi 5          :   1.0%
-  Kursi 6          :   1.7%
+  Kursi 1          :  25.3%
+  Kursi 2          :  25.7%
+  Kursi 3          :  21.2%
+  Kursi 4          :  23.7%
+  Kursi 5          :   1.9%
+  Kursi 6          :   2.2%
 
 Bayar sewa
-  Informasi/game   : 55.1   Uang/game: 72.7
-  Porsi informasi  : pemenang 57.6% vs lainnya 40.7%; korelasi dengan menang 0.28
+  Informasi/game   : 56.3   Uang/game: 72.5
+  Porsi informasi  : pemenang 59.5% vs lainnya 41.3%; korelasi dengan menang 0.30
 
 Misteri & lainnya
-  Tuduhan/game     : 0.24, salah 22.2%
+  Tuduhan/game     : 0.27, salah 18.2%
   Jam Perang saat misteri terpecahkan (menang Detektif): 10.4
-  Bangkrut/game 0.58 · ditangkap/game 0.72 · misi selesai/game 0.74
+  Bangkrut/game 0.61 · ditangkap/game 0.81 · misi selesai/game 0.72
+
+A/B: infoPaymentQuota = 1 (seed sama)
+  Metrik                          Kuota bawaan    Kuota 1    Selisih
+  Menit median                             260        260          0
+  Giliran rata-rata                      337.7      337.9       +0.1
+  Menang Detektif                        22.0%      22.2%      +0.2%
+  Menang Ekonomi                         13.9%      13.8%      -0.1%
+  Menang Skor Mei 1945                   64.1%      64.0%      -0.1%
+  Bayar informasi/game                    56.3       36.1      -20.2
+  Bayar uang/game                         72.5       92.5      +20.0
+  Korelasi info–menang                    0.30       0.28      -0.02
+  Tuduhan salah                          18.2%      19.9%      +1.6%
+  Jam saat terpecahkan                    10.4       10.4       +0.0
+  Bangkrut/game                           0.61       0.65      +0.03
+  Rasio faksi maks                        1.10       1.15      +0.05
 
 Target keseimbangan
-  [✓] Durasi median 210–270 menit (hasil 258)
-  [✓] Tidak ada faksi dengan win rate > 1.3× rata-rata (maks 1.20×)
-  [✓] Ketiga cara menang ≥ 10.0% (Detektif 18.7%, Ekonomi 15.7%, Akhir Perang 65.7%)
+  [✓] Durasi median 210–270 menit (hasil 260)
+  [✓] Tidak ada faksi dengan win rate > 1.3× rata-rata (maks 1.10×)
+  [✓] Ketiga cara menang ≥ 10.0% (Detektif 22.0%, Ekonomi 13.9%, Akhir Perang 64.1%)
   [✓] Tidak ada anomali (> batas aksi): 0
 
-Waktu simulasi: 41.9 detik
+Waktu simulasi: 208.8 detik
 CSV: docs/sim/report-6p.csv (+ ringkasan report-6p-summary.csv)

@@ -214,25 +214,32 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private fun pump() {
         if (botJob?.isActive == true) return
         botJob = viewModelScope.launch {
-            var steps = 0
-            while (true) {
-                val s = session ?: break
-                val botTurn = mutex.withLock { s.isBotTurn }
-                if (!botTurn) break
-                val d = if (fastForward) 0L else settings.speed.delayMs
-                if (d > 0) delay(d)
-                val r = withContext(Dispatchers.Default) { mutex.withLock { s.stepBot() } }
-                steps++
-                val events = (r as? StepResult.Ok)?.events.orEmpty()
-                if (d > 0 || steps % 25 == 0) publish(events)
-                if (steps % 40 == 0) autosave()
-            }
-            fastForward = false
-            publish(emptyList())
-            autosave()
-            if (session?.isOver == true && !endSeen) {
-                endSeen = true
-                screen = Screen.END
+            try {
+                var steps = 0
+                while (true) {
+                    val s = session ?: break
+                    val botTurn = mutex.withLock { s.isBotTurn }
+                    if (!botTurn) break
+                    val d = if (fastForward) 0L else settings.speed.delayMs
+                    if (d > 0) delay(d)
+                    val r = withContext(Dispatchers.Default) { mutex.withLock { s.stepBot() } }
+                    steps++
+                    val events = (r as? StepResult.Ok)?.events.orEmpty()
+                    if (d > 0 || steps % 25 == 0) publish(events)
+                    if (steps % 40 == 0) autosave()
+                }
+                fastForward = false
+                publish(emptyList())
+                autosave()
+                if (session?.isOver == true && !endSeen) {
+                    endSeen = true
+                    screen = Screen.END
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                // Jangan membeku diam-diam: tampilkan kesalahan; permainan tetap tersimpan di slot terakhir.
+                loadError = "${e::class.simpleName}: ${e.message}"
             }
         }
     }

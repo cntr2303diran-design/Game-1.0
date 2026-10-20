@@ -60,6 +60,7 @@ fun GameScreen(vm: AppViewModel) {
     } else {
         GameLayout(vm, ui)
     }
+    id.diran.lisbon1944.ui.screens.ErrorDialog(vm)
     if (quit) {
         AlertDialog(
             onDismissRequest = { quit = false },
