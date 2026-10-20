@@ -34,7 +34,11 @@ class BotBehaviourTest {
         4, listOf("S6", "L6", "I6"),
         listOf("S1", "L1", "I1"), listOf("S3", "L3", "I3"), listOf("S4", "L4", "I4"), listOf("S5", "L5", "I5"),
         factions = listOf(Faction.MI6, Faction.OSS, Faction.NKVD, Faction.RESISTANCE),
-    ).copy(currentPlayerIdx = 0, warStep = 3, activeFront = FrontId(3))
+    ).let { s ->
+        // Tuduhan sudah terbuka (langkah pembukaan) dan semua pemain punya Intel cukup.
+        val step = s.config.balance.accuseUnlockStep
+        s.copy(currentPlayerIdx = 0, warStep = step, activeFront = FrontId(step), players = s.players.map { it.copy(intel = 3) })
+    }
 
     /** P0 mengetahui letak semua kartu kecuali isi amplop. */
     private fun omniscient(s: GameState): GameState {
@@ -108,11 +112,14 @@ class BotBehaviourTest {
     @Test
     fun `menunjukkan kartu yang paling banyak sudah diketahui`() {
         val seen = GameEvent(0, GameEvents.CARD_SEEN, mapOf("viewer" to "1", "holder" to "0", "card" to "L1", "source" to "SUGGESTION"), Visibility.Private(setOf(p(0), p(1))))
-        val s = base().copy(
+        val s = base().let { b -> b.copy(players = b.players.map { it.copy(intel = 0) }) }.copy(
             eventLog = listOf(seen),
             pending = PendingDecision.RevealForSuggestion(p(0), p(2), listOf(c("S1"), c("L1")), listOf(c("S1"), c("L1"), c("I5"))),
         )
-        assertEquals(Action.RevealCard(p(0), c("L1")), decide(BotLevel.HARD, s))
+        assertEquals(Action.RevealCard(p(0), c("L1")), decide(BotLevel.HARD, s), "tanpa Intel wajib menunjukkan")
+        // Dengan Intel dan penanya belum tahu kartunya: Bungkam.
+        val withIntel = s.copy(players = s.players.map { it.copy(intel = 3) })
+        assertEquals(Action.StaySilent(p(0)), decide(BotLevel.HARD, withIntel))
     }
 
     @Test
@@ -133,7 +140,7 @@ class BotBehaviourTest {
             players = s0.players.mapIndexed { i, pl ->
                 when (i) {
                     0 -> pl.copy(money = 4000)
-                    1 -> pl.copy(isDoubleAgent = true)
+                    1 -> pl.copy(isDoubleAgent = true, intel = 0)
                     else -> pl
                 }
             },
@@ -159,6 +166,30 @@ class BotBehaviourTest {
         assertTrue(c("S6") !in a.suspects && a.item != c("I6") && a.location != c("L6"), "Dugaan $a menyebut jawaban")
         val honest = assertIs<Action.Suggest>(decide(BotLevel.HARD, s.copy(players = s0.players)))
         assertEquals(listOf(c("S1")), honest.suspects, "kategori terpecahkan → sebut kartu sendiri")
+    }
+
+    @Test
+    fun `bot menghindari Pasar Gelap saat Kecurigaan hampir penuh`() {
+        val limit = BotTestSupport.content.balance.suspicion.limit
+        val s = base().copy(pending = PendingDecision.BlackMarketChoice(p(0), listOf(p(1), p(2))))
+        assertIs<Action.BlackMarketBuy>(decide(BotLevel.HARD, s))
+        val hot = s.copy(players = s.players.map { if (it.id == p(0)) it.copy(suspicion = limit - 2) else it })
+        assertEquals(Action.BlackMarketSkip(p(0)), decide(BotLevel.HARD, hot))
+    }
+
+    @Test
+    fun `bot menawar properti lawan yang melengkapi distrik dan tawarannya sah`() {
+        val b0 = base().let { b -> b.copy(players = b.players.map { it.copy(abilityUsed = true) }) }
+        val s = b0.copy(
+            ownership = mapOf(1 to id.diran.lisbon1944.engine.model.Ownership(p(0)), 3 to id.diran.lisbon1944.engine.model.Ownership(p(0)), 6 to id.diran.lisbon1944.engine.model.Ownership(p(1))),
+            pending = PendingDecision.BusinessPhase(p(0)),
+        )
+        val a = assertIs<Action.ProposeTrade>(decide(BotLevel.HARD, s))
+        assertEquals(listOf(6), a.offer.takeProperties)
+        assertEquals(null, engine.checkAction(s, a), "tawaran bot harus legal")
+        // Lawan Hard menerima karena nilainya naik.
+        val after = (engine.reduce(s, a) as id.diran.lisbon1944.engine.ReduceResult.Ok).state
+        assertEquals(Action.RespondTrade(p(1), true), decide(BotLevel.HARD, after))
     }
 
     @Test

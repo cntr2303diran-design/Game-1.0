@@ -21,7 +21,7 @@ class BotMatch(private val engine: GameEngine, private val bots: Bots = Bots(eng
     fun play(
         config: GameConfig,
         seed: Long,
-        maxActions: Int = 2_000,
+        maxActions: Int = DEFAULT_MAX_ACTIONS,
         onStep: ((GameState, Action) -> Unit)? = null,
     ): MatchResult {
         val seats = config.players.map { bots.create(it.botLevel ?: BotLevel.NORMAL) }
@@ -49,7 +49,9 @@ class BotMatch(private val engine: GameEngine, private val bots: Bots = Bots(eng
         return MatchResult(state, count, state.winner == null, illegal)
     }
 
-    private companion object {
-        const val BOT_SALT = 0x5EED_B07L
+    companion object {
+        /** Permainan 4 jam ≈ 300+ giliran; di atas batas ini dianggap anomali. */
+        const val DEFAULT_MAX_ACTIONS = 8_000
+        private const val BOT_SALT = 0x5EED_B07L
     }
 }

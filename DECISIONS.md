@@ -55,3 +55,36 @@ nilai konfigurasi.
 | D35 | Kebohongan Agen Ganda | Bot Agen Ganda berbohong sekali saat penanya adalah pemain dengan skor proyeksi tertinggi; Dugaannya sendiri menyebut kartu dengan peluang amplop terendah. | "arahkan menjauh dari jawaban, bohong saat paling merugikan pemain terdepan". |
 | D36 | Perdagangan bot | Bot tidak mengajukan tawaran; hanya menjawab. Nilai = selisih uang + harga properti (+ bonus melengkapi distrik) ± 60 per kartu Bukti ± 50 per Surat Bebas; Hard menerima bila nilai naik. | Cukup untuk lawan manusia; tawaran proaktif bisa ditambah setelah simulasi Tahap 4. |
 | D37 | Easy | Dengan peluang `randomness` memilih aksi legal acak berbobot (kecuali tuduhan, tebakan akhir, utang, dan fase Bisnis), sisanya aturan sederhana. | "acak berbobot di antara aksi legal". |
+
+## Perombakan aturan — target permainan ±4 jam
+
+Simulasi antar-bot di Tahap 3 menunjukkan misteri terpecahkan dalam 4–9 putaran (±18 menit), sehingga
+ekonomi dan Jam Perang tidak pernah berperan. Atas permintaan pemilik proyek, aturan diubah dengan target
+**durasi ±4 jam** (45 detik per giliran) dan ketiga cara menang benar-benar muncul. Semua angka di `balance.json`.
+
+| # | Aturan / elemen | Isi | Alasan |
+|---|-----------------|-----|--------|
+| D38 | **Intel** (token baru) | Mulai 1, maks 4, +1 tiap melewati START, +1 saat Dekode berhasil. Dugaan dari properti sendiri dan Ruang Interogasi butuh 1 Intel; Tuduhan Akhir butuh 2 Intel. Dugaan gratis (Front Agu 1944, Rekrut Informan) tetap gratis. | Informasi menjadi sumber daya yang harus dikelola, bukan arus tanpa batas. |
+| D39 | **Bungkam** | Saat diminta menunjukkan kartu, pemain boleh membayar 1 Intel untuk diam; Dugaan berlanjut ke pemain berikutnya, penanya tidak belajar apa pun dari pemain itu. | Pertahanan informasi; memberi pilihan bermakna bagi penjawab. |
+| D40 | **Lewat Dugaan privat** | Pemain yang tidak punya kartu hanya diketahui penanya (dan dirinya), bukan semua pemain. | Pemain ketiga tidak lagi mendapat deduksi gratis. |
+| D41 | **Kunci Tuduhan** | Tuduhan Akhir (Kedutaan, melintas, April) baru boleh sejak langkah Jam Perang 10. | Misteri tidak bisa mengakhiri permainan sebelum ekonomi berkembang. |
+| D42 | **Map Merah berpindah** | Front Okt 1944 (Lokasi), Jan 1945 (Tersangka), Mar 1945 (Barang), Apr 1945 (Lokasi): kartu kategori itu dari amplop + tangan pemain aktif dikocok dan dibagi ulang; jumlah per pemain tetap; pengetahuan kategori itu dihapus (kecuali Kedutaan & tangan pemain bangkrut). | Misteri tetap hidup sampai akhir; jawaban bisa berubah. |
+| D43 | **Jam Perang berbasis lintasan START** | Jam maju setiap rata-rata 5,3 lintasan START (total semua pemain; pecahan dibulatkan per langkah). Tidak bergantung jumlah pemain, sehingga durasi 3–6 pemain setara. Mode lama tetap tersedia lewat `GameConfig.warClockMode`. | Tempo dapat disetel tepat; dulu satu lintasan per putaran membuat 12 langkah ±12 putaran. |
+| D44 | **Kecurigaan** (meteran baru) | Pasar Gelap +2, menang Kasino +1, beberapa kartu ±. Mencapai 6 → ditangkap (masuk Penjara, meteran 0). Uang Suap −2, melewati START −1. | Risiko nyata untuk aksi "kotor"; menambah ketegangan. |
+| D45 | **Misi Rahasia** | 14 misi (`missions.json`); tiap pemain menerima 1 secara rahasia; poin 30–55 bila terpenuhi saat Akhir Perang. | Tujuan pribadi yang membuat jalur skor berbeda-beda. |
+| D46 | **Dua faksi baru** | Penyelundup Spanyol (Pasar Gelap 100, tanpa Kecurigaan) dan Pembelot Abwehr (+2 Intel awal & batas). Total 8 faksi untuk 3–6 kursi. | Variasi pilihan faksi. |
+| D47 | **16 kartu baru** | Sandi & Telegram masing-masing 24 kartu; efek baru `gainIntel`, `loseIntel`, `addSuspicion`, `reduceSuspicion`. | Mengaitkan kartu dengan elemen baru. |
+| D48 | **Skala sewa bangunan** | `buildingRentPercent` = 48: sewa properti berbangunan (Rumah Aman/Markas) dikali 48%. Sewa dasar & Sel Mata-Mata tetap. | Dengan bot yang saling berdagang, sewa penuh membuat 75% permainan berakhir bangkrut sebelum 3 jam. |
+| D49 | **Bot berdagang** | Normal/Hard menawar properti lawan yang melengkapi distriknya (harga × 1,6 / 1,8), maksimal 1 tawaran per giliran. | Tanpa perdagangan distrik hampir tak pernah lengkap sehingga ekonomi mati. |
+| D50 | Test aturan dasar | Test nilai pasti BAGIAN 14 memakai "aturan dasar" (sewa 100%, Jam klasik, Tuduhan tanpa kunci/Intel, tanpa misi) lewat `GameStateFixture(classic = true)`; aturan baru diuji di `NewRulesTest`. | Nilai BAGIAN 14 tetap terverifikasi sebagai dasar; balance aktif boleh berubah. |
+
+Hasil simulasi balance aktif (200 game per meja, bot 2 Hard + 2 Normal kecuali disebut):
+
+| Meja | Median durasi | P10–P90 | Detektif | Akhir Perang | Ekonomi |
+|------|---------------|---------|----------|--------------|---------|
+| 4 pemain (2H 2N) | 240 mnt | 201–266 | 50% | 32% | 18% |
+| 3 pemain (H N E) | 225 mnt | 155–264 | 27% | 29% | 44% |
+| 5 pemain (2H 2N E) | 255 mnt | 222–270 | 21% | 69% | 10% |
+| 6 pemain (2H 2N 2E) | 261 mnt | 237–279 | 24% | 72% | 4% |
+
+Catatan: proporsi cara menang masih bergeser menurut jumlah pemain — dianalisis menyeluruh di Tahap 4.

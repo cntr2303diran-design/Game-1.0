@@ -64,6 +64,12 @@ data class PlayerState(
     val isDoubleAgent: Boolean = false,
     val doubleAgentLieUsed: Boolean = false,
     val finalGuess: Guess? = null,
+    /** Token Laporan Intel — dipakai untuk Dugaan dari properti sendiri. Publik. */
+    val intel: Int = 0,
+    /** Meteran Kecurigaan polisi rahasia — mencapai batas berarti ditangkap. Publik. */
+    val suspicion: Int = 0,
+    /** Misi Rahasia (id missions.json) — hanya diketahui pemiliknya. */
+    val missionId: Int? = null,
 ) {
     val inJail: Boolean get() = jail != null
     val active: Boolean get() = !bankrupt
@@ -181,6 +187,7 @@ data class ScoreBreakdown(
     val property: Int,
     val buildings: Int,
     val clues: Int,
+    val mission: Int = 0,
     val burned: Boolean,
     val total: Int,
 )
@@ -200,6 +207,8 @@ data class GameState(
     val activeFront: FrontId = FrontId(1),
     /** Front #12 sudah dibalik; permainan berakhir setelah aksi yang sedang berjalan selesai. */
     val warEnded: Boolean = false,
+    /** Total lintasan START sejak awal permainan (mode START_PASSES). */
+    val startPasses: Int = 0,
     /** Urutan tumpukan Sandi/Telegram; indeks 0 = kartu teratas. Kartu terpakai kembali ke bawah. */
     val cipherDeck: List<Int>,
     val telegramDeck: List<Int>,

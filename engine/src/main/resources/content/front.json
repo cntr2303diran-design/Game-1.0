@@ -1,50 +1,202 @@
 {
   "version": 1,
   "fronts": [
-    { "id": 1,  "month": "1944-06", "title": "Pendaratan di Prancis", "titleEn": "Landings in France",
-      "text": "Sewa distrik Pelabuhan 2×.", "textEn": "Harbour district rent ×2.",
-      "effects": [ { "type": "districtRentMultiplier", "districts": ["PELABUHAN"], "numerator": 2, "denominator": 1 } ] },
-    { "id": 2,  "month": "1944-07", "title": "Harga Wolfram Anjlok", "titleEn": "Wolfram Price Collapses",
+    {
+      "id": 1,
+      "month": "1944-06",
+      "title": "Pendaratan di Prancis",
+      "titleEn": "Landings in France",
+      "text": "Sewa distrik Pelabuhan 2×.",
+      "textEn": "Harbour district rent ×2.",
+      "effects": [
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "PELABUHAN"
+          ],
+          "numerator": 2,
+          "denominator": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "month": "1944-07",
+      "title": "Harga Wolfram Anjlok",
+      "titleEn": "Wolfram Price Collapses",
       "text": "Saat dibalik: setiap pemain yang memiliki minimal 1 properti Estoril bayar 50 ke bank.",
       "textEn": "On reveal: every player owning at least 1 Estoril property pays 50 to the bank.",
-      "effects": [ { "type": "onRevealPayIfOwnsInDistrict", "district": "ESTORIL", "amount": 50 } ] },
-    { "id": 3,  "month": "1944-08", "title": "Paris Dibebaskan", "titleEn": "Paris Liberated",
+      "effects": [
+        {
+          "type": "onRevealPayIfOwnsInDistrict",
+          "district": "ESTORIL",
+          "amount": 50
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "month": "1944-08",
+      "title": "Paris Dibebaskan",
+      "titleEn": "Paris Liberated",
       "text": "Saat dibalik: Perlawanan Prancis terima 150. Selama aktif: tiap pemain boleh 1 Dugaan gratis dari petak mana pun (Lokasi bebas).",
       "textEn": "On reveal: the French Resistance receives 150. While active: each player may make 1 free Suggestion from any tile (any Location).",
       "effects": [
-        { "type": "onRevealFactionBonus", "faction": "RESISTANCE", "amount": 150 },
-        { "type": "freeSuggestionEachPlayer", "count": 1 }
-      ] },
-    { "id": 4,  "month": "1944-09", "title": "Operasi Udara Gagal", "titleEn": "Airborne Operation Fails",
+        {
+          "type": "onRevealFactionBonus",
+          "faction": "RESISTANCE",
+          "amount": 150
+        },
+        {
+          "type": "freeSuggestionEachPlayer",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "month": "1944-09",
+      "title": "Operasi Udara Gagal",
+      "titleEn": "Airborne Operation Fails",
       "text": "Pesawat Amfibi ditutup: tanpa sewa, tidak bisa menjadi tujuan pindah jalur.",
       "textEn": "Flying Boat closed: no rent, cannot be a route-travel destination.",
-      "effects": [ { "type": "closeTile", "tile": 25 } ] },
-    { "id": 5,  "month": "1944-10", "title": "Razia Polisi Rahasia", "titleEn": "Secret Police Raid",
-      "text": "Saat dibalik: pemain dengan uang > 1.500 langsung masuk Penjara.",
-      "textEn": "On reveal: players with more than 1,500 go straight to Prison.",
-      "effects": [ { "type": "onRevealJailIfMoneyAbove", "threshold": 1500 } ] },
-    { "id": 6,  "month": "1944-11", "title": "Inflasi Escudo", "titleEn": "Escudo Inflation",
-      "text": "Semua biaya bangun naik 50%.", "textEn": "All building costs +50%.",
-      "effects": [ { "type": "buildCostMultiplier", "numerator": 3, "denominator": 2 } ] },
-    { "id": 7,  "month": "1944-12", "title": "Serangan Musim Dingin", "titleEn": "Winter Offensive",
-      "text": "Tidak ada gaji START selama aktif.", "textEn": "No START salary while active.",
-      "effects": [ { "type": "noStartSalary" } ] },
-    { "id": 8,  "month": "1945-01", "title": "Konferensi Rahasia", "titleEn": "Secret Conference",
-      "text": "Saat dibalik: setiap pemain (berurutan) menunjukkan 1 kartu Bukti pilihannya ke pemain di kirinya, secara rahasia.",
-      "textEn": "On reveal: each player in turn secretly shows 1 Evidence card of their choice to the player on their left.",
-      "effects": [ { "type": "onRevealSecretConference" } ] },
-    { "id": 9,  "month": "1945-02", "title": "Pengungsi Membanjiri Kota", "titleEn": "Refugees Flood the City",
-      "text": "Sewa Avenida & Chiado +50%.", "textEn": "Avenida & Chiado rent +50%.",
-      "effects": [ { "type": "districtRentMultiplier", "districts": ["AVENIDA", "CHIADO"], "numerator": 3, "denominator": 2 } ] },
-    { "id": 10, "month": "1945-03", "title": "Jembatan Direbut", "titleEn": "The Bridge Is Taken",
-      "text": "Semua sewa Jalur Pelarian 2×.", "textEn": "All Escape Route rents ×2.",
-      "effects": [ { "type": "escapeRouteRentMultiplier", "numerator": 2, "denominator": 1 } ] },
-    { "id": 11, "month": "1945-04", "title": "Para Agen Melarikan Diri", "titleEn": "The Agents Flee",
-      "text": "Tuduhan Akhir boleh dari petak mana pun dengan membayar 300 (fase Bisnis).",
-      "textEn": "Final Accusation allowed from any tile for 300 (Business phase).",
-      "effects": [ { "type": "accuseFromAnywhere" } ] },
-    { "id": 12, "month": "1945-05", "title": "Perang di Eropa Usai", "titleEn": "War in Europe Ends",
-      "text": "Permainan langsung berakhir — hitung skor.", "textEn": "The game ends immediately — count scores.",
-      "effects": [ { "type": "endGame" } ] }
+      "effects": [
+        {
+          "type": "closeTile",
+          "tile": 25
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "month": "1944-10",
+      "title": "Razia Polisi Rahasia",
+      "titleEn": "Secret Police Raid",
+      "text": "Saat dibalik: pemain dengan uang > 1.500 langsung masuk Penjara. Map Merah berpindah: semua kartu Lokasi (amplop + tangan) dikocok dan dibagi ulang.",
+      "textEn": "On reveal: players with more than 1,500 go straight to Prison. The Red Folder moves: all Location cards (envelope + hands) are reshuffled and redealt.",
+      "effects": [
+        {
+          "type": "onRevealJailIfMoneyAbove",
+          "threshold": 1500
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "LOCATION"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "month": "1944-11",
+      "title": "Inflasi Escudo",
+      "titleEn": "Escudo Inflation",
+      "text": "Semua biaya bangun naik 50%.",
+      "textEn": "All building costs +50%.",
+      "effects": [
+        {
+          "type": "buildCostMultiplier",
+          "numerator": 3,
+          "denominator": 2
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "month": "1944-12",
+      "title": "Serangan Musim Dingin",
+      "titleEn": "Winter Offensive",
+      "text": "Tidak ada gaji START selama aktif.",
+      "textEn": "No START salary while active.",
+      "effects": [
+        {
+          "type": "noStartSalary"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "month": "1945-01",
+      "title": "Konferensi Rahasia",
+      "titleEn": "Secret Conference",
+      "text": "Saat dibalik: setiap pemain (berurutan) menunjukkan 1 kartu Bukti pilihannya ke pemain di kirinya, secara rahasia. Map Merah berpindah: semua kartu Tersangka dikocok dan dibagi ulang.",
+      "textEn": "On reveal: each player in turn secretly shows 1 Evidence card of their choice to the player on their left. The Red Folder moves: all Suspect cards are reshuffled and redealt.",
+      "effects": [
+        {
+          "type": "onRevealSecretConference"
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "SUSPECT"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "month": "1945-02",
+      "title": "Pengungsi Membanjiri Kota",
+      "titleEn": "Refugees Flood the City",
+      "text": "Sewa Avenida & Chiado +50%.",
+      "textEn": "Avenida & Chiado rent +50%.",
+      "effects": [
+        {
+          "type": "districtRentMultiplier",
+          "districts": [
+            "AVENIDA",
+            "CHIADO"
+          ],
+          "numerator": 3,
+          "denominator": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "month": "1945-03",
+      "title": "Jembatan Direbut",
+      "titleEn": "The Bridge Is Taken",
+      "text": "Semua sewa Jalur Pelarian 2×. Map Merah berpindah: semua kartu Barang dikocok dan dibagi ulang.",
+      "textEn": "All Escape Route rents ×2. The Red Folder moves: all Item cards are reshuffled and redealt.",
+      "effects": [
+        {
+          "type": "escapeRouteRentMultiplier",
+          "numerator": 2,
+          "denominator": 1
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "ITEM"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "month": "1945-04",
+      "title": "Para Agen Melarikan Diri",
+      "titleEn": "The Agents Flee",
+      "text": "Tuduhan Akhir boleh dari petak mana pun dengan membayar 300 (fase Bisnis). Map Merah berpindah lagi: semua kartu Lokasi dibagi ulang.",
+      "textEn": "Final Accusation allowed from any tile for 300 (Business phase). The Red Folder moves again: all Location cards are redealt.",
+      "effects": [
+        {
+          "type": "accuseFromAnywhere"
+        },
+        {
+          "type": "reshuffleEvidence",
+          "category": "LOCATION"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "month": "1945-05",
+      "title": "Perang di Eropa Usai",
+      "titleEn": "War in Europe Ends",
+      "text": "Permainan langsung berakhir — hitung skor.",
+      "textEn": "The game ends immediately — count scores.",
+      "effects": [
+        {
+          "type": "endGame"
+        }
+      ]
+    }
   ]
 }

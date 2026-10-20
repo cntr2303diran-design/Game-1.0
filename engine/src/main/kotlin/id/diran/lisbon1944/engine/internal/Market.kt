@@ -143,14 +143,17 @@ internal fun Tx.casino(p: PlayerId, bet: Int) {
             s = s.copy(casinoVault = s.casinoVault - vault)
             upd(p) { it.copy(money = it.money + bet * payout.seven + vault) }
             emit(E.CASINO_RESULT, "player" to p, "result" to "seven", "won" to bet * payout.seven, "vault" to vault)
+            changeSuspicion(p, b.suspicion.casinoWin, "casino")
         }
         d1 + d2 == 11 -> {
             upd(p) { it.copy(money = it.money + bet * payout.eleven) }
             emit(E.CASINO_RESULT, "player" to p, "result" to "eleven", "won" to bet * payout.eleven)
+            changeSuspicion(p, b.suspicion.casinoWin, "casino")
         }
         d1 == d2 -> {
             upd(p) { it.copy(money = it.money + bet * payout.doubles) }
             emit(E.CASINO_RESULT, "player" to p, "result" to "doubles", "won" to bet * payout.doubles)
+            changeSuspicion(p, b.suspicion.casinoWin, "casino")
         }
         else -> {
             s = s.copy(casinoVault = s.casinoVault + bet)

@@ -96,7 +96,7 @@ class ContentLoaderTest {
     }
 
     @Test
-    fun `enam faksi dengan kemampuan dan flag sekali pakai`() {
+    fun `delapan faksi dengan kemampuan dan flag sekali pakai`() {
         assertEquals(Faction.entries.toSet(), content.factions.map { it.id }.toSet())
         assertEquals(FactionAbility.TELEGRAM_DRAW_TWO, content.faction(Faction.SWISS_JOURNALIST).ability)
         val oneShot = content.factions.filter { it.oneShot }.map { it.id }.toSet()
@@ -117,7 +117,10 @@ class ContentLoaderTest {
             content.front(FrontId(3)).effects,
         )
         assertEquals(listOf(FrontEffect.CloseTile(25)), content.front(FrontId(4)).effects)
-        assertEquals(listOf(FrontEffect.OnRevealJailIfMoneyAbove(1500)), content.front(FrontId(5)).effects)
+        assertEquals(
+            listOf(FrontEffect.OnRevealJailIfMoneyAbove(1500), FrontEffect.ReshuffleEvidence(EvidenceType.LOCATION)),
+            content.front(FrontId(5)).effects,
+        )
         assertEquals(listOf(FrontEffect.BuildCostMultiplier(3, 2)), content.front(FrontId(6)).effects)
         assertEquals(listOf(FrontEffect.NoStartSalary), content.front(FrontId(7)).effects)
         assertEquals(
@@ -129,8 +132,10 @@ class ContentLoaderTest {
 
     @Test
     fun `kartu sandi dan telegram terbaca dengan efek yang tepat`() {
-        assertEquals(16, content.cipher.size)
-        assertEquals(16, content.telegram.size)
+        assertEquals(24, content.cipher.size)
+        assertEquals(24, content.telegram.size)
+        assertEquals(listOf(CardEffect.GainIntel(2)), content.card(Deck.CIPHER, 17).effects)
+        assertEquals(listOf(CardEffect.AddSuspicion(1)), content.card(Deck.TELEGRAM, 18).effects)
         assertEquals(
             listOf(CardEffect.MoveToTile(tile = 15, collectSalary = true, rentMultiplier = 2)),
             content.card(Deck.CIPHER, 7).effects,

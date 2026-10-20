@@ -88,6 +88,10 @@ sealed interface FrontEffect {
 
     @Serializable @SerialName("endGame")
     data object EndGame : FrontEffect
+
+    /** "Map Merah berpindah": kartu kategori ini dari amplop + tangan pemain aktif dikocok dan dibagi ulang. */
+    @Serializable @SerialName("reshuffleEvidence")
+    data class ReshuffleEvidence(val category: EvidenceType) : FrontEffect
 }
 
 // ---------------------------------------------------------------------------
@@ -170,4 +174,45 @@ sealed interface CardEffect {
 
     @Serializable @SerialName("extraSuggestion")
     data class ExtraSuggestion(val turns: Int) : CardEffect
+
+    @Serializable @SerialName("gainIntel")
+    data class GainIntel(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("loseIntel")
+    data class LoseIntel(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("addSuspicion")
+    data class AddSuspicion(val amount: Int) : CardEffect
+
+    @Serializable @SerialName("reduceSuspicion")
+    data class ReduceSuspicion(val amount: Int) : CardEffect
+}
+
+// ---------------------------------------------------------------------------
+// Misi Rahasia
+// ---------------------------------------------------------------------------
+
+@Serializable
+data class MissionCard(
+    val id: Int,
+    val title: String,
+    val titleEn: String,
+    val text: String,
+    val textEn: String,
+    val points: Int,
+    val condition: MissionCondition,
+)
+
+/** Syarat misi, diperiksa saat skor Akhir Perang. */
+@Serializable
+sealed interface MissionCondition {
+    @Serializable @SerialName("ownDistrict") data class OwnDistrict(val district: District) : MissionCondition
+    @Serializable @SerialName("escapeRoutes") data class EscapeRoutes(val count: Int) : MissionCondition
+    @Serializable @SerialName("cashAtLeast") data class CashAtLeast(val amount: Int) : MissionCondition
+    @Serializable @SerialName("buildingPoints") data class BuildingPoints(val count: Int) : MissionCondition
+    @Serializable @SerialName("knownCards") data class KnownCards(val count: Int) : MissionCondition
+    @Serializable @SerialName("suspicionAtMost") data class SuspicionAtMost(val max: Int) : MissionCondition
+    @Serializable @SerialName("propertyCount") data class PropertyCount(val count: Int) : MissionCondition
+    @Serializable @SerialName("intelAtLeast") data class IntelAtLeast(val count: Int) : MissionCondition
+    @Serializable @SerialName("correctGuesses") data class CorrectGuesses(val count: Int) : MissionCondition
 }

@@ -51,6 +51,10 @@ data class BotParams(
     val tradeAcceptMargin: Int,
     /** Peluang mengambil aksi legal acak (khas Easy). */
     val randomness: Double,
+    /** Kecenderungan Bungkam (bayar Intel agar tidak menunjukkan kartu). */
+    val silenceChance: Double,
+    /** Tawaran beli properti lawan yang melengkapi distrik: harga × faktor (0 = tidak pernah menawar). */
+    val tradeOfferFactor: Double,
 )
 
 data class BotConfig(val easy: BotParams, val normal: BotParams, val hard: BotParams) {
@@ -112,6 +116,8 @@ data class BotConfig(val easy: BotParams, val normal: BotParams, val hard: BotPa
                     useAbility = dbl("useAbility"),
                     tradeAcceptMargin = int("tradeAcceptMargin"),
                     randomness = dbl("randomness"),
+                    silenceChance = dbl("silenceChance"),
+                    tradeOfferFactor = dbl("tradeOfferFactor"),
                 )
             }
             return BotConfig(level("easy"), level("normal"), level("hard"))

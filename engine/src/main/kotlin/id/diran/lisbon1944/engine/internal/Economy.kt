@@ -82,6 +82,10 @@ internal object Economy {
                 fx.filterIsInstance<FrontEffect.DistrictRentMultiplier>()
                     .filter { t.district in it.districts }
                     .forEach { num *= it.numerator; den *= it.denominator }
+                if (o.level > 0) {
+                    num *= s.config.balance.buildingRentPercent
+                    den *= 100
+                }
                 (num / den).toInt()
             }
             is EscapeRouteTile -> {

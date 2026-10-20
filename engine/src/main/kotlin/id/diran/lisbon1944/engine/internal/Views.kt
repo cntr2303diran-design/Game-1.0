@@ -34,6 +34,8 @@ internal object Views {
                 abilityUsed = o.abilityUsed,
                 heldCardCount = o.heldCards.size,
                 propertyCount = propertyCount[o.id] ?: 0,
+                intel = o.intel,
+                suspicion = o.suspicion,
             )
         }
         val pend = s.pending
@@ -45,6 +47,11 @@ internal object Views {
             embassyCards = s.embassyCards,
             warStep = s.warStep,
             activeFront = s.activeFront,
+            passesToNextStep = if (s.config.clockMode == id.diran.lisbon1944.engine.model.WarClockMode.START_PASSES) {
+                (s.config.passesNeededFor(s.warStep + 1) - s.startPasses).coerceAtLeast(0)
+            } else {
+                null
+            },
             cipherDeckSize = s.cipherDeck.size,
             telegramDeckSize = s.telegramDeck.size,
             casinoVault = s.casinoVault,

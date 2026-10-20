@@ -9,6 +9,7 @@ import id.diran.lisbon1944.engine.model.EvidenceType
 import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.FactionAbility
 import id.diran.lisbon1944.engine.model.FrontEffect
+import id.diran.lisbon1944.engine.model.MissionCondition
 import id.diran.lisbon1944.engine.model.OwnableTile
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.SpecialKind
@@ -27,8 +28,9 @@ object ContentValidator {
     const val SPECIAL_NON_CORNER_COUNT = 14
     const val EVIDENCE_PER_TYPE = 6
     const val FRONT_COUNT = 12
-    const val DECK_SIZE = 16
-    const val FACTION_COUNT = 6
+    const val DECK_SIZE = 24
+    const val FACTION_COUNT = 8
+    const val MIN_MISSIONS = 6
 
     /** Sudut papan (indeks → jenis). */
     val CORNERS: Map<Int, SpecialKind> = mapOf(
@@ -54,6 +56,7 @@ object ContentValidator {
         addAll(validateDeck("cipher.json", content.cipher, content))
         addAll(validateDeck("telegram.json", content.telegram, content))
         addAll(validateBalance(content.balance))
+        addAll(validateMissions(content))
     }
 
     // ---------------------------------------------------------------------------------
@@ -170,7 +173,7 @@ object ContentValidator {
                     is FrontEffect.OnRevealJailIfMoneyAbove ->
                         if (e.threshold < 0) add("front.json: Front ${f.id.value} ambang tidak boleh negatif")
                     FrontEffect.NoStartSalary, FrontEffect.OnRevealSecretConference,
-                    FrontEffect.AccuseFromAnywhere, FrontEffect.EndGame -> Unit
+                    FrontEffect.AccuseFromAnywhere, FrontEffect.EndGame, is FrontEffect.ReshuffleEvidence -> Unit
                 }
             }
         }
@@ -209,11 +212,36 @@ object ContentValidator {
                     is CardEffect.PayEachOtherPlayer -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
                     is CardEffect.CollectFromEachOtherPlayer -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
                     is CardEffect.ExtraSuggestion -> if (e.turns <= 0) add("$file: kartu ${c.id} jumlah giliran harus positif")
+                    is CardEffect.GainIntel -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
+                    is CardEffect.LoseIntel -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
+                    is CardEffect.AddSuspicion -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
+                    is CardEffect.ReduceSuspicion -> if (e.amount <= 0) add("$file: kartu ${c.id} jumlah harus positif")
                     is CardEffect.PeekRandomFromNeighbor, CardEffect.PeekRandomFromRichest,
                     is CardEffect.ShowOwnCardToNeighbor, is CardEffect.ForceShowByType,
                     CardEffect.GoToJail, CardEffect.JailPass, CardEffect.SkipNextSuggestion -> Unit
                 }
             }
+        }
+    }
+
+    fun validateMissions(content: GameContent): List<String> = buildList {
+        val m = content.missions
+        if (m.size < MIN_MISSIONS) add("missions.json: minimal $MIN_MISSIONS misi (satu per pemain), ditemukan ${m.size}")
+        if (m.map { it.id }.toSet().size != m.size) add("missions.json: id misi duplikat")
+        m.forEach { mission ->
+            if (mission.points <= 0) add("missions.json: misi ${mission.id} poin harus positif")
+            val bad = when (val c = mission.condition) {
+                is MissionCondition.OwnDistrict -> false
+                is MissionCondition.EscapeRoutes -> c.count !in 1..ESCAPE_ROUTE_COUNT
+                is MissionCondition.CashAtLeast -> c.amount <= 0
+                is MissionCondition.BuildingPoints -> c.count <= 0
+                is MissionCondition.KnownCards -> c.count !in 1..content.evidence.size
+                is MissionCondition.SuspicionAtMost -> c.max < 0
+                is MissionCondition.PropertyCount -> c.count !in 1..(PROPERTY_COUNT + ESCAPE_ROUTE_COUNT)
+                is MissionCondition.IntelAtLeast -> c.count <= 0
+                is MissionCondition.CorrectGuesses -> c.count !in 1..3
+            }
+            if (bad) add("missions.json: misi ${mission.id} syarat tidak masuk akal")
         }
     }
 
@@ -276,5 +304,24 @@ object ContentValidator {
         nonNegative("familyMode.wrongAccusePenalty", b.familyMode.wrongAccusePenalty)
         positive("quickMode.startProperties", b.quickMode.startProperties)
         if (b.quickMode.startWarStep !in 1..FRONT_COUNT) add("balance.json: quickMode.startWarStep harus 1..$FRONT_COUNT")
+        if (b.warClock.passesPerStep < 1.0) add("balance.json: warClock.passesPerStep minimal 1")
+        if (b.accuseUnlockStep !in 1..FRONT_COUNT) add("balance.json: accuseUnlockStep harus 1..$FRONT_COUNT")
+        nonNegative("intel.start", b.intel.start)
+        positive("intel.max", b.intel.max)
+        if (b.intel.start > b.intel.max) add("balance.json: intel.start tidak boleh melebihi intel.max")
+        nonNegative("intel.perStartPass", b.intel.perStartPass)
+        nonNegative("intel.suggestionCost", b.intel.suggestionCost)
+        nonNegative("intel.decodeSuccess", b.intel.decodeSuccess)
+        nonNegative("intel.defectorBonus", b.intel.defectorBonus)
+        nonNegative("intel.accuseCost", b.intel.accuseCost)
+        positive("intel.silenceCost", b.intel.silenceCost)
+        if (b.intel.accuseCost > b.intel.max) add("balance.json: intel.accuseCost tidak boleh melebihi intel.max")
+        positive("suspicion.limit", b.suspicion.limit)
+        nonNegative("suspicion.blackMarket", b.suspicion.blackMarket)
+        nonNegative("suspicion.casinoWin", b.suspicion.casinoWin)
+        nonNegative("suspicion.decayPerStartPass", b.suspicion.decayPerStartPass)
+        nonNegative("suspicion.bribeRelief", b.suspicion.bribeRelief)
+        positive("smugglerBlackMarketPrice", b.smugglerBlackMarketPrice)
+        positive("buildingRentPercent", b.buildingRentPercent)
     }
 }

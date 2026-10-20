@@ -16,6 +16,8 @@ data class PlayerView(
     val embassyCards: List<CardId>,
     val warStep: Int,
     val activeFront: FrontId,
+    /** Lintasan START yang masih dibutuhkan sebelum Jam Perang maju (mode START_PASSES), null untuk mode lain. */
+    val passesToNextStep: Int? = null,
     val cipherDeckSize: Int,
     val telegramDeckSize: Int,
     val casinoVault: Int,
@@ -58,4 +60,6 @@ data class OpponentView(
     val abilityUsed: Boolean,
     val heldCardCount: Int,
     val propertyCount: Int,
+    val intel: Int = 0,
+    val suspicion: Int = 0,
 )

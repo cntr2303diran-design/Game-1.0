@@ -55,6 +55,8 @@ fun summary(c: GameContent): String = buildString {
     appendLine("  Front        : ${c.fronts.size} (${c.fronts.first().month} → ${c.fronts.last().month})")
     appendLine("  Sandi        : ${c.cipher.size} kartu")
     appendLine("  Telegram     : ${c.telegram.size} kartu")
+    appendLine("  Misi Rahasia : ${c.missions.size}")
+    appendLine("  Jam Perang   : ${c.balance.warClock.mode}, ±${c.balance.warClock.passesPerStep} lintasan START per langkah; Tuduhan sejak langkah ${c.balance.accuseUnlockStep}")
     appendLine("  Uang awal    : ${c.balance.startingMoney}, gaji START ${c.balance.startSalary}")
     appendLine("  Kuota info   : ${c.balance.infoPaymentQuota}× per langkah Jam Perang, maks sewa ${c.balance.infoPaymentMaxRent}")
     appendLine("  Kombinasi    : ${EvidenceType.entries.fold(1) { acc, t -> acc * c.evidenceOfType(t).size }} jawaban amplop")

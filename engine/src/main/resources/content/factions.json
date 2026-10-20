@@ -72,6 +72,30 @@
       "oneShot": false,
       "abilityText": "Pasif: saat mengambil Kartu Telegram, ambil 2, jalankan 1, dan taruh yang lain di bawah tumpukan.",
       "abilityTextEn": "Passive: when drawing a Telegram card, draw 2, resolve 1 and put the other on the bottom of the deck."
+    },
+    {
+      "id": "SPANISH_SMUGGLER",
+      "name": "Penyelundup Spanyol",
+      "nameEn": "Spanish Smuggler",
+      "organization": "Contrabandistas",
+      "accentColor": "#8C4A2F",
+      "badgeIcon": "badge_smuggler_anchor_rope",
+      "ability": "BLACK_MARKET_DISCOUNT",
+      "oneShot": false,
+      "abilityText": "Pasif: Pasar Gelap hanya 100 escudo dan tidak menambah Kecurigaan.",
+      "abilityTextEn": "Passive: the Black Market costs only 100 escudos and never raises Suspicion."
+    },
+    {
+      "id": "ABWEHR_DEFECTOR",
+      "name": "Pembelot Abwehr",
+      "nameEn": "Abwehr Defector",
+      "organization": "Ex-Abwehr",
+      "accentColor": "#5E6062",
+      "badgeIcon": "badge_defector_broken_eagle",
+      "ability": "INTEL_NETWORK",
+      "oneShot": false,
+      "abilityText": "Pasif: mulai dengan +2 Intel dan batas Intel +2.",
+      "abilityTextEn": "Passive: start with +2 Intel and +2 Intel capacity."
     }
   ]
 }

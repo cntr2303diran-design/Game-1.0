@@ -1,7 +1,12 @@
 package id.diran.lisbon1944.engine.internal
 
 import id.diran.lisbon1944.engine.GameEvents as E
+import id.diran.lisbon1944.engine.model.CardId
 import id.diran.lisbon1944.engine.model.Creditor
+import id.diran.lisbon1944.engine.model.EvidenceType
+import id.diran.lisbon1944.engine.model.Holder
+import id.diran.lisbon1944.engine.model.KnowledgeSource
+import id.diran.lisbon1944.engine.model.KnownFact
 import id.diran.lisbon1944.engine.model.Deck
 import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.FrontEffect
@@ -131,7 +136,7 @@ internal fun Tx.nextTurn() {
     if (newRound) {
         s = s.copy(roundNumber = s.roundNumber + 1, warClockAdvancedThisRound = false)
         emit(E.ROUND_STARTED, "round" to s.roundNumber)
-        if (s.config.warClockMode == WarClockMode.EVERY_ROUND && s.warStep < LAST_FRONT) revealFront(s.warStep + 1)
+        if (s.config.clockMode == WarClockMode.EVERY_ROUND && s.warStep < LAST_FRONT) revealFront(s.warStep + 1)
     }
 }
 
@@ -155,7 +160,9 @@ internal fun Tx.investigateOffer(p: PlayerId): PendingDecision.SuggestionOffer? 
         null
     }
     val free = pl.freeSuggestions > 0 || pl.extraSuggestionTurnsLeft > 0
-    if (fixed == null && !free) return null
+    val affordable = fixed?.takeIf { pl.intel >= b.intel.suggestionCost }
+    if (affordable == null && !free) return null
+    if (affordable == null) return PendingDecision.SuggestionOffer(p, freeLocation = true, fixedLocation = null, source = SuggestionSource.INVESTIGATE)
     return PendingDecision.SuggestionOffer(p, freeLocation = free, fixedLocation = fixed, source = SuggestionSource.INVESTIGATE)
 }
 
@@ -195,11 +202,23 @@ internal fun Tx.moveStep(t: Task.Move) {
 /** Jam Perang maju lebih dulu, baru gaji — Front yang baru dibalik langsung berlaku (DECISIONS D17). */
 internal fun Tx.passStart(p: PlayerId, salary: Boolean) {
     if (player(p).bankrupt) return
-    if (s.config.warClockMode == WarClockMode.FIRST_PASS_PER_ROUND && !s.warClockAdvancedThisRound && s.warStep < LAST_FRONT) {
-        s = s.copy(warClockAdvancedThisRound = true)
-        revealFront(s.warStep + 1)
+    when (s.config.clockMode) {
+        WarClockMode.FIRST_PASS_PER_ROUND -> if (!s.warClockAdvancedThisRound && s.warStep < LAST_FRONT) {
+            s = s.copy(warClockAdvancedThisRound = true)
+            revealFront(s.warStep + 1)
+        }
+        WarClockMode.START_PASSES -> if (s.warStep < LAST_FRONT) {
+            val passes = s.startPasses + 1
+            s = s.copy(startPasses = passes)
+            val needed = s.config.passesNeededFor(s.warStep + 1)
+            if (passes >= needed) revealFront(s.warStep + 1) else emit(E.WAR_CLOCK, "passes" to passes, "needed" to needed)
+        }
+        WarClockMode.EVERY_ROUND -> Unit
     }
-    if (!salary || s.warEnded || player(p).inJail || player(p).bankrupt) return
+    if (s.warEnded || player(p).inJail || player(p).bankrupt) return
+    changeIntel(p, b.intel.perStartPass, "start")
+    changeSuspicion(p, -b.suspicion.decayPerStartPass, "start")
+    if (!salary) return
     if (frontEffects().any { it is FrontEffect.NoStartSalary }) {
         emit(E.SALARY_BLOCKED, "player" to p, "front" to s.activeFront.value)
     } else {
@@ -213,11 +232,12 @@ internal fun Tx.embassyPass(p: PlayerId) {
 
 internal fun Tx.canAccuse(p: PlayerId, cost: Int): Boolean {
     val pl = player(p)
-    return !pl.bankrupt && (!pl.burned || familyMode) && pl.money >= cost
+    return !pl.bankrupt && (!pl.burned || familyMode) && pl.money >= cost && s.warStep >= b.accuseUnlockStep &&
+        pl.intel >= b.intel.accuseCost
 }
 
 internal fun Tx.sendToJail(p: PlayerId) {
-    upd(p) { it.copy(jail = JailState(0), position = JAIL_TILE) }
+    upd(p) { it.copy(jail = JailState(0), position = JAIL_TILE, suspicion = 0) }
     if (p == current) s = s.copy(doublesCount = 0)
     s = s.copy(tasks = s.tasks.filterNot { it.isMovementOf(p) })
     emit(E.JAIL_ENTERED, "player" to p)
@@ -267,15 +287,20 @@ private fun Tx.landSpecial(p: PlayerId, tile: SpecialTile) {
         SpecialKind.TELEGRAM -> draw(p, Deck.TELEGRAM)
         SpecialKind.CIPHER -> draw(p, Deck.CIPHER)
         SpecialKind.WAR_TAX -> push(Task.Pay(p, Creditor.Vault, b.warTax, "war_tax"))
-        SpecialKind.BRIBE -> push(Task.Pay(p, Creditor.Vault, b.bribe, "bribe"))
+        SpecialKind.BRIBE -> {
+            changeSuspicion(p, -b.suspicion.bribeRelief, "bribe")
+            push(Task.Pay(p, Creditor.Vault, b.bribe, "bribe"))
+        }
         SpecialKind.RADIO, SpecialKind.TELEGRAPH -> startDecode(p)
         SpecialKind.INTERROGATION ->
-            if (canSuggest(p)) setPending(PendingDecision.SuggestionOffer(p, freeLocation = true, source = SuggestionSource.INTERROGATION))
+            if (canSuggest(p) && (b.intel.interrogationFree || pl.intel >= b.intel.suggestionCost)) {
+                setPending(PendingDecision.SuggestionOffer(p, freeLocation = true, source = SuggestionSource.INTERROGATION))
+            }
         SpecialKind.CASINO ->
             if (!familyMode && pl.money >= b.casinoMinBet) {
                 setPending(PendingDecision.CasinoChoice(p, b.casinoMinBet, b.casinoMaxBet, b.casinoBetStep))
             }
-        SpecialKind.BLACK_MARKET -> if (!familyMode && pl.money >= b.blackMarketPrice) {
+        SpecialKind.BLACK_MARKET -> if (!familyMode && pl.money >= blackMarketPrice(p)) {
             val candidates = othersFromLeft(p).filter { player(it).hand.isNotEmpty() }
             if (candidates.isNotEmpty()) setPending(PendingDecision.BlackMarketChoice(p, candidates))
         }
@@ -313,6 +338,8 @@ internal fun Tx.revealFront(step: Int) {
     val tasks = ArrayList<Task>()
     val startSeat = if (isActive(current)) current else leftOf(current) ?: current
     val order = (listOf(startSeat) + othersFromLeft(startSeat)).filter(::isActive)
+    // Pembagian ulang dilakukan lebih dulu agar efek lain (mis. Konferensi Rahasia) memakai tangan baru.
+    front.effects.filterIsInstance<FrontEffect.ReshuffleEvidence>().forEach { reshuffleEvidence(it.category) }
     for (e in front.effects) {
         when (e) {
             is FrontEffect.OnRevealPayIfOwnsInDistrict -> order
@@ -330,10 +357,50 @@ internal fun Tx.revealFront(step: Int) {
             FrontEffect.EndGame -> s = s.copy(warEnded = true)
             is FrontEffect.DistrictRentMultiplier, is FrontEffect.EscapeRouteRentMultiplier,
             is FrontEffect.FreeSuggestionEachPlayer, is FrontEffect.CloseTile, is FrontEffect.BuildCostMultiplier,
-            FrontEffect.NoStartSalary, FrontEffect.AccuseFromAnywhere -> Unit
+            FrontEffect.NoStartSalary, FrontEffect.AccuseFromAnywhere, is FrontEffect.ReshuffleEvidence -> Unit
         }
     }
     pushAll(tasks)
+}
+
+/**
+ * Map Merah berpindah: kartu kategori [type] di amplop dan di tangan pemain aktif dikumpulkan, dikocok, lalu dibagi
+ * ulang (jumlah per pemain tetap). Pengetahuan semua pemain tentang kategori itu dihapus, kecuali Kedutaan dan
+ * tangan pemain bangkrut yang terbuka.
+ */
+internal fun Tx.reshuffleEvidence(type: EvidenceType) {
+    fun isType(card: CardId) = c.evidence(card).type == type
+    val active = s.players.filter { !it.bankrupt }
+    val counts = active.associate { it.id to it.hand.count(::isType) }
+    val envCard = s.envelope.cards.first(::isType)
+    val pool = rng.shuffled(listOf(envCard) + active.flatMap { pl -> pl.hand.filter(::isType) })
+    val newEnv = pool.first()
+    var k = 1
+    val newHands = HashMap<PlayerId, List<CardId>>()
+    active.forEach { pl ->
+        val n = counts.getValue(pl.id)
+        newHands[pl.id] = pl.hand.filterNot(::isType) + pool.subList(k, k + n)
+        k += n
+    }
+    s = s.copy(
+        envelope = when (type) {
+            EvidenceType.SUSPECT -> s.envelope.copy(suspect = newEnv)
+            EvidenceType.LOCATION -> s.envelope.copy(location = newEnv)
+            EvidenceType.ITEM -> s.envelope.copy(item = newEnv)
+        },
+        players = s.players.map { pl -> newHands[pl.id]?.let { pl.copy(hand = it) } ?: pl },
+        doubleAgentSteered = s.doubleAgentSteered.filterNot(::isType).toSet(),
+    )
+    val bankruptIds = s.players.filter { it.bankrupt }.map { Holder.Player(it.id) }.toSet()
+    s = s.copy(
+        knowledge = s.knowledge.mapIndexed { viewer, facts ->
+            val kept = facts.filter { f -> !isType(f.cardId) || f.holder == Holder.Embassy || f.holder in bankruptIds }
+            val own = newHands[PlayerId(viewer)].orEmpty().filter(::isType)
+                .map { KnownFact(it, Holder.Player(PlayerId(viewer)), KnowledgeSource.OWN_HAND) }
+            (kept + own).toSet()
+        },
+    )
+    emit(E.EVIDENCE_RESHUFFLED, "category" to type, "front" to s.warStep)
 }
 
 /** Front #12 sudah dibalik: ganti sisa giliran dengan pengumpulan tebakan akhir lalu skor. */

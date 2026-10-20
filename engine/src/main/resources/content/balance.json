@@ -3,10 +3,27 @@
   "startingMoney": 1500,
   "startSalary": 200,
   "ossSalary": 250,
-  "buildCost": { "PELABUHAN": 50, "ALFAMA": 50, "BAIXA": 100, "CHIADO": 100, "AVENIDA": 150, "ESTORIL": 200 },
-  "levelMultipliers": [5, 15, 35, 45],
+  "buildCost": {
+    "PELABUHAN": 50,
+    "ALFAMA": 50,
+    "BAIXA": 100,
+    "CHIADO": 100,
+    "AVENIDA": 150,
+    "ESTORIL": 200
+  },
+  "levelMultipliers": [
+    5,
+    15,
+    35,
+    45
+  ],
   "monopolyBaseMultiplier": 2,
-  "escapeRouteRent": [25, 50, 100, 200],
+  "escapeRouteRent": [
+    25,
+    50,
+    100,
+    200
+  ],
   "escapeRouteTravelCost": 50,
   "infoPaymentMaxRent": 300,
   "infoPaymentQuota": 2,
@@ -18,14 +35,18 @@
   "casinoMinBet": 50,
   "casinoMaxBet": 300,
   "casinoBetStep": 10,
-  "casinoPayout": { "seven": 3, "eleven": 3, "doubles": 2 },
+  "casinoPayout": {
+    "seven": 3,
+    "eleven": 3,
+    "doubles": 2
+  },
   "sevenWinsVault": true,
   "jailFine": 50,
   "maxJailTurns": 3,
   "embassyPassCost": 100,
   "aprilAccuseCost": 300,
-  "mortgageInterest": 0.10,
-  "portugalDiscount": 0.10,
+  "mortgageInterest": 0.1,
+  "portugalDiscount": 0.1,
   "auctionStart": 10,
   "auctionStep": 10,
   "warTax": 200,
@@ -33,7 +54,46 @@
   "burnPenaltyFraction": 0.5,
   "safeHouseStock": 32,
   "hqStock": 12,
-  "score": { "cashPer": 10, "propertyPer": 10, "safeHouse": 5, "hq": 25, "correctGuess": 50, "burnedFactor": 0.5 },
-  "familyMode": { "wrongAccusePenalty": 200 },
-  "quickMode": { "startProperties": 2, "startWarStep": 5 }
+  "score": {
+    "cashPer": 10,
+    "propertyPer": 10,
+    "safeHouse": 5,
+    "hq": 25,
+    "correctGuess": 50,
+    "burnedFactor": 0.5,
+    "missionsEnabled": true
+  },
+  "familyMode": {
+    "wrongAccusePenalty": 200
+  },
+  "quickMode": {
+    "startProperties": 2,
+    "startWarStep": 5
+  },
+  "warClock": {
+    "mode": "START_PASSES",
+    "passesPerStep": 5.3
+  },
+  "accuseUnlockStep": 10,
+  "publicPasses": false,
+  "intel": {
+    "start": 1,
+    "max": 4,
+    "perStartPass": 1,
+    "suggestionCost": 1,
+    "interrogationFree": false,
+    "decodeSuccess": 1,
+    "defectorBonus": 2,
+    "accuseCost": 2,
+    "silenceCost": 1
+  },
+  "suspicion": {
+    "limit": 6,
+    "blackMarket": 2,
+    "casinoWin": 1,
+    "decayPerStartPass": 1,
+    "bribeRelief": 2
+  },
+  "smugglerBlackMarketPrice": 100,
+  "buildingRentPercent": 48
 }

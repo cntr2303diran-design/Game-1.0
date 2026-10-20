@@ -92,14 +92,14 @@ class ContentValidatorTest {
     }
 
     @Test
-    fun `sandi bukan 16 ditolak`() {
-        assertInvalid(good.copy(cipher = good.cipher.drop(1)), "cipher.json: harus 16 kartu, ditemukan 15")
+    fun `sandi bukan 24 ditolak`() {
+        assertInvalid(good.copy(cipher = good.cipher.drop(1)), "cipher.json: harus 24 kartu, ditemukan 23")
     }
 
     @Test
-    fun `telegram bukan 16 ditolak`() {
-        val extra = good.telegram + good.telegram.first().copy(id = 17)
-        assertInvalid(good.copy(telegram = extra), "telegram.json: harus 16 kartu, ditemukan 17")
+    fun `telegram bukan 24 ditolak`() {
+        val extra = good.telegram + good.telegram.first().copy(id = 25)
+        assertInvalid(good.copy(telegram = extra), "telegram.json: harus 24 kartu, ditemukan 25")
     }
 
     @Test

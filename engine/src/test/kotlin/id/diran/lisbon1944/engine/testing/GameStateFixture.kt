@@ -6,6 +6,8 @@ import id.diran.lisbon1944.engine.RuleViolation
 import id.diran.lisbon1944.engine.content.ContentLoader
 import id.diran.lisbon1944.engine.content.GameContent
 import id.diran.lisbon1944.engine.model.Action
+import id.diran.lisbon1944.engine.model.Balance
+import id.diran.lisbon1944.engine.model.WarClockMode
 import id.diran.lisbon1944.engine.model.CardId
 import id.diran.lisbon1944.engine.model.Envelope
 import id.diran.lisbon1944.engine.model.Faction
@@ -56,6 +58,8 @@ class GameStateFixture(
     seed: Long = 11,
     doubleAgent: Boolean = false,
     quota: Int? = null,
+    /** true = aturan dasar BAGIAN 5–6 (nilai test BAGIAN 14); false = balance.json saat ini. */
+    classic: Boolean = true,
 ) {
     val engine: GameEngine = TestEngine.engine
     val content: GameContent = TestEngine.content
@@ -63,10 +67,11 @@ class GameStateFixture(
     var state: GameState = engine.newGame(
         GameConfig(
             players = factions.mapIndexed { i, f -> PlayerSetup("Agen ${i + 1}", f) },
-            balance = content.balance,
+            balance = if (classic) classicBalance() else content.balance,
             mode = mode,
             doubleAgentVariant = doubleAgent,
             infoPaymentQuotaOverride = quota,
+            warClockMode = if (classic) WarClockMode.FIRST_PASS_PER_ROUND else null,
         ),
         seed,
     )
@@ -165,6 +170,18 @@ class GameStateFixture(
         }
 
     companion object {
+        /** Aturan dasar: sewa penuh, Tuduhan sejak awal tanpa Intel, Ruang Interogasi gratis, lewat Dugaan publik, tanpa misi. */
+        fun classicBalance(): Balance {
+            val b = TestEngine.content.balance
+            return b.copy(
+                buildingRentPercent = 100,
+                accuseUnlockStep = 1,
+                publicPasses = true,
+                intel = b.intel.copy(accuseCost = 0, interrogationFree = true),
+                score = b.score.copy(missionsEnabled = false),
+            )
+        }
+
         /** Faksi tanpa efek pasif pada uang/gerak lebih dulu, agar skenario test tidak terganggu. */
         val DEFAULT_FACTIONS = listOf(
             Faction.MI6, Faction.RESISTANCE, Faction.NKVD, Faction.SWISS_JOURNALIST, Faction.OSS, Faction.PORTUGAL_TRADER,

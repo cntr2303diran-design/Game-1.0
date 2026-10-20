@@ -8,6 +8,8 @@ import id.diran.lisbon1944.engine.content.GameContent
 import id.diran.lisbon1944.engine.model.CardId
 import id.diran.lisbon1944.engine.model.District
 import id.diran.lisbon1944.engine.model.EvidenceType
+import id.diran.lisbon1944.engine.model.MissionCard
+import id.diran.lisbon1944.engine.model.MissionCondition
 import id.diran.lisbon1944.engine.model.OwnableTile
 import id.diran.lisbon1944.engine.model.Ownership
 import id.diran.lisbon1944.engine.model.PlayerId
@@ -99,4 +101,18 @@ class Insight(val view: PlayerView, private val content: GameContent, private va
     }
 
     fun cardsOfType(type: EvidenceType): List<CardId> = content.evidenceOfType(type).map { it.id }
+
+    /** Misi Rahasia saya (hanya saya yang tahu). */
+    val mission: MissionCard? get() = view.me.missionId?.let(content::mission)
+
+    /** Sisa ruang Kecurigaan sebelum ditangkap. */
+    val suspicionRoom: Int get() = view.config.balance.suspicion.limit - 1 - view.me.suspicion
+
+    /** Apakah petak ini membantu Misi Rahasia saya? */
+    fun helpsMission(tile: Int): Boolean = when (val c = mission?.condition) {
+        is MissionCondition.OwnDistrict -> districtOf(tile) == c.district
+        is MissionCondition.EscapeRoutes -> content.tile(tile) is id.diran.lisbon1944.engine.model.EscapeRouteTile
+        is MissionCondition.PropertyCount -> true
+        else -> false
+    }
 }

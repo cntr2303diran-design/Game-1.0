@@ -40,7 +40,7 @@ class CardsAndFrontTest {
         f.land(0, 2)
         assertEquals(1600, f.p(0).money)
         assertEquals(1, f.state.telegramDeck.last())
-        assertEquals(16, f.state.telegramDeck.size)
+        assertEquals(24, f.state.telegramDeck.size)
     }
 
     @Test
@@ -102,7 +102,7 @@ class CardsAndFrontTest {
         val f = table().top(Deck.CIPHER, 6)
         f.land(0, 7)
         assertEquals(1, f.p(0).heldCards.size)
-        assertEquals(15, f.state.cipherDeck.size)
+        assertEquals(23, f.state.cipherDeck.size)
     }
 
     @Test

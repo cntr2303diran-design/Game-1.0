@@ -12,6 +12,7 @@ import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.FactionDef
 import id.diran.lisbon1944.engine.model.FrontCard
 import id.diran.lisbon1944.engine.model.FrontId
+import id.diran.lisbon1944.engine.model.MissionCard
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.SpecialKind
 import id.diran.lisbon1944.engine.model.SpecialTile
@@ -26,6 +27,7 @@ data class GameContent(
     val cipher: List<DeckCard>,
     val telegram: List<DeckCard>,
     val balance: Balance,
+    val missions: List<MissionCard>,
 ) {
     private val evidenceById: Map<CardId, EvidenceCard> by lazy { evidence.associateBy { it.id } }
 
@@ -59,4 +61,6 @@ data class GameContent(
     }
 
     fun card(deck: Deck, id: Int): DeckCard = deck(deck).first { it.id == id }
+
+    fun mission(id: Int): MissionCard = missions.first { it.id == id }
 }

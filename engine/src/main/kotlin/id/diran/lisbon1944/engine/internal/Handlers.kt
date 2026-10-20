@@ -5,6 +5,7 @@ import id.diran.lisbon1944.engine.model.Action as A
 import id.diran.lisbon1944.engine.model.PendingDecision as PD
 import id.diran.lisbon1944.engine.model.Creditor
 import id.diran.lisbon1944.engine.model.Deck
+import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.Guess
 import id.diran.lisbon1944.engine.model.Holder
 import id.diran.lisbon1944.engine.model.JailState
@@ -81,6 +82,7 @@ internal fun Tx.handle(pend: PD, a: A) {
             if ((pend as PD.SuggestionOffer).source == SuggestionSource.INVESTIGATE) push(Task.Business(p))
         }
         is A.RevealCard -> revealForSuggestion(p, pend as PD.RevealForSuggestion, a.cardId)
+        is A.StaySilent -> staySilent(p, pend as PD.RevealForSuggestion)
         is A.DecodePickNumber -> {
             s = s.copy(decode = s.decode!!.copy(number = a.n))
             emit(E.DECODE_NUMBER_PICKED, "operator" to p)
@@ -91,8 +93,10 @@ internal fun Tx.handle(pend: PD, a: A) {
         is A.CasinoBet -> casino(p, a.amount)
         is A.CasinoSkip -> emit(E.CASINO_SKIP, "player" to p)
         is A.BlackMarketBuy -> {
-            pay(p, Creditor.Player(a.targetPlayer), b.blackMarketPrice, "black_market")
+            pay(p, Creditor.Player(a.targetPlayer), blackMarketPrice(p), "black_market")
             emit(E.BLACK_MARKET_DEAL, "player" to p, "seller" to a.targetPlayer)
+            // Penangkapan karena Kecurigaan tidak membatalkan transaksi: penjual tetap memilih kartu.
+            if (player(p).faction != Faction.SPANISH_SMUGGLER) changeSuspicion(p, b.suspicion.blackMarket, "black_market")
             setPending(PD.BlackMarketPickCard(a.targetPlayer, p, player(a.targetPlayer).hand))
         }
         is A.BlackMarketChooseCard -> show(p, (pend as PD.BlackMarketPickCard).buyer, a.cardId, KnowledgeSource.BLACK_MARKET)
@@ -100,6 +104,7 @@ internal fun Tx.handle(pend: PD, a: A) {
         is A.Accuse -> {
             val cost = if (pend is PD.AccuseOffer) pend.cost else b.aprilAccuseCost
             if (cost > 0) pay(p, Creditor.Bank, cost, "accusation")
+            changeIntel(p, -b.intel.accuseCost, "accusation")
             resolveAccusation(p, Guess(a.suspect, a.location, a.item))
             if (pend is PD.BusinessPhase && s.winner == null) push(Task.Business(p))
         }

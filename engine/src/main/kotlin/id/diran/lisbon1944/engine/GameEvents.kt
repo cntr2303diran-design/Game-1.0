@@ -41,6 +41,7 @@ object GameEvents {
     const val SUGGESTION_MADE = "suggestion_made"
     const val SUGGESTION_PASS = "suggestion_pass"
     const val SUGGESTION_SHOWN = "suggestion_shown"
+    const val SUGGESTION_SILENT = "suggestion_silent"
     const val SUGGESTION_STRONG = "suggestion_strong"
     const val SUGGESTION_SKIPPED = "suggestion_skipped"
     const val EVIDENCE_SHOWN = "evidence_shown"
@@ -82,4 +83,13 @@ object GameEvents {
     const val DOUBLE_AGENT_REVEALED = "double_agent_revealed"
     const val DOUBLE_AGENT_LIE = "double_agent_lie"
     const val DOUBLE_AGENT_LIE_REVEALED = "double_agent_lie_revealed"
+    const val INTEL = "intel"
+    const val SUSPICION = "suspicion"
+    const val SUSPICION_ARREST = "suspicion_arrest"
+    /** Privat: misi yang diterima pemain. */
+    const val MISSION_ASSIGNED = "mission_assigned"
+    const val MISSION_COMPLETED = "mission_completed"
+    const val WAR_CLOCK = "war_clock"
+    /** Publik: kategori kartu Bukti yang dibagi ulang (Map Merah berpindah). */
+    const val EVIDENCE_RESHUFFLED = "evidence_reshuffled"
 }

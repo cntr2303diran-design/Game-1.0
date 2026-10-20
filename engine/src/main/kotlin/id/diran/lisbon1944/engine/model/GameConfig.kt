@@ -16,13 +16,26 @@ data class GameConfig(
     val balance: Balance,
     val mode: GameMode = GameMode.STANDARD,
     val doubleAgentVariant: Boolean = false,
-    val warClockMode: WarClockMode = WarClockMode.FIRST_PASS_PER_ROUND,
+    /** null = pakai balance.warClock.mode. */
+    val warClockMode: WarClockMode? = null,
     /** Jika diisi, menimpa balance.infoPaymentQuota (house rule = 1). */
     val infoPaymentQuotaOverride: Int? = null,
     /** Mode Kampanye: properti yang dimulai sebagai milik pemain (indeks petak → kursi). */
     val presetOwnership: Map<Int, Int> = emptyMap(),
 ) {
     val infoPaymentQuota: Int get() = infoPaymentQuotaOverride ?: balance.infoPaymentQuota
+
+    val clockMode: WarClockMode get() = warClockMode ?: balance.warClock.mode
+
+    /** Langkah Jam Perang saat permainan dimulai (Mode Cepat mulai lebih lanjut). */
+    val startWarStep: Int get() = if (mode == GameMode.QUICK) balance.quickMode.startWarStep else 1
+
+    /**
+     * START_PASSES: total lintasan START (sejak awal) yang dibutuhkan agar Jam mencapai langkah [step].
+     * Pecahan dibulatkan per langkah sehingga rata-rata tepat passesPerStep per langkah.
+     */
+    fun passesNeededFor(step: Int): Int =
+        kotlin.math.round((step - startWarStep) * balance.warClock.passesPerStep).toInt().coerceAtLeast(step - startWarStep)
 
     /** Daftar pelanggaran; kosong berarti konfigurasi sah. */
     fun validate(): List<String> = buildList {

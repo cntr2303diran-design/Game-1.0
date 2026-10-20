@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "missions": [
+    {
+      "id": 1,
+      "title": "Raja Pelabuhan",
+      "titleEn": "Harbour King",
+      "text": "Miliki seluruh distrik Pelabuhan.",
+      "textEn": "Own the whole Harbour district.",
+      "points": 30,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "PELABUHAN"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Bayangan Alfama",
+      "titleEn": "Shadow of Alfama",
+      "text": "Miliki seluruh distrik Alfama.",
+      "textEn": "Own the whole Alfama district.",
+      "points": 35,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "ALFAMA"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Bankir Baixa",
+      "titleEn": "Baixa Banker",
+      "text": "Miliki seluruh distrik Baixa.",
+      "textEn": "Own the whole Baixa district.",
+      "points": 40,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "BAIXA"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Salon Chiado",
+      "titleEn": "Chiado Salon",
+      "text": "Miliki seluruh distrik Chiado.",
+      "textEn": "Own the whole Chiado district.",
+      "points": 45,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "CHIADO"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Penguasa Avenida",
+      "titleEn": "Lord of the Avenida",
+      "text": "Miliki seluruh distrik Avenida.",
+      "textEn": "Own the whole Avenida district.",
+      "points": 50,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "AVENIDA"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Pesta di Estoril",
+      "titleEn": "Estoril Soirée",
+      "text": "Miliki seluruh distrik Estoril.",
+      "textEn": "Own the whole Estoril district.",
+      "points": 55,
+      "condition": {
+        "type": "ownDistrict",
+        "district": "ESTORIL"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Jaringan Pelarian",
+      "titleEn": "Escape Network",
+      "text": "Miliki minimal 3 Jalur Pelarian.",
+      "textEn": "Own at least 3 Escape Routes.",
+      "points": 45,
+      "condition": {
+        "type": "escapeRoutes",
+        "count": 3
+      }
+    },
+    {
+      "id": 8,
+      "title": "Kas Rahasia",
+      "titleEn": "Secret Treasury",
+      "text": "Akhiri perang dengan minimal 2.500 escudo tunai.",
+      "textEn": "End the war with at least 2,500 escudos in cash.",
+      "points": 40,
+      "condition": {
+        "type": "cashAtLeast",
+        "amount": 2500
+      }
+    },
+    {
+      "id": 9,
+      "title": "Arsitek Rumah Aman",
+      "titleEn": "Safe House Architect",
+      "text": "Miliki bangunan senilai minimal 8 Rumah Aman (Markas = 5).",
+      "textEn": "Own buildings worth at least 8 Safe Houses (HQ = 5).",
+      "points": 45,
+      "condition": {
+        "type": "buildingPoints",
+        "count": 8
+      }
+    },
+    {
+      "id": 10,
+      "title": "Arsip Lengkap",
+      "titleEn": "Complete Archive",
+      "text": "Ketahui letak minimal 10 kartu Bukti di luar tanganmu dan Kedutaan.",
+      "textEn": "Know where at least 10 Evidence cards outside your hand and the Embassy are.",
+      "points": 40,
+      "condition": {
+        "type": "knownCards",
+        "count": 10
+      }
+    },
+    {
+      "id": 11,
+      "title": "Hantu Lisbon",
+      "titleEn": "Ghost of Lisbon",
+      "text": "Akhiri perang dengan Kecurigaan 0.",
+      "textEn": "End the war with 0 Suspicion.",
+      "points": 30,
+      "condition": {
+        "type": "suspicionAtMost",
+        "max": 0
+      }
+    },
+    {
+      "id": 12,
+      "title": "Tuan Tanah",
+      "titleEn": "Landlord",
+      "text": "Miliki minimal 8 properti atau Jalur Pelarian.",
+      "textEn": "Own at least 8 properties or Escape Routes.",
+      "points": 45,
+      "condition": {
+        "type": "propertyCount",
+        "count": 8
+      }
+    },
+    {
+      "id": 13,
+      "title": "Gudang Intel",
+      "titleEn": "Intel Stockpile",
+      "text": "Akhiri perang dengan minimal 3 Intel.",
+      "textEn": "End the war with at least 3 Intel.",
+      "points": 30,
+      "condition": {
+        "type": "intelAtLeast",
+        "count": 3
+      }
+    },
+    {
+      "id": 14,
+      "title": "Analis Ulung",
+      "titleEn": "Master Analyst",
+      "text": "Tebakan Akhirmu memuat minimal 2 jawaban benar.",
+      "textEn": "Your Final Guess contains at least 2 correct answers.",
+      "points": 40,
+      "condition": {
+        "type": "correctGuesses",
+        "count": 2
+      }
+    }
+  ]
+}

@@ -44,6 +44,8 @@ class StrategicBot(
         }
         val insight = Insight(view, content, tracker, params.deduction)
         val wanted = runCatching { choose(decision, insight, legal, rng) }.getOrNull()
+        // ProposeTrade tidak dienumerasi engine (parametrik) — disusun sesuai aturan tradeCheck di proposeTrade().
+        if (wanted is Action.ProposeTrade && decision is PD.BusinessPhase) return wanted
         return wanted?.takeIf { it in legalSet } ?: safeDefault(legal)
     }
 
@@ -102,7 +104,7 @@ class StrategicBot(
         val after = i.money - price
         val district = i.districtOf(tile)
         val priority = district != null && district in params.priorityDistricts && i.warStep <= params.priorityUntilStep
-        val strategic = i.completesSet(tile) || i.blocksOpponent(tile) || (district != null && i.ownedIn(district) > 0)
+        val strategic = i.completesSet(tile) || i.blocksOpponent(tile) || (district != null && i.ownedIn(district) > 0) || i.helpsMission(tile)
         return when {
             after < reserve(i) -> false
             priority || strategic -> true
@@ -113,7 +115,7 @@ class StrategicBot(
     private fun maxBid(i: Insight, tile: Int): Int {
         val price = (content.tile(tile) as OwnableTile).price
         var value = price * params.auctionFactor
-        if (i.completesSet(tile) || i.blocksOpponent(tile)) value *= 1.0 + params.setBonus
+        if (i.completesSet(tile) || i.blocksOpponent(tile) || i.helpsMission(tile)) value *= 1.0 + params.setBonus
         return minOf(value.toInt(), i.money - reserve(i))
     }
 
@@ -141,6 +143,15 @@ class StrategicBot(
         }
         val r = i.deduction
         val steer = i.view.me.isDoubleAgent
+        // Simpan Intel untuk Tuduhan Akhir bila misteri hampir terpecahkan dan Dugaan ini memakan Intel.
+        val bal = i.view.config.balance
+        val costsIntel = (d.source == id.diran.lisbon1944.engine.model.SuggestionSource.INVESTIGATE && !d.freeLocation) ||
+            (d.source == id.diran.lisbon1944.engine.model.SuggestionSource.INTERROGATION && !bal.intel.interrogationFree)
+        if (!steer && costsIntel && r.bestProbability >= params.lateAccuseThreshold.coerceAtMost(params.accuseThreshold) &&
+            i.view.me.intel - bal.intel.suggestionCost < bal.intel.accuseCost
+        ) {
+            return Action.SkipSuggestion(me)
+        }
         fun pick(type: EvidenceType, count: Int = 1): List<CardId> {
             val cards = i.cardsOfType(type)
             val solved = r.solvedCard(cards)
@@ -175,7 +186,22 @@ class StrategicBot(
             val lie = view.me.hand.filter { it !in d.named }
             if (lie.isNotEmpty()) return Action.RevealCard(me, i.mostKnown(lie))
         }
-        return Action.RevealCard(me, i.mostKnown(d.allowedCards))
+        val card = i.mostKnown(d.allowedCards)
+        if (shouldStaySilent(i, d, card)) return Action.StaySilent(me)
+        return Action.RevealCard(me, card)
+    }
+
+    /** Bungkam bila penanya belum tahu kartu itu dan Intel cukup tanpa mengorbankan Tuduhan. */
+    private fun shouldStaySilent(i: Insight, d: PD.RevealForSuggestion, card: CardId): Boolean {
+        if (params.silenceChance <= 0.0) return false
+        val bal = i.view.config.balance
+        val askerKnows = i.knownBy[card]?.contains(d.asker) == true
+        if (askerKnows) return false
+        val keep = if (i.warStep >= bal.accuseUnlockStep - 1 && !i.view.me.burned) bal.intel.accuseCost else 0
+        if (i.view.me.intel - bal.intel.silenceCost < keep) return false
+        // Lebih rela bungkam terhadap pemain terdepan.
+        val chance = if (d.asker == i.leader) 1.0 else params.silenceChance
+        return chance >= 1.0 || (i.view.me.intel + i.warStep) % 10 < chance * 10
     }
 
     private fun decodeContinue(i: Insight): Action {
@@ -186,16 +212,20 @@ class StrategicBot(
 
     private fun casino(i: Insight, d: PD.CasinoChoice, rng: GameRng): Action {
         val me = i.me
-        val ok = i.view.casinoVault >= params.casinoMinVault && i.money - d.minBet >= reserve(i) &&
+        val safe = i.suspicionRoom > i.view.config.balance.suspicion.casinoWin
+        val ok = safe && i.view.casinoVault >= params.casinoMinVault && i.money - d.minBet >= reserve(i) &&
             rng.nextInt(1000) < params.casinoChance * 1000
         return if (ok) Action.CasinoBet(me, d.minBet) else Action.CasinoSkip(me)
     }
 
     private fun blackMarket(i: Insight, d: PD.BlackMarketChoice): Action {
         val me = i.me
-        val price = i.view.config.balance.blackMarketPrice
+        val bal = i.view.config.balance
+        val smuggler = i.view.me.faction == Faction.SPANISH_SMUGGLER
+        val price = if (smuggler) bal.smugglerBlackMarketPrice else bal.blackMarketPrice
         val unsolved = i.deduction.bestProbability < 0.9
-        if (!unsolved || i.money - price < params.blackMarketReserve) return Action.BlackMarketSkip(me)
+        val safe = smuggler || i.suspicionRoom > bal.suspicion.blackMarket
+        if (!unsolved || !safe || i.money - price < params.blackMarketReserve) return Action.BlackMarketSkip(me)
         return Action.BlackMarketBuy(me, d.candidates.maxBy { i.deduction.unknownCount[it] ?: 0 })
     }
 
@@ -270,6 +300,26 @@ class StrategicBot(
         }
     }
 
+    private fun proposeTrade(i: Insight): Action? {
+        if (params.tradeOfferFactor <= 0.0) return null
+        val view = i.view
+        val mine = i.me.value.toString()
+        val lastTurn = view.log.indexOfLast { it.type == id.diran.lisbon1944.engine.GameEvents.TURN_STARTED && it.payload["player"] == mine }
+        val alreadyProposed = view.log.drop(lastTurn.coerceAtLeast(0))
+            .any { it.type == id.diran.lisbon1944.engine.GameEvents.TRADE_PROPOSED && it.payload["from"] == mine }
+        if (alreadyProposed) return null
+        val candidates = content.properties.filter { t ->
+            val o = view.ownership[t.index] ?: return@filter false
+            o.ownerId != i.me && o.ownerId in i.activeOpponents && i.completesSet(t.index) &&
+                content.propertiesIn(t.district).all { (view.ownership[it.index]?.level ?: 0) == 0 }
+        }
+        val target = candidates.maxByOrNull { it.price } ?: return null
+        val offer = (target.price * params.tradeOfferFactor).toInt()
+        if (i.money - offer < reserve(i)) return null
+        val owner = view.ownership.getValue(target.index).ownerId
+        return Action.ProposeTrade(i.me, TradeOffer(from = i.me, to = owner, giveMoney = offer, takeProperties = listOf(target.index)))
+    }
+
     // --- Utang ---------------------------------------------------------------------------
     private fun raiseFunds(i: Insight, legal: List<Action>): Action {
         legal.filterIsInstance<Action.SellBuilding>().minByOrNull { i.view.ownership[it.tile]?.level ?: 0 }?.let { return it }
@@ -295,15 +345,19 @@ class StrategicBot(
             return target
         }
 
-        // 3. Tebus gadai bila kaya.
+        // 3. Tawarkan pembelian properti lawan yang melengkapi distrik (maksimal satu tawaran per giliran).
+        proposeTrade(i)?.let { return it }
+
+        // 3b. Tebus gadai bila kaya.
         legal.filterIsInstance<Action.Unmortgage>().firstOrNull()?.let { a ->
             val half = (content.tile(a.tile) as OwnableTile).price / 2
             val cost = half + Math.ceil(half * i.view.config.balance.mortgageInterest).toInt()
             if (i.money - cost >= params.unmortgageReserve) return a
         }
 
-        // 4. Bangun merata, termurah dulu, sebelum menjelang akhir perang.
-        if (i.warStep < params.stopBuildingStep) {
+        // 4. Bangun merata, termurah dulu, sebelum menjelang akhir perang (misi bangunan: terus membangun).
+        val buildMission = i.mission?.condition is id.diran.lisbon1944.engine.model.MissionCondition.BuildingPoints
+        if (i.warStep < params.stopBuildingStep || buildMission) {
             val builds = legal.filterIsInstance<Action.Build>()
             val best = builds.minWithOrNull(compareBy({ i.view.ownership[it.tile]?.level ?: 0 }, { -(content.tile(it.tile) as PropertyTile).baseRent }))
             if (best != null) {

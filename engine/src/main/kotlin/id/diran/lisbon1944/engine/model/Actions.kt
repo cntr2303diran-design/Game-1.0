@@ -36,6 +36,8 @@ sealed interface Action {
     ) : Action
     @Serializable @SerialName("skipSuggestion") data class SkipSuggestion(override val actorId: PlayerId) : Action
     @Serializable @SerialName("revealCard") data class RevealCard(override val actorId: PlayerId, val cardId: CardId) : Action
+    /** Bungkam: bayar Intel untuk tidak menunjukkan kartu; Dugaan berlanjut ke pemain berikutnya. */
+    @Serializable @SerialName("staySilent") data class StaySilent(override val actorId: PlayerId) : Action
 
     // --- Dekode ----------------------------------------------------------------------
     @Serializable @SerialName("decodePickNumber") data class DecodePickNumber(override val actorId: PlayerId, val n: Int) : Action

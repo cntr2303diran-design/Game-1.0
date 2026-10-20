@@ -28,7 +28,9 @@
     "blackMarketReserve": 99999,
     "useAbility": 0.25,
     "tradeAcceptMargin": 0,
-    "randomness": 0.35
+    "randomness": 0.35,
+    "silenceChance": 0.3,
+    "tradeOfferFactor": 0.0
   },
   "normal": {
     "deduction": "basic",
@@ -36,7 +38,10 @@
     "lateReserve": 300,
     "lateStep": 10,
     "buyMargin": 150,
-    "priorityDistricts": ["PELABUHAN", "ALFAMA"],
+    "priorityDistricts": [
+      "PELABUHAN",
+      "ALFAMA"
+    ],
     "priorityUntilStep": 4,
     "auctionFactor": 0.9,
     "setBonus": 0.3,
@@ -58,7 +63,9 @@
     "blackMarketReserve": 600,
     "useAbility": 1.0,
     "tradeAcceptMargin": 20,
-    "randomness": 0.0
+    "randomness": 0.0,
+    "silenceChance": 0.6,
+    "tradeOfferFactor": 1.6
   },
   "hard": {
     "deduction": "full",
@@ -66,7 +73,11 @@
     "lateReserve": 300,
     "lateStep": 10,
     "buyMargin": 100,
-    "priorityDistricts": ["PELABUHAN", "ALFAMA", "BAIXA"],
+    "priorityDistricts": [
+      "PELABUHAN",
+      "ALFAMA",
+      "BAIXA"
+    ],
     "priorityUntilStep": 5,
     "auctionFactor": 1.0,
     "setBonus": 0.5,
@@ -88,6 +99,8 @@
     "blackMarketReserve": 350,
     "useAbility": 1.0,
     "tradeAcceptMargin": 0,
-    "randomness": 0.0
+    "randomness": 0.0,
+    "silenceChance": 0.8,
+    "tradeOfferFactor": 1.8
   }
 }

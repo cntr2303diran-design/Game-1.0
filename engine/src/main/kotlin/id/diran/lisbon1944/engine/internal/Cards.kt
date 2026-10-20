@@ -127,6 +127,10 @@ private fun Tx.applyCardEffect(p: PlayerId, card: DeckCard, e: CardEffect) {
         }
         CardEffect.SkipNextSuggestion -> upd(p) { it.copy(skipNextSuggestion = true) }
         is CardEffect.ExtraSuggestion -> upd(p) { it.copy(extraSuggestionTurnsLeft = e.turns + 1) }
+        is CardEffect.GainIntel -> changeIntel(p, e.amount, "card")
+        is CardEffect.LoseIntel -> changeIntel(p, -e.amount, "card")
+        is CardEffect.AddSuspicion -> changeSuspicion(p, e.amount, "card")
+        is CardEffect.ReduceSuspicion -> changeSuspicion(p, -e.amount, "card")
     }
 }
 

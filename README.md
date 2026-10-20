@@ -19,6 +19,20 @@ Desain asli: **@DIRAN**.
 | 6 | UI lengkap, audio, aksesibilitas, tutorial | — |
 | 7 | Poles & rilis | — |
 
+## Aturan tambahan (versi 4 jam)
+
+Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), versi ini menambahkan:
+
+- **Intel** — token untuk mengajukan Dugaan (1), Bungkam (1), dan Tuduhan Akhir (2). +1 tiap melewati START.
+- **Bungkam** — bayar 1 Intel agar tidak perlu menunjukkan kartu saat Dugaan.
+- **Kecurigaan** — Pasar Gelap dan menang Kasino menaikkan meteran; penuh (6) berarti ditangkap.
+- **Misi Rahasia** — 14 tujuan pribadi bernilai 30–55 poin di Akhir Perang.
+- **Map Merah berpindah** — pada 4 Front, satu kategori kartu Bukti dibagi ulang (jawaban bisa berubah).
+- **Tuduhan Akhir** baru dibuka sejak langkah Jam Perang 10; Jam maju tiap ±5 lintasan START.
+- **8 faksi** (baru: Penyelundup Spanyol, Pembelot Abwehr) dan **48 kartu Sandi/Telegram**.
+
+Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D50).
+
 ## Struktur modul
 
 ```
@@ -41,7 +55,7 @@ engine/src/main/kotlin/id/diran/lisbon1944/engine/
 └── GameEvents.kt   kunci event stabil untuk UI
 engine/src/main/resources/content/
 ├── board.json  factions.json  evidence.json  front.json
-└── cipher.json telegram.json  balance.json
+└── cipher.json telegram.json  balance.json  missions.json
 ```
 
 ## Cara build

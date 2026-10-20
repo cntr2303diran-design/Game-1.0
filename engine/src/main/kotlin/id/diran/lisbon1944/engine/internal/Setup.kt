@@ -5,6 +5,7 @@ import id.diran.lisbon1944.engine.content.GameContent
 import id.diran.lisbon1944.engine.model.CardId
 import id.diran.lisbon1944.engine.model.Envelope
 import id.diran.lisbon1944.engine.model.EvidenceType
+import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.FrontId
 import id.diran.lisbon1944.engine.model.GameConfig
 import id.diran.lisbon1944.engine.model.GameMode
@@ -82,10 +83,15 @@ internal object Setup {
             }
         }
 
+        // Misi Rahasia: satu per pemain, rahasia.
+        val missionIds = if (b.score.missionsEnabled && c.missions.size >= n) rng.shuffled(c.missions.map { it.id }).take(n) else emptyList()
+
         val players = config.players.mapIndexed { i, setup ->
+            val intel = b.intel.start + if (setup.faction == Faction.ABWEHR_DEFECTOR) b.intel.defectorBonus else 0
             PlayerState(
                 id = PlayerId(i), name = setup.name, faction = setup.faction, isBot = setup.isBot, botLevel = setup.botLevel,
                 money = b.startingMoney, hand = hands[i], isDoubleAgent = i == doubleAgent,
+                intel = intel, missionId = missionIds.getOrNull(i),
             )
         }
         val knowledge = (0 until n).map { i ->
@@ -118,6 +124,7 @@ internal object Setup {
         rolls.forEach { (seat, d1, d2) -> tx.emit(E.INITIATIVE_ROLL, "player" to PlayerId(seat), "d1" to d1, "d2" to d2) }
         tx.emit(E.FIRST_PLAYER, "player" to PlayerId(first))
         if (doubleAgent >= 0) tx.emit(E.DOUBLE_AGENT_ROLE, "player" to PlayerId(doubleAgent), visibleTo = listOf(PlayerId(doubleAgent)))
+        missionIds.forEachIndexed { i, m -> tx.emit(E.MISSION_ASSIGNED, "player" to PlayerId(i), "mission" to m, visibleTo = listOf(PlayerId(i))) }
         tx.revealFront(startStep)
         tx.advance()
         return tx.commit()

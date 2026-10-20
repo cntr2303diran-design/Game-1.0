@@ -14,10 +14,15 @@ import id.diran.lisbon1944.engine.model.FamilyModeRules
 import id.diran.lisbon1944.engine.model.FrontCard
 import id.diran.lisbon1944.engine.model.FrontEffect
 import id.diran.lisbon1944.engine.model.FrontId
+import id.diran.lisbon1944.engine.model.IntelRules
+import id.diran.lisbon1944.engine.model.MissionCard
+import id.diran.lisbon1944.engine.model.MissionCondition
 import id.diran.lisbon1944.engine.model.PropertyTile
 import id.diran.lisbon1944.engine.model.QuickModeRules
 import id.diran.lisbon1944.engine.model.ScoreRules
 import id.diran.lisbon1944.engine.model.SpecialTile
+import id.diran.lisbon1944.engine.model.SuspicionRules
+import id.diran.lisbon1944.engine.model.WarClockRules
 import id.diran.lisbon1944.engine.model.Tile
 import kotlinx.serialization.json.Json
 
@@ -30,6 +35,7 @@ data class ContentSources(
     val cipher: String,
     val telegram: String,
     val balance: String,
+    val missions: String,
 )
 
 /**
@@ -45,6 +51,7 @@ object ContentLoader {
     const val CIPHER = "cipher.json"
     const val TELEGRAM = "telegram.json"
     const val BALANCE = "balance.json"
+    const val MISSIONS = "missions.json"
 
     private val json = Json { isLenient = false }
 
@@ -59,6 +66,7 @@ object ContentLoader {
         cipher = resource(CIPHER),
         telegram = resource(TELEGRAM),
         balance = resource(BALANCE),
+        missions = resource(MISSIONS),
     )
 
     /** Muat dan validasi. */
@@ -77,6 +85,7 @@ object ContentLoader {
         cipher = parseDeck(sources.cipher, CIPHER, Deck.CIPHER),
         telegram = parseDeck(sources.telegram, TELEGRAM, Deck.TELEGRAM),
         balance = parseBalance(sources.balance),
+        missions = parseMissions(sources.missions),
     )
 
     /** Hanya balance.json — dipakai :sim untuk --balance path. */
@@ -184,6 +193,7 @@ object ContentLoader {
         "onRevealSecretConference" -> FrontEffect.OnRevealSecretConference
         "accuseFromAnywhere" -> FrontEffect.AccuseFromAnywhere
         "endGame" -> FrontEffect.EndGame
+        "reshuffleEvidence" -> FrontEffect.ReshuffleEvidence(n.enum("category"))
         else -> n.child("type").fail("efek Front '$type' tidak dikenal")
     }
 
@@ -229,8 +239,38 @@ object ContentLoader {
         "jailPass" -> CardEffect.JailPass
         "skipNextSuggestion" -> CardEffect.SkipNextSuggestion
         "extraSuggestion" -> CardEffect.ExtraSuggestion(n.int("turns"))
+        "gainIntel" -> CardEffect.GainIntel(n.int("amount"))
+        "loseIntel" -> CardEffect.LoseIntel(n.int("amount"))
+        "addSuspicion" -> CardEffect.AddSuspicion(n.int("amount"))
+        "reduceSuspicion" -> CardEffect.ReduceSuspicion(n.int("amount"))
         else -> n.child("type").fail("efek kartu '$type' tidak dikenal")
     }
+
+    private fun parseMissions(text: String): List<MissionCard> =
+        root(MISSIONS, text).child("missions").array().map { n ->
+            val c = n.child("condition")
+            val condition = when (val type = c.string("type")) {
+                "ownDistrict" -> MissionCondition.OwnDistrict(c.enum("district"))
+                "escapeRoutes" -> MissionCondition.EscapeRoutes(c.int("count"))
+                "cashAtLeast" -> MissionCondition.CashAtLeast(c.int("amount"))
+                "buildingPoints" -> MissionCondition.BuildingPoints(c.int("count"))
+                "knownCards" -> MissionCondition.KnownCards(c.int("count"))
+                "suspicionAtMost" -> MissionCondition.SuspicionAtMost(c.int("max"))
+                "propertyCount" -> MissionCondition.PropertyCount(c.int("count"))
+                "intelAtLeast" -> MissionCondition.IntelAtLeast(c.int("count"))
+                "correctGuesses" -> MissionCondition.CorrectGuesses(c.int("count"))
+                else -> c.child("type").fail("syarat misi '$type' tidak dikenal")
+            }
+            MissionCard(
+                id = n.int("id"),
+                title = n.string("title"),
+                titleEn = n.string("titleEn"),
+                text = n.string("text"),
+                textEn = n.string("textEn"),
+                points = n.int("points"),
+                condition = condition,
+            )
+        }
 
     private fun parseBalance(text: String): Balance {
         val n = root(BALANCE, text)
@@ -238,6 +278,9 @@ object ContentLoader {
         val score = n.child("score")
         val family = n.child("familyMode")
         val quick = n.child("quickMode")
+        val clock = n.child("warClock")
+        val intel = n.child("intel")
+        val sus = n.child("suspicion")
         return Balance(
             startingMoney = n.int("startingMoney"),
             startSalary = n.int("startSalary"),
@@ -279,9 +322,33 @@ object ContentLoader {
                 hq = score.int("hq"),
                 correctGuess = score.int("correctGuess"),
                 burnedFactor = score.double("burnedFactor"),
+                missionsEnabled = score.boolean("missionsEnabled"),
             ),
             familyMode = FamilyModeRules(family.int("wrongAccusePenalty")),
             quickMode = QuickModeRules(quick.int("startProperties"), quick.int("startWarStep")),
+            warClock = WarClockRules(clock.enum("mode"), clock.double("passesPerStep")),
+            accuseUnlockStep = n.int("accuseUnlockStep"),
+            publicPasses = n.boolean("publicPasses"),
+            intel = IntelRules(
+                start = intel.int("start"),
+                max = intel.int("max"),
+                perStartPass = intel.int("perStartPass"),
+                suggestionCost = intel.int("suggestionCost"),
+                interrogationFree = intel.boolean("interrogationFree"),
+                decodeSuccess = intel.int("decodeSuccess"),
+                defectorBonus = intel.int("defectorBonus"),
+                accuseCost = intel.int("accuseCost"),
+                silenceCost = intel.int("silenceCost"),
+            ),
+            suspicion = SuspicionRules(
+                limit = sus.int("limit"),
+                blackMarket = sus.int("blackMarket"),
+                casinoWin = sus.int("casinoWin"),
+                decayPerStartPass = sus.int("decayPerStartPass"),
+                bribeRelief = sus.int("bribeRelief"),
+            ),
+            smugglerBlackMarketPrice = n.int("smugglerBlackMarketPrice"),
+            buildingRentPercent = n.int("buildingRentPercent"),
         )
     }
 }

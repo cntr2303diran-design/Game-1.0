@@ -2,59 +2,338 @@
   "version": 1,
   "deck": "TELEGRAM",
   "cards": [
-    { "id": 1,  "title": "Dana Operasi Tiba", "titleEn": "Operation Funds Arrive",
-      "text": "Terima 100 escudo.", "textEn": "Receive 100 escudos.",
-      "effects": [ { "type": "gainFromBank", "amount": 100 } ] },
-    { "id": 2,  "title": "Biaya Perbaikan Rumah Aman", "titleEn": "Safe House Repairs",
-      "text": "Bayar 25 per Rumah Aman dan 100 per Markas milikmu.", "textEn": "Pay 25 per Safe House and 100 per HQ you own.",
-      "effects": [ { "type": "payPerBuilding", "perSafeHouse": 25, "perHq": 100 } ] },
-    { "id": 3,  "title": "Telegram Terbuka", "titleEn": "Open Telegram",
+    {
+      "id": 1,
+      "title": "Dana Operasi Tiba",
+      "titleEn": "Operation Funds Arrive",
+      "text": "Terima 100 escudo.",
+      "textEn": "Receive 100 escudos.",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Biaya Perbaikan Rumah Aman",
+      "titleEn": "Safe House Repairs",
+      "text": "Bayar 25 per Rumah Aman dan 100 per Markas milikmu.",
+      "textEn": "Pay 25 per Safe House and 100 per HQ you own.",
+      "effects": [
+        {
+          "type": "payPerBuilding",
+          "perSafeHouse": 25,
+          "perHq": 100
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Telegram Terbuka",
+      "titleEn": "Open Telegram",
       "text": "Setiap pemain lain yang punya kartu Barang Curian wajib menunjukkan 1 (pilihannya) kepadamu secara rahasia.",
       "textEn": "Every other player holding a Stolen Item card must secretly show you 1 of their choice.",
-      "effects": [ { "type": "forceShowByType", "targets": "ALL_OTHERS", "cardType": "ITEM" } ] },
-    { "id": 4,  "title": "Rapat Agen", "titleEn": "Agents' Meeting",
-      "text": "Terima 20 escudo dari setiap pemain lain.", "textEn": "Collect 20 escudos from every other player.",
-      "effects": [ { "type": "collectFromEachOtherPlayer", "amount": 20 } ] },
-    { "id": 5,  "title": "Kode Dibakar", "titleEn": "Codes Burned",
-      "text": "Kamu tidak boleh mengajukan Dugaan pada giliran berikutnya.", "textEn": "You may not make a Suggestion on your next turn.",
-      "effects": [ { "type": "skipNextSuggestion" } ] },
-    { "id": 6,  "title": "Bonus Natal Kedutaan", "titleEn": "Embassy Christmas Bonus",
-      "text": "Terima 50 escudo.", "textEn": "Receive 50 escudos.",
-      "effects": [ { "type": "gainFromBank", "amount": 50 } ] },
-    { "id": 7,  "title": "Kembali ke Dermaga", "titleEn": "Back to the Pier",
-      "text": "Maju ke START dan terima gaji.", "textEn": "Advance to START and collect salary.",
-      "effects": [ { "type": "moveToTile", "tile": 0, "collectSalary": true } ] },
-    { "id": 8,  "title": "Laporan Intelijen", "titleEn": "Intelligence Report",
+      "effects": [
+        {
+          "type": "forceShowByType",
+          "targets": "ALL_OTHERS",
+          "cardType": "ITEM"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Rapat Agen",
+      "titleEn": "Agents' Meeting",
+      "text": "Terima 20 escudo dari setiap pemain lain.",
+      "textEn": "Collect 20 escudos from every other player.",
+      "effects": [
+        {
+          "type": "collectFromEachOtherPlayer",
+          "amount": 20
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Kode Dibakar",
+      "titleEn": "Codes Burned",
+      "text": "Kamu tidak boleh mengajukan Dugaan pada giliran berikutnya.",
+      "textEn": "You may not make a Suggestion on your next turn.",
+      "effects": [
+        {
+          "type": "skipNextSuggestion"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Bonus Natal Kedutaan",
+      "titleEn": "Embassy Christmas Bonus",
+      "text": "Terima 50 escudo.",
+      "textEn": "Receive 50 escudos.",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 50
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Kembali ke Dermaga",
+      "titleEn": "Back to the Pier",
+      "text": "Maju ke START dan terima gaji.",
+      "textEn": "Advance to START and collect salary.",
+      "effects": [
+        {
+          "type": "moveToTile",
+          "tile": 0,
+          "collectSalary": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Laporan Intelijen",
+      "titleEn": "Intelligence Report",
       "text": "Pemain di kananmu wajib menunjukkan 1 kartu Tersangka (pilihannya) kepadamu jika punya.",
       "textEn": "The player on your right must show you 1 Suspect card of their choice, if they have one.",
-      "effects": [ { "type": "forceShowByType", "targets": "RIGHT", "cardType": "SUSPECT" } ] },
-    { "id": 9,  "title": "Gaji Agen Terlambat", "titleEn": "Late Agent Wages",
-      "text": "Bayar 50 escudo ke bank.", "textEn": "Pay 50 escudos to the bank.",
-      "effects": [ { "type": "payToBank", "amount": 50 } ] },
-    { "id": 10, "title": "Warisan Kontak Lama", "titleEn": "An Old Contact's Legacy",
-      "text": "Terima 100 escudo.", "textEn": "Receive 100 escudos.",
-      "effects": [ { "type": "gainFromBank", "amount": 100 } ] },
-    { "id": 11, "title": "Biaya Penginapan", "titleEn": "Lodging Fees",
-      "text": "Bayar 50 ke Brankas Kasino.", "textEn": "Pay 50 to the Casino Vault.",
-      "effects": [ { "type": "payToVault", "amount": 50 } ] },
-    { "id": 12, "title": "Peta Kota Baru", "titleEn": "New City Map",
+      "effects": [
+        {
+          "type": "forceShowByType",
+          "targets": "RIGHT",
+          "cardType": "SUSPECT"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Gaji Agen Terlambat",
+      "titleEn": "Late Agent Wages",
+      "text": "Bayar 50 escudo ke bank.",
+      "textEn": "Pay 50 escudos to the bank.",
+      "effects": [
+        {
+          "type": "payToBank",
+          "amount": 50
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Warisan Kontak Lama",
+      "titleEn": "An Old Contact's Legacy",
+      "text": "Terima 100 escudo.",
+      "textEn": "Receive 100 escudos.",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 100
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Biaya Penginapan",
+      "titleEn": "Lodging Fees",
+      "text": "Bayar 50 ke Brankas Kasino.",
+      "textEn": "Pay 50 to the Casino Vault.",
+      "effects": [
+        {
+          "type": "payToVault",
+          "amount": 50
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Peta Kota Baru",
+      "titleEn": "New City Map",
       "text": "Pemain di kirimu wajib menunjukkan 1 kartu Lokasi (pilihannya) kepadamu jika punya.",
       "textEn": "The player on your left must show you 1 Location card of their choice, if they have one.",
-      "effects": [ { "type": "forceShowByType", "targets": "LEFT", "cardType": "LOCATION" } ] },
-    { "id": 13, "title": "Panggilan ke Kantor Telegraf", "titleEn": "Called to the Telegraph Office",
+      "effects": [
+        {
+          "type": "forceShowByType",
+          "targets": "LEFT",
+          "cardType": "LOCATION"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Panggilan ke Kantor Telegraf",
+      "titleEn": "Called to the Telegraph Office",
       "text": "Pindah ke Kantor Telegraf dan mainkan Dekode. Jika melewati START, terima gaji.",
       "textEn": "Move to the Telegraph Office and play Decode. Collect salary if you pass START.",
-      "effects": [ { "type": "moveToTile", "tile": 28, "collectSalary": true } ] },
-    { "id": 14, "title": "Kantong Diplomatik", "titleEn": "Diplomatic Pouch",
-      "text": "Terima Surat Bebas Diplomatik (simpan kartu ini).", "textEn": "Receive a Diplomatic Release Letter (keep this card).",
+      "effects": [
+        {
+          "type": "moveToTile",
+          "tile": 28,
+          "collectSalary": true
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Kantong Diplomatik",
+      "titleEn": "Diplomatic Pouch",
+      "text": "Terima Surat Bebas Diplomatik (simpan kartu ini).",
+      "textEn": "Receive a Diplomatic Release Letter (keep this card).",
       "keep": true,
-      "effects": [ { "type": "jailPass" } ] },
-    { "id": 15, "title": "Audit Keuangan", "titleEn": "Financial Audit",
-      "text": "Bayar 10% uang tunaimu (dibulatkan ke bawah) ke Brankas Kasino.", "textEn": "Pay 10% of your cash (rounded down) to the Casino Vault.",
-      "effects": [ { "type": "payPercentOfCashToVault", "percent": 10 } ] },
-    { "id": 16, "title": "Rekrut Informan", "titleEn": "Recruit an Informant",
+      "effects": [
+        {
+          "type": "jailPass"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Audit Keuangan",
+      "titleEn": "Financial Audit",
+      "text": "Bayar 10% uang tunaimu (dibulatkan ke bawah) ke Brankas Kasino.",
+      "textEn": "Pay 10% of your cash (rounded down) to the Casino Vault.",
+      "effects": [
+        {
+          "type": "payPercentOfCashToVault",
+          "percent": 10
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Rekrut Informan",
+      "titleEn": "Recruit an Informant",
       "text": "Terima 1 Dugaan tambahan dari petak mana pun dalam 3 giliranmu berikutnya (Lokasi bebas).",
       "textEn": "Gain 1 extra Suggestion from any tile within your next 3 turns (any Location).",
-      "effects": [ { "type": "extraSuggestion", "turns": 3 } ] }
+      "effects": [
+        {
+          "type": "extraSuggestion",
+          "turns": 3
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Bonus dari London",
+      "titleEn": "Bonus from London",
+      "text": "Terima 50 escudo dan 1 Intel.",
+      "textEn": "Receive 50 escudos and 1 Intel.",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 50
+        },
+        {
+          "type": "gainIntel",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Pengawasan Ketat",
+      "titleEn": "Close Surveillance",
+      "text": "Kecurigaan +1.",
+      "textEn": "Suspicion +1.",
+      "effects": [
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Amnesti Kota",
+      "titleEn": "City Amnesty",
+      "text": "Kecurigaan −2.",
+      "textEn": "Suspicion −2.",
+      "effects": [
+        {
+          "type": "reduceSuspicion",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Sumbangan Perang",
+      "titleEn": "War Donation",
+      "text": "Bayar 75 escudo ke bank.",
+      "textEn": "Pay 75 escudos to the bank.",
+      "effects": [
+        {
+          "type": "payToBank",
+          "amount": 75
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Kurir dari Bern",
+      "titleEn": "Courier from Bern",
+      "text": "Terima 1 Intel.",
+      "textEn": "Gain 1 Intel.",
+      "effects": [
+        {
+          "type": "gainIntel",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Berita Palsu",
+      "titleEn": "False Report",
+      "text": "Terima 10 dari setiap pemain lain; Kecurigaan +1.",
+      "textEn": "Collect 10 from every other player; Suspicion +1.",
+      "effects": [
+        {
+          "type": "collectFromEachOtherPlayer",
+          "amount": 10
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Dana Darurat",
+      "titleEn": "Emergency Funds",
+      "text": "Terima 150 escudo; Kecurigaan +1.",
+      "textEn": "Receive 150 escudos; Suspicion +1.",
+      "effects": [
+        {
+          "type": "gainFromBank",
+          "amount": 150
+        },
+        {
+          "type": "addSuspicion",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Sensor Pos",
+      "titleEn": "Postal Censorship",
+      "text": "Kehilangan 1 Intel; terima 50 escudo.",
+      "textEn": "Lose 1 Intel; receive 50 escudos.",
+      "effects": [
+        {
+          "type": "loseIntel",
+          "amount": 1
+        },
+        {
+          "type": "gainFromBank",
+          "amount": 50
+        }
+      ]
+    }
   ]
 }

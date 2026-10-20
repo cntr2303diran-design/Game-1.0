@@ -21,9 +21,13 @@ import id.diran.lisbon1944.engine.model.WinType
 
 internal fun Tx.suggest(p: PlayerId, offer: PendingDecision.SuggestionOffer, a: Action.Suggest) {
     val named = a.suspects + a.item + a.location
+    if (offer.source == SuggestionSource.INTERROGATION && !b.intel.interrogationFree) {
+        changeIntel(p, -b.intel.suggestionCost, "suggestion")
+    }
     if (offer.source == SuggestionSource.INVESTIGATE) {
         if (offer.fixedLocation != null && a.location == offer.fixedLocation) {
             s = s.copy(propertySuggestionUsed = true)
+            changeIntel(p, -b.intel.suggestionCost, "suggestion")
         } else if (player(p).freeSuggestions > 0) {
             upd(p) { it.copy(freeSuggestions = it.freeSuggestions - 1) }
         } else {
@@ -55,11 +59,17 @@ internal fun Tx.suggestionAsk(t: Task.SuggestionAsk) {
     val q = remaining.first()
     val match = player(q).hand.filter { it in t.named }
     if (match.isEmpty()) {
-        emit(E.SUGGESTION_PASS, "player" to q, "asker" to t.asker)
+        emit(E.SUGGESTION_PASS, "player" to q, "asker" to t.asker, visibleTo = if (b.publicPasses) null else listOf(q, t.asker))
         push(t.copy(remaining = remaining.drop(1)))
         return
     }
-    setPending(PendingDecision.RevealForSuggestion(q, t.asker, match, t.named))
+    setPending(PendingDecision.RevealForSuggestion(q, t.asker, match, t.named, remaining.drop(1)))
+}
+
+internal fun Tx.staySilent(p: PlayerId, pend: PendingDecision.RevealForSuggestion) {
+    changeIntel(p, -b.intel.silenceCost, "silence")
+    emit(E.SUGGESTION_SILENT, "player" to p, "asker" to pend.asker)
+    push(Task.SuggestionAsk(pend.asker, pend.named, pend.remaining))
 }
 
 internal fun Tx.revealForSuggestion(p: PlayerId, pend: PendingDecision.RevealForSuggestion, card: CardId) {
@@ -112,6 +122,7 @@ private fun Tx.decodeSuccess() {
     s = s.copy(decode = null)
     if (d.paid > 0) emit(E.MONEY, "from" to "escrow", "to" to "bank", "amount" to d.paid, "reason" to "decode")
     emit(E.DECODE_SUCCESS, "player" to d.asker, "operator" to d.operator, "number" to d.number)
+    changeIntel(d.asker, b.intel.decodeSuccess, "decode")
     if (player(d.operator).hand.isEmpty()) gainFromBank(d.asker, b.decodeEmptyHandReward, "decode")
     else peek(d.asker, d.operator, KnowledgeSource.DECODE, ownerSees = true)
 }
@@ -169,6 +180,7 @@ internal fun Tx.collectFinalGuesses(remaining: List<PlayerId>) {
 
 internal fun Tx.finishWar() {
     val scores = Scoring.compute(s, c)
+    scores.filter { it.mission > 0 }.forEach { emit(E.MISSION_COMPLETED, "player" to it.player, "mission" to player(it.player).missionId, "points" to it.mission) }
     emit(E.SCORES, "totals" to scores.joinToString(",") { "${it.player.value}:${it.total}" })
     val da = s.players.firstOrNull { it.isDoubleAgent && !it.bankrupt }
     if (s.config.doubleAgentVariant && da != null) {

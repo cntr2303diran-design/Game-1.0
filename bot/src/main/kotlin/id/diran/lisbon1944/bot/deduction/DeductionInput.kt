@@ -68,6 +68,14 @@ data class DeductionInput(
                         val who = p.player("player")
                         if (type != null && who != null) lacks.getOrPut(who) { HashSet() } += typeCards.getValue(type)
                     }
+                    GameEvents.EVIDENCE_RESHUFFLED -> {
+                        val type = p["category"]?.let { raw -> EvidenceType.entries.firstOrNull { it.name == raw } }
+                        if (type != null) {
+                            val cards = typeCards.getValue(type)
+                            lacks.values.forEach { it.removeAll(cards) }
+                            hasOne.values.forEach { sets -> sets.removeAll { set -> set.any { it in cards } } }
+                        }
+                    }
                     GameEvents.TRADE_ACCEPTED -> {
                         val moved = (p["giveEvidence"]?.toIntOrNull() ?: 0) + (p["takeEvidence"]?.toIntOrNull() ?: 0)
                         if (moved > 0) {

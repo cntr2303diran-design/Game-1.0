@@ -41,6 +41,47 @@ data class Balance(
     val score: ScoreRules,
     val familyMode: FamilyModeRules,
     val quickMode: QuickModeRules,
+    val warClock: WarClockRules,
+    /** Tuduhan Akhir baru boleh sejak langkah Jam Perang ini. */
+    val accuseUnlockStep: Int,
+    /** false = pemain yang "lewat" saat Dugaan hanya diketahui penanya. */
+    val publicPasses: Boolean,
+    val intel: IntelRules,
+    val suspicion: SuspicionRules,
+    val smugglerBlackMarketPrice: Int,
+    /** Skala global sewa bangunan distrik (persen), diterapkan terakhir sebelum pembulatan. */
+    val buildingRentPercent: Int,
+)
+
+@Serializable
+data class WarClockRules(
+    val mode: WarClockMode,
+    /** START_PASSES: rata-rata lintasan START (total semua pemain) per langkah Jam — durasi tak bergantung jumlah pemain. */
+    val passesPerStep: Double,
+)
+
+@Serializable
+data class IntelRules(
+    val start: Int,
+    val max: Int,
+    val perStartPass: Int,
+    val suggestionCost: Int,
+    val interrogationFree: Boolean,
+    val decodeSuccess: Int,
+    val defectorBonus: Int,
+    /** Intel yang dihabiskan untuk Tuduhan Akhir ("dossier lengkap"). */
+    val accuseCost: Int,
+    /** Intel untuk "Bungkam": menolak menunjukkan kartu saat Dugaan (penanya tidak mendapat apa-apa). */
+    val silenceCost: Int,
+)
+
+@Serializable
+data class SuspicionRules(
+    val limit: Int,
+    val blackMarket: Int,
+    val casinoWin: Int,
+    val decayPerStartPass: Int,
+    val bribeRelief: Int,
 )
 
 @Serializable
@@ -54,6 +95,7 @@ data class ScoreRules(
     val hq: Int,
     val correctGuess: Int,
     val burnedFactor: Double,
+    val missionsEnabled: Boolean,
 )
 
 @Serializable

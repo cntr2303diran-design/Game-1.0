@@ -70,6 +70,18 @@ object Invariants {
             }
         }
 
+        s.players.forEach { pl ->
+            val cap = b.intel.max + if (pl.faction == id.diran.lisbon1944.engine.model.Faction.ABWEHR_DEFECTOR) b.intel.defectorBonus else 0
+            if (pl.intel !in 0..cap) add("Intel ${pl.name} di luar 0..$cap: ${pl.intel}")
+            if (pl.suspicion !in 0 until b.suspicion.limit) add("Kecurigaan ${pl.name} di luar 0..${b.suspicion.limit - 1}: ${pl.suspicion}")
+        }
+        if (s.startPasses < 0) add("startPasses negatif: ${s.startPasses}")
+        if (s.config.clockMode == id.diran.lisbon1944.engine.model.WarClockMode.START_PASSES && s.warStep < 12 &&
+            s.startPasses >= s.config.passesNeededFor(s.warStep + 1)
+        ) {
+            add("Jam Perang tertinggal: ${s.startPasses} lintasan tetapi masih langkah ${s.warStep}")
+        }
+
         val knowledgeSize = s.knowledge.size
         if (knowledgeSize != s.players.size) add("Jumlah catatan pengetahuan $knowledgeSize ≠ jumlah pemain ${s.players.size}")
     }

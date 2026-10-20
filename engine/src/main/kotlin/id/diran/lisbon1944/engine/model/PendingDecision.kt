@@ -63,6 +63,8 @@ sealed interface PendingDecision {
         val allowedCards: List<CardId>,
         /** Kartu yang disebut dalam Dugaan (publik). */
         val named: List<CardId>,
+        /** Pemain yang belum ditanya setelah decider (untuk melanjutkan bila Bungkam). */
+        val remaining: List<PlayerId> = emptyList(),
     ) : PendingDecision
     @Serializable @SerialName("decodeOperatorPick") data class DecodeOperatorPick(override val decider: PlayerId, val asker: PlayerId) : PendingDecision
     @Serializable @SerialName("decodeContinue") data class DecodeContinue(override val decider: PlayerId, val extraRollsUsed: Int, val paid: Int) : PendingDecision

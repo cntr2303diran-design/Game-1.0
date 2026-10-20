@@ -91,6 +91,8 @@ internal object Legality {
                     me.isDoubleAgent && !me.doubleAgentLieUsed && a.cardId in me.hand -> null
                     else -> v(ViolationCode.CARD_NOT_ALLOWED, "Harus menunjukkan salah satu kartu yang disebut")
                 }
+                is A.StaySilent ->
+                    if (me.intel >= b.intel.silenceCost) null else v(ViolationCode.NOT_ENOUGH_INTEL, "Bungkam butuh ${b.intel.silenceCost} Intel")
                 else -> wrong(s, c, me, a, pend)
             }
             is PD.DecodeOperatorPick -> when (a) {
@@ -118,7 +120,7 @@ internal object Legality {
                 is A.BlackMarketSkip -> null
                 is A.BlackMarketBuy ->
                     if (a.targetPlayer !in pend.candidates) v(ViolationCode.INVALID_TARGET, "Pemain itu tidak punya kartu")
-                    else funds(me, b.blackMarketPrice)
+                    else funds(me, if (me.faction == Faction.SPANISH_SMUGGLER) b.smugglerBlackMarketPrice else b.blackMarketPrice)
                 else -> wrong(s, c, me, a, pend)
             }
             is PD.BlackMarketPickCard -> when (a) {
@@ -237,6 +239,12 @@ internal object Legality {
 
     private fun accuseCheck(s: GameState, c: GameContent, me: PlayerState, a: A.Accuse, cost: Int): RuleViolation? {
         if (me.burned && s.config.mode != GameMode.FAMILY) return v(ViolationCode.ALREADY_BURNED, "Pemain Terbakar tidak boleh menuduh lagi")
+        if (s.warStep < s.config.balance.accuseUnlockStep) {
+            return v(ViolationCode.ACCUSE_LOCKED, "Tuduhan Akhir baru dibuka sejak langkah Jam Perang ${s.config.balance.accuseUnlockStep}")
+        }
+        if (me.intel < s.config.balance.intel.accuseCost) {
+            return v(ViolationCode.NOT_ENOUGH_INTEL, "Tuduhan Akhir butuh ${s.config.balance.intel.accuseCost} Intel")
+        }
         guessCheck(c, a.suspect, a.location, a.item)?.let { return it }
         return funds(me, cost)
     }
@@ -299,7 +307,7 @@ internal object Legality {
             is PD.AuctionBid -> listOf<A>(A.PassBid(p)) + amounts(pend.minBid, me.money, b.auctionStep).map { A.Bid(p, it) }
             is PD.RentChoice -> listOf<A>(A.PayRentMoney(p)) + me.hand.map { A.PayRentInfo(p, it) }
             is PD.SuggestionOffer -> listOf<A>(A.SkipSuggestion(p)) + suggestions(c, p, me)
-            is PD.RevealForSuggestion -> me.hand.map { A.RevealCard(p, it) }
+            is PD.RevealForSuggestion -> me.hand.map { A.RevealCard(p, it) } + A.StaySilent(p)
             is PD.DecodeOperatorPick -> (1..6).map { A.DecodePickNumber(p, it) }
             is PD.DecodeContinue -> listOf(A.DecodeStop(p), A.DecodeRollExtra(p))
             is PD.CasinoChoice -> listOf<A>(A.CasinoSkip(p)) + amounts(pend.minBet, minOf(pend.maxBet, me.money), pend.step).map { A.CasinoBet(p, it) }
