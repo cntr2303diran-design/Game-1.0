@@ -41,10 +41,14 @@ class FullGameUiTest {
     }
 
     private fun waitFor(ms: Long, what: String, cond: () -> Boolean) {
-        try {
-            rule.waitUntil(ms) { cond() }
-        } catch (e: androidx.compose.ui.test.ComposeTimeoutException) {
-            throw AssertionError("Timeout menunggu $what — ${state()}", e)
+        // Looper utama Robolectric (mode PAUSED) harus dijalankan manual agar coroutine Main berlanjut.
+        val end = System.currentTimeMillis() + ms
+        while (true) {
+            org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idle()
+            rule.waitForIdle()
+            if (cond()) return
+            if (System.currentTimeMillis() > end) throw AssertionError("Timeout menunggu $what — ${state()}")
+            Thread.sleep(2)
         }
     }
 
