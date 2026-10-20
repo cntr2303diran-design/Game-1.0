@@ -13,8 +13,8 @@ Desain asli: **@DIRAN**.
 |-------|-----|--------|
 | 1 | Proyek 4 modul, model data, konten JSON, loader + validator | ✅ selesai |
 | 2 | Mesin aturan (`reduce`, `legalActions`, `viewFor`, skor) | ✅ selesai |
-| 3 | Bot Easy / Normal / Hard + DeductionTracker | ⏳ berikutnya |
-| 4 | Simulasi keseimbangan (`:sim`) | — |
+| 3 | Bot Easy / Normal / Hard + DeductionTracker | ✅ selesai |
+| 4 | Simulasi keseimbangan (`:sim`) | ⏳ berikutnya |
 | 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | — |
 | 6 | UI lengkap, audio, aksesibilitas, tutorial | — |
 | 7 | Poles & rilis | — |
@@ -72,6 +72,18 @@ when (val r = engine.reduce(state, legal.first())) {
 }
 val save = GameJson.encode(state)               // save/replay deterministik
 ```
+
+## Bot
+
+```kotlin
+val bots = Bots(engine.content)                 // parameter dari bot/src/main/resources/bot-config.json
+val bot = bots.create(BotLevel.HARD)
+val action = bot.decide(engine.viewFor(state, me), engine.legalActions(state, me), rng)
+val result = BotMatch(engine).play(config, seed) // satu permainan penuh antar-bot
+```
+
+Bot hanya menerima `PlayerView`. `DeductionTracker` menghitung peluang tiap kombinasi amplop dari
+pengetahuan sendiri dan log publik.
 
 ## Mengubah keseimbangan & kartu
 

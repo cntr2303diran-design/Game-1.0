@@ -41,3 +41,17 @@ nilai konfigurasi.
 | D26 | Kebangkrutan | Bangunan dijual ke bank setengah harga dasar; uang & properti (status gadai tetap) & Surat Bebas pindah ke kreditur pemain; kreditur bank/Brankas → properti dilelang (Surat Bebas kembali ke tumpukan). Kartu Bukti terbuka untuk semua. Tersisa 1 pemain aktif → kemenangan ekonomi. | 6.8. |
 | D27 | Kasino & tuduhan keluarga | Kasino/Pasar Gelap tidak muncul di Mode Keluarga; tuduhan salah di Mode Keluarga: denda min(uang, 200) ke Brankas tanpa Terbakar. | BAGIAN 7 Mode Keluarga. |
 | D28 | Keluar Penjara dengan kembar | Langsung jalan sesuai dadu, tanpa giliran tambahan. Gagal kembar ke-3 → wajib bayar 50 lalu jalan. | Aturan Monopoli klasik yang dirujuk 6.3. |
+
+## Tahap 3 — Bot
+
+| # | Topik | Keputusan | Alasan |
+|---|-------|-----------|--------|
+| D29 | Perhitungan deduksi | `DeductionTracker` menghitung **eksak** jumlah pembagian kartu yang konsisten untuk tiap 216 kombinasi amplop (memo atas sisa kartu), bukan sampling. | Lebih akurat daripada sampling dan tetap cepat (6 pemain < 1 detik di JVM); hasil deterministik untuk test. |
+| D30 | Sumber constraint | Pasti: tangan sendiri, Kedutaan, `knowledge` view, tangan pemain bangkrut, amplop setelah Terbakar. "Tidak punya": lewat Dugaan, `no_card` bertipe. "Punya salah satu": menunjukkan kartu untuk Dugaan orang lain, Telegram Terbuka / Laporan Intelijen / Peta Kota. Perdagangan kartu Bukti menghapus constraint lama kedua pihak. | Semua dibaca dari `PlayerView` (log publik + pengetahuan sendiri). |
+| D31 | Constraint bertentangan | Bila tak ada pembagian yang konsisten (kebohongan Agen Ganda, catatan basi), constraint dilonggarkan bertahap: buang "punya salah satu" → buang "tidak punya" → buang catatan selain tangan sendiri & Kedutaan. | Bot tidak boleh macet karena satu data salah. |
+| D32 | Deduksi Normal vs Hard | Normal & Easy memakai deduksi dasar (tanpa "punya salah satu"); Hard memakai semua constraint. | "Deduksi dasar" vs "DeductionTracker penuh" (BAGIAN 10). |
+| D33 | Dugaan maksimal-informasi | Per kategori pilih kartu dengan p(1−p) terbesar (p = peluang di amplop); kategori yang sudah terpecahkan → sebut kartu sendiri. NKVD memakai 2 tersangka saat ≥ 3 kandidat tersangka. | Heuristik informasi yang murah dan tidak membocorkan jawaban yang sudah diketahui. |
+| D34 | Ambang tuduhan | Easy ≥ 0,95; Normal ≥ 0,9; Hard ≥ 0,9, ≥ 0,6 sejak Jam Perang 11, ≥ 0,4 bila skor proyeksi < 75% pemimpin sejak Jam Perang 11 (langkah 12 langsung mengakhiri permainan, jadi "di langkah 12" dibaca sebagai giliran terakhir sebelum Front #12). | BAGIAN 10. |
+| D35 | Kebohongan Agen Ganda | Bot Agen Ganda berbohong sekali saat penanya adalah pemain dengan skor proyeksi tertinggi; Dugaannya sendiri menyebut kartu dengan peluang amplop terendah. | "arahkan menjauh dari jawaban, bohong saat paling merugikan pemain terdepan". |
+| D36 | Perdagangan bot | Bot tidak mengajukan tawaran; hanya menjawab. Nilai = selisih uang + harga properti (+ bonus melengkapi distrik) ± 60 per kartu Bukti ± 50 per Surat Bebas; Hard menerima bila nilai naik. | Cukup untuk lawan manusia; tawaran proaktif bisa ditambah setelah simulasi Tahap 4. |
+| D37 | Easy | Dengan peluang `randomness` memilih aksi legal acak berbobot (kecuali tuduhan, tebakan akhir, utang, dan fase Bisnis), sisanya aturan sederhana. | "acak berbobot di antara aksi legal". |
