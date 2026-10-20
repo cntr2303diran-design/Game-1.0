@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lisbon 1944</string>
+    <string name="title_main">LISBON 1944</string>
+    <string name="subtitle_main">Kota Para Mata-Mata</string>
+    <string name="stamp_secret">RAHASIA</string>
+    <string name="dossier_title">Berkas Konten</string>
+    <string name="dossier_loading">Membuka berkas…</string>
+    <string name="dossier_error">Konten rusak: %1$s</string>
+    <string name="dossier_board">Papan: %1$d petak · %2$d bangunan · %3$d jalur</string>
+    <string name="dossier_evidence">Kartu Bukti: %1$d · kombinasi amplop: %2$d</string>
+    <string name="dossier_fronts">Kartu Front: %1$d (%2$s → %3$s)</string>
+    <string name="dossier_decks">Sandi: %1$d · Telegram: %2$d</string>
+    <string name="dossier_factions">Faksi</string>
+    <string name="dossier_stage">Tahap 1 — fondasi data siap. Papan permainan hadir di Tahap 5.</string>
+    <string name="cd_faction_badge">Lencana faksi %1$s</string>
+</resources>

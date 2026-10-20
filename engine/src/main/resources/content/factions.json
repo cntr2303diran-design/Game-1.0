@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "factions": [
+    {
+      "id": "MI6",
+      "name": "Dinas Rahasia Inggris",
+      "nameEn": "British Secret Service",
+      "organization": "MI6",
+      "accentColor": "#3A5A8C",
+      "badgeIcon": "badge_mi6_lion_key",
+      "ability": "PEEK_RANDOM_CARD",
+      "oneShot": true,
+      "abilityText": "Sekali per game: lihat 1 kartu Bukti acak dari tangan pemain pilihanmu. Pemain lain hanya tahu kamu memakai kemampuan pada pemain itu.",
+      "abilityTextEn": "Once per game: look at 1 random Evidence card from a chosen player's hand. Others only learn that you used the ability on that player."
+    },
+    {
+      "id": "OSS",
+      "name": "Kantor Layanan Strategis",
+      "nameEn": "Office of Strategic Services",
+      "organization": "OSS",
+      "accentColor": "#7A8B99",
+      "badgeIcon": "badge_oss_eagle_compass",
+      "ability": "START_SALARY_BONUS",
+      "oneShot": false,
+      "abilityText": "Pasif: menerima 250 escudo (bukan 200) setiap melewati START.",
+      "abilityTextEn": "Passive: collect 250 escudos (not 200) whenever passing START."
+    },
+    {
+      "id": "NKVD",
+      "name": "Komisariat Rakyat Soviet",
+      "nameEn": "Soviet People's Commissariat",
+      "organization": "NKVD",
+      "accentColor": "#9C2A2A",
+      "badgeIcon": "badge_nkvd_star_shield",
+      "ability": "DOUBLE_SUSPECT",
+      "oneShot": true,
+      "abilityText": "Sekali per game: saat mengajukan Dugaan, sebut 2 Tersangka sekaligus.",
+      "abilityTextEn": "Once per game: name 2 Suspects at once when making a Suggestion."
+    },
+    {
+      "id": "RESISTANCE",
+      "name": "Perlawanan Prancis",
+      "nameEn": "French Resistance",
+      "organization": "Résistance",
+      "accentColor": "#2F5D50",
+      "badgeIcon": "badge_resistance_cross_flame",
+      "ability": "FREE_JAIL_EXIT",
+      "oneShot": true,
+      "abilityText": "Sekali per game: keluar dari Penjara tanpa membayar.",
+      "abilityTextEn": "Once per game: leave Prison without paying."
+    },
+    {
+      "id": "PORTUGAL_TRADER",
+      "name": "Pedagang Netral Portugal",
+      "nameEn": "Neutral Portuguese Trader",
+      "organization": "Casa Comercial",
+      "accentColor": "#B07D2B",
+      "badgeIcon": "badge_trader_caravel_scale",
+      "ability": "PURCHASE_DISCOUNT",
+      "oneShot": false,
+      "abilityText": "Pasif: diskon 10% saat membeli properti dengan harga tertera (bukan lelang), dibulatkan ke bawah.",
+      "abilityTextEn": "Passive: 10% discount when buying property at list price (not auctions), rounded down."
+    },
+    {
+      "id": "SWISS_JOURNALIST",
+      "name": "Jurnalis Swiss",
+      "nameEn": "Swiss Journalist",
+      "organization": "Agence de Presse",
+      "accentColor": "#C8C2B4",
+      "badgeIcon": "badge_journalist_quill_cross",
+      "ability": "TELEGRAM_DRAW_TWO",
+      "oneShot": false,
+      "abilityText": "Pasif: saat mengambil Kartu Telegram, ambil 2, jalankan 1, dan taruh yang lain di bawah tumpukan.",
+      "abilityTextEn": "Passive: when drawing a Telegram card, draw 2, resolve 1 and put the other on the bottom of the deck."
+    }
+  ]
+}

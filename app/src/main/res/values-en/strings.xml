@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lisbon 1944</string>
+    <string name="title_main">LISBON 1944</string>
+    <string name="subtitle_main">City of Spies</string>
+    <string name="stamp_secret">SECRET</string>
+    <string name="dossier_title">Content Dossier</string>
+    <string name="dossier_loading">Opening the file…</string>
+    <string name="dossier_error">Content is corrupt: %1$s</string>
+    <string name="dossier_board">Board: %1$d tiles · %2$d buildings · %3$d routes</string>
+    <string name="dossier_evidence">Evidence cards: %1$d · envelope combinations: %2$d</string>
+    <string name="dossier_fronts">Front cards: %1$d (%2$s → %3$s)</string>
+    <string name="dossier_decks">Cipher: %1$d · Telegram: %2$d</string>
+    <string name="dossier_factions">Factions</string>
+    <string name="dossier_stage">Stage 1 — data foundation ready. The game board arrives in Stage 5.</string>
+    <string name="cd_faction_badge">%1$s faction badge</string>
+</resources>
