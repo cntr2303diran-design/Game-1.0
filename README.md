@@ -15,8 +15,8 @@ Desain asli: **@DIRAN**.
 | 2 | Mesin aturan (`reduce`, `legalActions`, `viewFor`, skor) | ✅ selesai |
 | 3 | Bot Easy / Normal / Hard + DeductionTracker | ✅ selesai |
 | 4 | Simulasi keseimbangan (`:sim`) | ✅ selesai |
-| 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | ⏳ berikutnya |
-| 6 | UI lengkap, audio, aksesibilitas, tutorial | — |
+| 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | ✅ selesai |
+| 6 | UI lengkap, audio, aksesibilitas, tutorial | ⏳ berikutnya |
 | 7 | Poles & rilis | — |
 
 ## Aturan tambahan (versi 4 jam)
@@ -38,7 +38,13 @@ Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), ver
 
 Buku aturan lengkap untuk pemain: [docs/ATURAN.md](docs/ATURAN.md).
 
-Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D66).
+Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D74).
+
+## Memainkan di Android
+
+Menu → **Permainan Baru**: pilih 3–6 pemain, tiap kursi Manusia atau Bot (Mudah/Normal/Sulit), faksi, mode, Agen Ganda (5–6 pemain), dan seed. Beberapa manusia bergantian di satu perangkat; layar privasi muncul tiap kali perangkat harus berpindah tangan. Permainan tersimpan otomatis di 3 slot dan bisa dilanjutkan dari menu.
+
+Layar permainan: HUD (giliran, uang, Intel, Kecurigaan, Jam Perang), papan (cubit untuk zoom, ketuk petak untuk detail), dan tab **Aksi · Agen · Catatan · Kota · Log**. Catatan detektif terisi otomatis dari semua kartu yang pernah kamu lihat.
 
 ## Struktur modul
 
@@ -46,6 +52,7 @@ Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D66).
 :engine  mesin aturan — Kotlin murni, tanpa dependensi Android
 :bot     AI pemain komputer — hanya melihat PlayerView
 :sim     CLI JVM untuk validasi konten & simulasi ribuan game
+:session sesi permainan (pass-and-play, bot, simpan/muat, teks log id/en) — Kotlin murni
 :app     aplikasi Android (Compose)
 ```
 
@@ -70,7 +77,7 @@ engine/src/main/resources/content/
 Butuh JDK 17+ dan Android SDK (untuk `:app`).
 
 ```bash
-./gradlew :engine:test :bot:test :sim:test   # semua test JVM
+./gradlew :engine:test :bot:test :sim:test :session:test   # semua test JVM
 ./gradlew :sim:run --args="--validate"       # validasi konten & ringkasan
 ./gradlew :sim:run --args="--games 1000 --players 4 --bots hard,hard,normal,normal --seed 42 --out report.csv"
 ./gradlew :app:assembleDebug                 # APK debug

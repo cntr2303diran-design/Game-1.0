@@ -56,6 +56,27 @@ jobs:
           set -o pipefail
           ./gradlew :app:assembleDebug --stacktrace 2>&1 | tee build-app.log
 
+      - name: Test UI (Robolectric — permainan penuh dirender)
+        run: |
+          set -o pipefail
+          ./gradlew :app:testDebugUnitTest --stacktrace 2>&1 | tee build-uitest.log
+
+      - name: Ringkasan test UI
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          t = f = 0
+          for path in glob.glob('app/build/test-results/testDebugUnitTest/*.xml'):
+              root = ET.parse(path).getroot()
+              t += int(root.get('tests', 0)); f += int(root.get('failures', 0)) + int(root.get('errors', 0))
+              for tc in root.iter('testcase'):
+                  for x in list(tc.findall('failure')) + list(tc.findall('error')):
+                      msg = (x.get('message') or x.text or '').replace('\n', ' ')[:800]
+                      print(f"::error title={tc.get('classname')}::{tc.get('name')} — {msg}")
+          print(f"::notice title=Test :app::{t} test, {f} gagal")
+          PY
+
       - name: Anotasi error kompilasi
         if: failure()
         run: |

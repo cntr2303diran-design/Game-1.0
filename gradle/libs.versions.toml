@@ -15,6 +15,9 @@ junitPlatform = "1.11.4"
 kotest = "5.9.1"
 androidxJunit = "1.2.1"
 espresso = "3.6.1"
+robolectric = "4.14.1"
+junit4 = "4.13.2"
+androidxTestCore = "1.6.1"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -45,6 +48,9 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
 androidx-test-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 
 [plugins]

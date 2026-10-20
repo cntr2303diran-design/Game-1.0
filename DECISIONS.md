@@ -139,3 +139,16 @@ Hasil simulasi setelah ekspansi (seed 42):
 | 4 pemain | 1000 | 238 mnt | 55% | 16% | 29% | 1,12× | 0,68 | ✓ |
 | 5 pemain | 300 | 254 mnt | 22% | 23% | 54% | 1,31× | 0,73 | hampir (faksi) |
 | 6 pemain | 300 | 258 mnt | 19% | 16% | 66% | 1,20× | 0,72 | ✓ |
+
+## Tahap 5 — UI inti
+
+| # | Keputusan | Alasan |
+|---|-----------|--------|
+| D67 | Modul baru **`:session`** (Kotlin murni): `GameSession` (pass-and-play, giliran bot, simpan/muat), `LogText`/`Names`/`ActionText` (teks id/en dari konten), `Choices` (mengelompokkan aksi legal jadi menu), `BoardGeometry`. | Semua logika layar bisa diuji di JVM tanpa Android; app hanya merender. |
+| D68 | UI hanya membaca `PlayerView` + daftar aksi legal. Semua tombol berasal dari `legalActions`; satu-satunya aksi yang disusun UI adalah Tawaran Dagang, dan itu diperiksa `checkAction` sebelum dikirim. Panel "Semua aksi" menjamin setiap aksi legal selalu bisa dipilih. | Tidak mungkin UI menampilkan aksi ilegal atau membocorkan rahasia. |
+| D69 | **Layar privasi**: bila keputusan pindah ke manusia lain (≥ 2 manusia), layar tertutup sampai "Saya siap". Sebelum ada yang membuka layar, sudut pandang tidak pernah memakai pemain yang sedang ditunggu. Dengan 1 manusia tidak ada layar privasi. | Pass-and-play aman tanpa mengintip. |
+| D70 | **Simpan otomatis** ke 3 slot (JSON `{"version":1,"revealedTo":…,"state":…}` + file meta). Disimpan setelah tiap aksi manusia dan tiap 40 langkah bot; muat memeriksa versi dan invariant. "Lanjutkan" = slot terbaru yang belum selesai. | Permainan 4 jam harus bisa dijeda kapan saja; dites termasuk muat di tengah lelang. |
+| D71 | Bot berjalan di `Dispatchers.Default` di balik `Mutex`, dengan jeda per langkah (Lambat 900 / Normal 380 / Cepat 120 / Instan 0 ms) dan tombol "Percepat bot". Langkah bot memakai RNG turunan seed + nomor aksi, sehingga permainan yang dimuat ulang berlanjut identik. | UI tetap responsif saat bot Sulit berpikir; deterministik. |
+| D72 | Papan: tata letak 11×11 persegi (START kanan bawah, searah jarum jam), petak sebagai composable biasa (bukan Canvas) agar teks & ketukan mudah; cubit untuk zoom, geser untuk pan, ketuk petak untuk detail di tengah papan. Hanya API Compose stabil (tanpa FlowRow/ModalBottomSheet/TopAppBar eksperimental). | Bisa dibangun di CI tanpa opt-in eksperimental. |
+| D73 | Teks UI statis di `strings.xml` (id + en) dibangkitkan dari satu tabel (`tools/strings.py`) agar kunci kedua bahasa selalu sama; teks konten (petak, kartu, Front, log) dari JSON lewat `Names`. | Lokalisasi konsisten. |
+| D74 | Mode tanpa manusia diperbolehkan (menonton bot). | Demo & uji keseimbangan visual. |
