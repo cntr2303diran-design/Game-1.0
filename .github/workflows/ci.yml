@@ -34,6 +34,14 @@ jobs:
               echo "::notice title=Test :$m::$t test, $f gagal, $s dilewati"
             fi
           done
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for path in glob.glob('*/build/test-results/test/*.xml'):
+              for tc in ET.parse(path).getroot().iter('testcase'):
+                  for f in list(tc.findall('failure')) + list(tc.findall('error')):
+                      msg = (f.get('message') or f.text or '').replace('\n', ' ')[:600]
+                      print(f"::error title={tc.get('classname')}::{tc.get('name')} — {msg}")
+          PY
 
       - name: Validasi konten lewat CLI simulasi
         run: ./gradlew :sim:run --args="--validate"
