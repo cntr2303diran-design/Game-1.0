@@ -100,7 +100,7 @@ def answer_any_decision():
         if (n.get("text") or "").strip():
             print("Memilih aksi:", n.get("text"))
             tap(n)
-            return True
+            return (n.get("text") or "").strip()
     return False
 
 
@@ -138,18 +138,23 @@ def main():
 
     # Sebelum giliran pertama, pemain bisa harus memutuskan hal lain (mis. memilih angka sandi saat bot
     # mencoba Dekode). Pakai daftar "Semua aksi" untuk memilih aksi pertama sampai tombol Lempar Dadu muncul.
-    roll = None
+    rolled = False
     end = time.time() + 300
-    while time.time() < end:
+    while time.time() < end and not rolled:
         roll = find(r"(ROLL DICE|LEMPAR DADU)")
         if roll is not None:
+            shot("e05-game")
+            tap(roll)
+            rolled = True
             break
-        if not answer_any_decision():
+        picked = answer_any_decision()
+        if picked and re.fullmatch(r"(Roll dice|Lempar dadu)", picked, re.I):
+            rolled = True
+        elif not picked:
             time.sleep(2)
-    if roll is None:
-        roll = wait(r"(ROLL DICE|LEMPAR DADU)", "lempar dadu", timeout=5)
-    shot("e05-game")
-    tap(roll)
+    if not rolled:
+        wait(r"(ROLL DICE|LEMPAR DADU)", "lempar dadu", timeout=5)
+    print("Dadu dilempar oleh pemain manusia.")
     time.sleep(2.5)
     shot("e06-after-roll")
 
