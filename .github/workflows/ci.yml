@@ -158,7 +158,7 @@ jobs:
   # Uji APK RILIS (R8) di emulator Android 12 + tangkapan layar perangkat sungguhan.
   device:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -184,13 +184,16 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
-          target: google_apis
+          target: aosp_atd
           arch: x86_64
+          channel: canary
           disable-animations: false
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
           script: |
-            adb install -r app/build/outputs/apk/release/app-release.apk
-            adb install -r app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
-            adb shell am instrument -w -e class id.diran.lisbon1944.ReleaseSmokeTest id.diran.lisbon1944.test/androidx.test.runner.AndroidJUnitRunner | tee instrument.log
+            timeout 180 adb install -r app/build/outputs/apk/release/app-release.apk
+            timeout 180 adb install -r app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+            timeout 900 adb shell am instrument -w -e class id.diran.lisbon1944.ReleaseSmokeTest id.diran.lisbon1944.test/androidx.test.runner.AndroidJUnitRunner | tee instrument.log
             mkdir -p emu-shots && adb pull /sdcard/Android/data/id.diran.lisbon1944/files/shots/. emu-shots/ || true
             adb shell input keyevent KEYCODE_HOME && sleep 3 && adb shell input swipe 540 2000 540 500 400 && sleep 3 && adb exec-out screencap -p > emu-shots/e09-app-drawer.png || true
             adb logcat -d -s AndroidRuntime:E > emu-shots/crash-log.txt || true
