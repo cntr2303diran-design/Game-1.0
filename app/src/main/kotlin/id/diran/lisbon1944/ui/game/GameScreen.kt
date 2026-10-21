@@ -118,6 +118,7 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             val cfg = LocalConfiguration.current
             val landscape = cfg.screenWidthDp > cfg.screenHeightDp
             val bigText = LocalDensity.current.fontScale > 1.15f
+            val boxHeight = maxHeight
             val panel: @Composable (Modifier) -> Unit = { m ->
                 Column(m.background(LisbonColors.InkSoft)) {
                     vm.tutorial?.let { t -> if (!t.dismissed) TutorialCoach(vm, ui) }
@@ -160,7 +161,7 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             } else {
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     // Saat teks besar, papan dibatasi agar panel aksi tetap punya ruang.
-                    BoardView(ui.view, content, names, Modifier.fillMaxWidth().heightIn(max = maxHeight * 0.55f), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
+                    BoardView(ui.view, content, names, Modifier.fillMaxWidth().heightIn(max = boxHeight * 0.55f), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxWidth())
                 }
             }
