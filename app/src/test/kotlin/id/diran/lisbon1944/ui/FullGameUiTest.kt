@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import id.diran.lisbon1944.bot.Bots
 import id.diran.lisbon1944.engine.model.BotLevel
@@ -134,9 +135,9 @@ class FullGameUiTest {
         val vm = setUp()
         vm.go(Screen.SETTINGS)
         waitFor(10_000, "pengaturan") { vm.screen == Screen.SETTINGS }
-        rule.onAllNodesWithText("Colour-blind mode", substring = true)[0].performClick()
+        rule.onAllNodesWithText("Colour-blind mode", substring = true)[0].performScrollTo().performClick()
         waitFor(5_000, "mode buta warna") { vm.settings.colorBlind }
-        rule.onAllNodesWithText("200%", substring = true)[0].performClick()
+        rule.onAllNodesWithText("200%", substring = true)[0].performScrollTo().performClick()
         waitFor(5_000, "teks 200%") { vm.settings.textScale == 2f }
         vm.updateSettings(vm.settings.copy(textScale = 1f))
 
@@ -146,7 +147,7 @@ class FullGameUiTest {
         rule.waitForIdle()
         val cells = rule.onAllNodesWithContentDescription(": —", substring = true)
         assertTrue("sel catatan kosong harus ada", cells.fetchSemanticsNodes().isNotEmpty())
-        cells[0].performClick()
+        cells[0].performScrollTo().performClick()
         waitFor(5_000, "tanda ✓") { vm.marks().values.any { it == "✓" } }
     }
 }
