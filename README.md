@@ -16,8 +16,8 @@ Desain asli: **@DIRAN**.
 | 3 | Bot Easy / Normal / Hard + DeductionTracker | ✅ selesai |
 | 4 | Simulasi keseimbangan (`:sim`) | ✅ selesai |
 | 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | ✅ selesai |
-| 6 | UI lengkap, audio, aksesibilitas, tutorial | ⏳ berikutnya |
-| 7 | Poles & rilis | — |
+| 6 | UI lengkap, audio, aksesibilitas, tutorial | ✅ selesai |
+| 7 | Poles & rilis | ⏳ berikutnya |
 
 ## Aturan tambahan (versi 4 jam)
 
@@ -38,7 +38,7 @@ Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), ver
 
 Buku aturan lengkap untuk pemain: [docs/ATURAN.md](docs/ATURAN.md).
 
-Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D74).
+Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D87).
 
 ## Memainkan di Android
 
@@ -81,11 +81,19 @@ Butuh JDK 17+ dan Android SDK (untuk `:app`).
 ./gradlew :sim:run --args="--validate"       # validasi konten & ringkasan
 ./gradlew :sim:run --args="--games 1000 --players 4 --bots hard,hard,normal,normal --seed 42 --out report.csv"
 ./gradlew :app:assembleDebug                 # APK debug
+./gradlew :app:assembleRelease               # APK rilis (R8)
+./gradlew :app:testDebugUnitTest             # test UI Robolectric + tangkapan layar (app/build/screenshots)
 ```
 
 Setiap push ke `main` menjalankan GitHub Actions (`.github/workflows/ci.yml`): test, validasi
 konten, dan build APK debug. APK bisa diunduh dari tab **Actions → artifact
 `lisbon1944-debug-apk`**.
+
+## Tampilan & audio
+
+- Tangkapan layar terbaru tiap build ada di cabang [`screenshots`](../../tree/screenshots).
+- Font: Playfair Display SC, Special Elite, Courier Prime — lisensi di [`docs/licenses/`](docs/licenses).
+- Semua suara & musik dibuat prosedural oleh `session/src/main/kotlin/.../audio/Synth.kt` (tanpa aset pihak ketiga).
 
 ## Memakai mesin aturan
 

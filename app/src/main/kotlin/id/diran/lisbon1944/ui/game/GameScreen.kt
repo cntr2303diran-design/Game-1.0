@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.platform.LocalConfiguration
@@ -119,6 +119,7 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             val landscape = cfg.screenWidthDp > cfg.screenHeightDp
             val bigText = LocalDensity.current.fontScale > 1.15f
             val boxHeight = maxHeight
+            val boxWidth = maxWidth
             val panel: @Composable (Modifier) -> Unit = { m ->
                 Column(m.background(LisbonColors.InkSoft)) {
                     vm.tutorial?.let { t -> if (!t.dismissed) TutorialCoach(vm, ui) }
@@ -161,7 +162,7 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             } else {
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                     // Saat teks besar, papan dibatasi agar panel aksi tetap punya ruang.
-                    BoardView(ui.view, content, names, Modifier.fillMaxWidth().heightIn(max = boxHeight * 0.55f), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
+                    BoardView(ui.view, content, names, Modifier.size(minOf(boxWidth, boxHeight * 0.6f)), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxWidth())
                 }
             }

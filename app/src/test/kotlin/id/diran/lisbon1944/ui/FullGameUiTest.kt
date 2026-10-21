@@ -2,6 +2,7 @@ package id.diran.lisbon1944.ui
 
 import android.app.Application
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
@@ -126,5 +127,26 @@ class FullGameUiTest {
         assertTrue("layar privasi harus muncul pada pass-and-play", privacy > 0)
         
         assertEquals(true, vm.ui?.isOver)
+    }
+
+    @Test
+    fun settingsAndNotebookMarksRespondToTaps() {
+        val vm = setUp()
+        vm.go(Screen.SETTINGS)
+        waitFor(10_000, "pengaturan") { vm.screen == Screen.SETTINGS }
+        rule.onAllNodesWithText("Colour-blind mode", substring = true)[0].performClick()
+        waitFor(5_000, "mode buta warna") { vm.settings.colorBlind }
+        rule.onAllNodesWithText("200%", substring = true)[0].performClick()
+        waitFor(5_000, "teks 200%") { vm.settings.textScale == 2f }
+        vm.updateSettings(vm.settings.copy(textScale = 1f))
+
+        vm.newGame(config(vm, humans = 1, n = 3), seed = 4)
+        waitFor(60_000, "giliran manusia") { vm.ui?.let { !it.isBotTurn && it.view.myDecision != null } == true }
+        rule.onAllNodesWithText("Notes", substring = true)[0].performClick()
+        rule.waitForIdle()
+        val cells = rule.onAllNodesWithContentDescription(": —", substring = true)
+        assertTrue("sel catatan kosong harus ada", cells.fetchSemanticsNodes().isNotEmpty())
+        cells[0].performClick()
+        waitFor(5_000, "tanda ✓") { vm.marks().values.any { it == "✓" } }
     }
 }
