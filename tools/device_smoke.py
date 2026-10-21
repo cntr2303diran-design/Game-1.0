@@ -62,7 +62,9 @@ def wait(pattern, what, timeout=90):
         time.sleep(1.5)
     shot("fail-" + re.sub(r"\W+", "-", what))
     crash = adb("logcat", "-d", "-s", "AndroidRuntime:E", check=False)
-    raise SystemExit(f"GAGAL: tidak menemukan '{what}' ({pattern}).\n{crash[-3000:]}")
+    seen = [(n.get("text") or n.get("content-desc") or "").strip() for n in nodes()]
+    seen = [t for t in seen if t][:60]
+    raise SystemExit(f"GAGAL: tidak menemukan '{what}' ({pattern}). Terlihat: {seen} {crash[-2000:]}")
 
 
 def tap(n):
