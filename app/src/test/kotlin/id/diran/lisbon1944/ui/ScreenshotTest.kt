@@ -2,11 +2,10 @@ package id.diran.lisbon1944.ui
 
 import android.app.Application
 import android.graphics.Bitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.junit4.createComposeRule
+import android.graphics.Canvas
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import id.diran.lisbon1944.bot.Bots
@@ -37,7 +36,7 @@ import java.io.FileOutputStream
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xxhdpi")
 class ScreenshotTest {
     @get:Rule
-    val rule = createComposeRule()
+    val rule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var vm: AppViewModel
     private val dir = File("build/screenshots").apply { mkdirs() }
@@ -63,7 +62,10 @@ class ScreenshotTest {
 
     private fun shot(name: String) {
         idle()
-        val bmp = rule.onRoot().captureToImage().asAndroidBitmap()
+        // View.draw ke Bitmap (captureToImage menunggu frame yang tidak pernah datang di looper PAUSED).
+        val view = rule.activity.window.decorView.rootView
+        val bmp = Bitmap.createBitmap(view.width.coerceAtLeast(1), view.height.coerceAtLeast(1), Bitmap.Config.ARGB_8888)
+        view.draw(Canvas(bmp))
         FileOutputStream(File(dir, "$name.png")).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
