@@ -187,6 +187,7 @@ jobs:
           target: aosp_atd
           arch: x86_64
           channel: canary
+          profile: pixel_6
           disable-animations: false
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot

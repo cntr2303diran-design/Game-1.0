@@ -71,12 +71,19 @@ def tap(n):
     time.sleep(1.2)
 
 
+def screen_size():
+    m = re.search(r"(\d+)x(\d+)", adb("shell", "wm", "size", check=False))
+    return (int(m.group(1)), int(m.group(2))) if m else (1080, 2400)
+
+
 def swipe_up():
-    adb("shell", "input", "swipe", "540", "1700", "540", "600", "300")
+    w, h = screen_size()
+    adb("shell", "input", "swipe", str(w // 2), str(int(h * 0.75)), str(w // 2), str(int(h * 0.3)), "300")
     time.sleep(1)
 
 
 def main():
+    print("Layar:", screen_size())
     adb("logcat", "-c", check=False)
     adb("shell", "am", "force-stop", PKG, check=False)
     adb("shell", "monkey", "-p", PKG, "-c", "android.intent.category.LAUNCHER", "1")
