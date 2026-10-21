@@ -170,3 +170,14 @@ Hasil simulasi setelah ekspansi (seed 42):
 | D85 | **Mode Kampanye** di Setup: tiap kursi mulai dengan 2 properti di distrik berbeda, ditentukan seed (`CampaignPreset`). | Mode keempat BAGIAN 12.2 no. 3 kini bisa dipilih. |
 | D86 | **Tangkapan layar otomatis**: test Robolectric dengan grafik native merender 30+ layar (termasuk setiap jenis keputusan, teks 200%, buta warna, lanskap, bahasa Indonesia) dan CI menerbitkannya ke cabang `screenshots`. | Tinjauan visual tanpa emulator; beberapa bug tata letak ditemukan & diperbaiki dari sini. |
 | D87 | `:app:assembleRelease` (R8 + aturan ProGuard untuk kotlinx.serialization dan model) dibangun di CI; APK rilis diunggah sebagai artefak. | Syarat selesai Tahap 6. |
+
+## Tahap 7 — Poles & rilis
+
+| # | Keputusan | Alasan |
+|---|-----------|--------|
+| D88 | **Ikon adaptif** orisinal: amplop Map Merah dengan segel lilin emas berbintang dan stempel miring, di atas tinta; lapisan **monokrom** untuk ikon bertema Android 13+. Semua vektor (tanpa PNG). | BAGIAN 15 Tahap 7; tajam di semua kepadatan layar. |
+| D89 | **Splash Android 12+** via `core-splashscreen` (juga backport ke 8–11): latar tinta + amplop; ditahan sampai konten JSON selesai dimuat & divalidasi, lalu splash sinematik dalam aplikasi (bisa diketuk untuk lewat). | Tidak ada layar kosong saat memuat. |
+| D90 | **Pulih setelah proses mati**: slot aktif disimpan di `SavedStateHandle`; ViewModel baru langsung memuat slot itu dan kembali ke keputusan terakhir. Dites dengan Robolectric. | BAGIAN 12.1. |
+| D91 | **Signing rilis** dari variabel lingkungan / secret CI; tanpa kunci → kunci debug agar APK rilis tetap bisa dipasang. `bundleRelease` (AAB) ikut dibangun. | Kunci tidak pernah masuk repo. |
+| D92 | **Uji APK rilis di emulator** (Android 12, job `device`): ditulis Java + UiAutomator agar tidak bergantung pada kelas aplikasi yang diobfuskasi R8; memverifikasi aturan ProGuard untuk kotlinx.serialization lewat simpan & muat sungguhan. `isShrinkResources` aktif. | Menangkap kerusakan khusus R8 yang tidak terlihat di build debug. |
+| D93 | Versi **1.0.0** (versionCode 10). | Rilis pertama yang lengkap. |

@@ -17,7 +17,7 @@ Desain asli: **@DIRAN**.
 | 4 | Simulasi keseimbangan (`:sim`) | ✅ selesai |
 | 5 | UI inti (papan, HUD, sewa, lelang, privasi, save) | ✅ selesai |
 | 6 | UI lengkap, audio, aksesibilitas, tutorial | ✅ selesai |
-| 7 | Poles & rilis | ⏳ berikutnya |
+| 7 | Poles & rilis (ikon, splash 12+, R8, signing, uji rilis di emulator) | ✅ selesai |
 
 ## Aturan tambahan (versi 4 jam)
 
@@ -38,7 +38,7 @@ Selain aturan dasar (ekonomi properti, misteri amplop, Jam Perang 12 Front), ver
 
 Buku aturan lengkap untuk pemain: [docs/ATURAN.md](docs/ATURAN.md).
 
-Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D87).
+Detail dan alasan tiap keputusan: [DECISIONS.md](DECISIONS.md) (D38–D93).
 
 ## Memainkan di Android
 
@@ -52,7 +52,7 @@ Layar permainan: HUD (giliran, uang, Intel, Kecurigaan, Jam Perang), papan (cubi
 :engine  mesin aturan — Kotlin murni, tanpa dependensi Android
 :bot     AI pemain komputer — hanya melihat PlayerView
 :sim     CLI JVM untuk validasi konten & simulasi ribuan game
-:session sesi permainan (pass-and-play, bot, simpan/muat, teks log id/en) — Kotlin murni
+:session sesi permainan (pass-and-play, bot, simpan/muat, teks log id/en, isyarat animasi, audio prosedural) — Kotlin murni
 :app     aplikasi Android (Compose)
 ```
 
@@ -72,6 +72,17 @@ engine/src/main/resources/content/
 └── cipher.json telegram.json  balance.json  missions.json  tactics.json  operations.json
 ```
 
+## Unduh & pasang
+
+Setiap push ke `main` menghasilkan dua APK di tab **Actions** (build terbaru → *Artifacts*):
+
+- `lisbon1944-release-apk` — APK rilis (R8). Tanpa kunci rilis di secret repo, APK ditandatangani kunci debug
+  (bisa dipasang langsung, tetapi bukan untuk Play Store).
+- `lisbon1944-debug-apk` — APK debug.
+
+Android 8.0 (API 26) ke atas. Pasang dengan membuka berkas APK di ponsel (izinkan "sumber tidak dikenal") atau
+`adb install app-release.apk`.
+
 ## Cara build
 
 Butuh JDK 17+ dan Android SDK (untuk `:app`).
@@ -85,9 +96,22 @@ Butuh JDK 17+ dan Android SDK (untuk `:app`).
 ./gradlew :app:testDebugUnitTest             # test UI Robolectric + tangkapan layar (app/build/screenshots)
 ```
 
-Setiap push ke `main` menjalankan GitHub Actions (`.github/workflows/ci.yml`): test, validasi
-konten, dan build APK debug. APK bisa diunduh dari tab **Actions → artifact
-`lisbon1944-debug-apk`**.
+Setiap push ke `main` menjalankan GitHub Actions (`.github/workflows/ci.yml`), dua job paralel:
+
+- **build** — test engine/bot/sim/session (JVM), validasi konten, simulasi asap 20 game, APK debug & rilis,
+  test UI Robolectric (permainan penuh dirender, pulih setelah proses mati, pengaturan, catatan), tangkapan
+  layar ke cabang `screenshots`.
+- **device** — APK rilis (R8) dipasang di emulator Android 12; uji UiAutomator memainkan: splash → menu →
+  permainan baru → lempar dadu → kembali ke menu (simpan) → Lanjutkan (muat). Tangkapan layar perangkat ke
+  cabang `screenshots-device`.
+
+### Kunci rilis (Play Store)
+
+Buat keystore sekali (`keytool -genkeypair -v -keystore lisbon.jks -alias lisbon -keyalg RSA -keysize 4096 -validity 10000`),
+lalu isi secret repo: `LISBON_KEYSTORE_BASE64` (`base64 -w0 lisbon.jks`), `LISBON_KEYSTORE_PASSWORD`,
+`LISBON_KEY_ALIAS`, `LISBON_KEY_PASSWORD`. CI mendekode keystore ke berkas dan Gradle memakainya otomatis
+(lihat `signingConfigs` di `app/build.gradle.kts`). Secara lokal cukup set variabel lingkungan yang sama dengan
+`LISBON_KEYSTORE_FILE` menunjuk ke berkas keystore. `./gradlew :app:bundleRelease` menghasilkan AAB untuk Play Store.
 
 ## Tampilan & audio
 
