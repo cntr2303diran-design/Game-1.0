@@ -80,8 +80,10 @@ jobs:
               t += int(root.get('tests', 0)); f += int(root.get('failures', 0)) + int(root.get('errors', 0))
               for tc in root.iter('testcase'):
                   for x in list(tc.findall('failure')) + list(tc.findall('error')):
-                      msg = (x.get('message') or x.text or '').replace('\n', ' ')[:800]
-                      print(f"::error title={tc.get('classname')}::{tc.get('name')} — {msg}")
+                      msg = (x.get('message') or '').replace('\n', ' ')[:500]
+                      lines = [l.strip() for l in (x.text or '').splitlines()]
+                      stack = [l for l in lines if l.startswith('at ') and ('lisbon1944' in l or 'compose' in l)][:12]
+                      print(f"::error title={tc.get('classname')}::{tc.get('name')} — {msg} || " + ' | '.join(stack))
           print(f"::notice title=Test :app::{t} test, {f} gagal")
           PY
 
