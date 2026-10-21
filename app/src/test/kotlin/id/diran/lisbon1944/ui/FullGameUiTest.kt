@@ -147,7 +147,9 @@ class FullGameUiTest {
         rule.waitForIdle()
         val cells = rule.onAllNodesWithContentDescription(": —", substring = true)
         assertTrue("sel catatan kosong harus ada", cells.fetchSemanticsNodes().isNotEmpty())
+        val desc = cells[0].fetchSemanticsNode().config.toString()
+        val before = vm.notesVersion
         cells[0].performScrollTo().performClick()
-        waitFor(5_000, "tanda ✓") { vm.marks().values.any { it == "✓" } }
+        waitFor(5_000, "tanda ✓ (node=$desc, versi $before→${vm.notesVersion}, marks=${vm.marks()})") { vm.marks().values.any { it == "✓" } }
     }
 }
