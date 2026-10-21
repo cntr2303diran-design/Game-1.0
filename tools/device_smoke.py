@@ -84,6 +84,26 @@ def swipe_up():
     time.sleep(1)
 
 
+def answer_any_decision():
+    """Bila ada keputusan menunggu, buka 'Semua aksi' dan pilih aksi pertama. True bila sesuatu diketuk."""
+    all_btn = find(r"(All actions|Semua aksi) \(\d+\).*")
+    if all_btn is None:
+        return False
+    if "▼" in (all_btn.get("text") or ""):
+        tap(all_btn)
+    ns = nodes()
+    texts = [(n.get("text") or "").strip() for n in ns]
+    idx = next((i for i, t in enumerate(texts) if re.fullmatch(r"(All actions|Semua aksi) \(\d+\).*", t, re.I)), None)
+    if idx is None:
+        return False
+    for n in ns[idx + 1:]:
+        if (n.get("text") or "").strip():
+            print("Memilih aksi:", n.get("text"))
+            tap(n)
+            return True
+    return False
+
+
 def main():
     print("Layar:", screen_size())
     adb("logcat", "-c", check=False)
@@ -116,7 +136,18 @@ def main():
         shot("e04-intro")
         tap(skip)
 
-    roll = wait(r"(ROLL DICE|LEMPAR DADU)", "lempar dadu", timeout=240)
+    # Sebelum giliran pertama, pemain bisa harus memutuskan hal lain (mis. memilih angka sandi saat bot
+    # mencoba Dekode). Pakai daftar "Semua aksi" untuk memilih aksi pertama sampai tombol Lempar Dadu muncul.
+    roll = None
+    end = time.time() + 300
+    while time.time() < end:
+        roll = find(r"(ROLL DICE|LEMPAR DADU)")
+        if roll is not None:
+            break
+        if not answer_any_decision():
+            time.sleep(2)
+    if roll is None:
+        roll = wait(r"(ROLL DICE|LEMPAR DADU)", "lempar dadu", timeout=5)
     shot("e05-game")
     tap(roll)
     time.sleep(2.5)
