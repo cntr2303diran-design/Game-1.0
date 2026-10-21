@@ -101,9 +101,10 @@ Setiap push ke `main` menjalankan GitHub Actions (`.github/workflows/ci.yml`), d
 - **build** — test engine/bot/sim/session (JVM), validasi konten, simulasi asap 20 game, APK debug & rilis,
   test UI Robolectric (permainan penuh dirender, pulih setelah proses mati, pengaturan, catatan), tangkapan
   layar ke cabang `screenshots`.
-- **device** — APK rilis (R8) dipasang di emulator Android 12; uji UiAutomator memainkan: splash → menu →
-  permainan baru → lempar dadu → kembali ke menu (simpan) → Lanjutkan (muat). Tangkapan layar perangkat ke
-  cabang `screenshots-device`.
+- **device** — APK rilis (R8) dipasang di emulator Android 12 dan dikendalikan dari luar oleh
+  `tools/device_smoke.py` (adb + `uiautomator dump`): splash → menu → permainan baru → menjawab keputusan apa pun
+  sampai lempar dadu → kembali ke menu (simpan) → Lanjutkan (muat). Gagal bila teks yang diharapkan tak muncul
+  atau aplikasi crash.
 
 ### Kunci rilis (Play Store)
 
