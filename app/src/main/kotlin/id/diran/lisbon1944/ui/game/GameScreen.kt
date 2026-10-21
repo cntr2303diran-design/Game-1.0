@@ -47,6 +47,7 @@ import id.diran.lisbon1944.ui.common.PrimaryButton
 import id.diran.lisbon1944.ui.common.SecondaryButton
 import id.diran.lisbon1944.ui.common.Stamp
 import id.diran.lisbon1944.ui.common.ToggleTag
+import id.diran.lisbon1944.ui.common.WrapGrid
 import id.diran.lisbon1944.ui.screens.Backdrop
 import id.diran.lisbon1944.ui.screens.ErrorDialog
 import id.diran.lisbon1944.ui.theme.LisbonColors
@@ -122,24 +123,21 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             val panel: @Composable (Modifier) -> Unit = { m ->
                 Column(m.background(LisbonColors.InkSoft)) {
                     vm.tutorial?.let { t -> if (!t.dismissed) TutorialCoach(vm, ui) }
-                    Row(
-                        Modifier.fillMaxWidth().then(if (bigText) Modifier.horizontalScroll(rememberScrollState()) else Modifier).padding(6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    ) {
-                        val tabs = listOf(
-                            Tab.ACTION to stringResource(R.string.tab_action) + if (myTurnBadge) " •" else "",
-                            Tab.PLAYERS to stringResource(R.string.tab_players),
-                            Tab.NOTES to stringResource(R.string.tab_notes),
-                            Tab.PROPS to stringResource(R.string.tab_props),
-                            Tab.CARDS to stringResource(R.string.tab_city),
-                            Tab.LOG to stringResource(R.string.tab_log),
-                        )
-                        tabs.forEach { (t, label) ->
-                            ToggleTag(label, tab == t, {
-                                tab = t
-                                vm.uiSound(Sfx.CARD)
-                            }, if (bigText) Modifier else Modifier.weight(1f), dense = true)
-                        }
+                    val tabs = listOf(
+                        Tab.ACTION to stringResource(R.string.tab_action) + if (myTurnBadge) " •" else "",
+                        Tab.PLAYERS to stringResource(R.string.tab_players),
+                        Tab.NOTES to stringResource(R.string.tab_notes),
+                        Tab.PROPS to stringResource(R.string.tab_props),
+                        Tab.CARDS to stringResource(R.string.tab_city),
+                        Tab.LOG to stringResource(R.string.tab_log),
+                    )
+                    // Kolom sempit (lanskap) atau teks besar: tab dalam 2 baris × 3 agar label tidak terpotong.
+                    val columns = if (landscape || bigText) 3 else 6
+                    WrapGrid(tabs, columns, Modifier.fillMaxWidth().padding(6.dp)) { (t, label), m ->
+                        ToggleTag(label, tab == t, {
+                            tab = t
+                            vm.uiSound(Sfx.CARD)
+                        }, m, dense = true)
                     }
                     Box(Modifier.fillMaxSize()) {
                         when (tab) {

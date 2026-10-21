@@ -255,7 +255,7 @@ private fun BoardViewInner(
                 BoardCenter(view, content, names, selected, factions, wide = cellW > cellH * 1.15f, onClear = { selected = null })
             }
         }
-        Row(Modifier.align(Alignment.TopEnd).padding(top = cellH + 6.dp, end = cellW + 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.align(Alignment.BottomStart).padding(bottom = cellH + 6.dp, start = cellW + 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (scale > 1.01f) {
                 MiniChip(if (follow) "◎" else "○", stringResource(R.string.board_follow)) { follow = !follow }
                 MiniChip("⤢", stringResource(R.string.board_reset)) {

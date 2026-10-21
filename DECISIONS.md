@@ -181,3 +181,10 @@ Hasil simulasi setelah ekspansi (seed 42):
 | D91 | **Signing rilis** dari variabel lingkungan / secret CI; tanpa kunci → kunci debug agar APK rilis tetap bisa dipasang. `bundleRelease` (AAB) ikut dibangun. | Kunci tidak pernah masuk repo. |
 | D92 | **Uji APK rilis di emulator** (Android 12 ATD, job `device`): skrip kotak-hitam `tools/device_smoke.py` mengendalikan APK rilis lewat adb + `uiautomator dump` dari luar proses aplikasi (uji instrumentasi di dalam proses bentrok dengan kelas Kotlin yang sudah diobfuskasi R8). Memverifikasi aturan ProGuard untuk kotlinx.serialization lewat simpan & muat sungguhan. `isShrinkResources` aktif. | Menangkap kerusakan khusus R8 yang tidak terlihat di build debug. |
 | D93 | Versi **1.0.0** (versionCode 10). | Rilis pertama yang lengkap. |
+
+## Versi 1.1 — tampilan karakter & papan besar
+
+| # | Keputusan | Alasan |
+|---|-----------|--------|
+| D94 | **Potret karakter** orisinal digambar dengan Canvas: 8 agen faksi (topi bowler MI6, fedora & mantel OSS, ushanka NKVD, baret Perlawanan, topi jerami & pipa Pedagang, kacamata & kamera Jurnalis, topi lebar & janggut Penyelundup, topi pet & bekas luka Pembelot) dan 6 tersangka. Dipakai untuk pion di papan, HUD, daftar agen, Catatan, pemilih Dugaan, dan kartu. | Permintaan pemain: karakter punya gambar sendiri, bukan titik warna. Tanpa aset berlisensi. |
+| D95 | **Papan memenuhi layar**: petak boleh persegi panjang. Lanskap: papan setinggi layar & ±62% lebar, HUD + panel di kolom kanan; potret: papan selebar layar. Teks petak, ikon, dan pion diskalakan menurut ukuran petak. Tengah papan menampilkan daftar agen (potret, nama, uang). | Papan sebelumnya kecil di kiri pada ponsel lanskap. |
