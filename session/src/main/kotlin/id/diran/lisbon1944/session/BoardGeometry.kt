@@ -29,3 +29,21 @@ object BoardGeometry {
         if (steps >= 0) (1..steps).map { (from + it) % TILES }
         else (1..-steps).map { ((from - it) % TILES + TILES) % TILES }
 }
+
+/** Mode Kampanye: tiap kursi memulai dengan 2 properti acak (berbeda distrik) — ditentukan seed agar bisa dibagikan. */
+object CampaignPreset {
+    fun deal(content: id.diran.lisbon1944.engine.content.GameContent, players: Int, seed: Long): Map<Int, Int> {
+        val rnd = kotlin.random.Random(seed xor 0xCA_4A16L)
+        val props = content.properties.shuffled(rnd).toMutableList()
+        val out = LinkedHashMap<Int, Int>()
+        for (seat in 0 until players) {
+            repeat(2) {
+                val taken = out.filterValues { it == seat }.keys.map { t -> content.properties.first { p -> p.index == t }.district }
+                val pick = props.firstOrNull { it.district !in taken } ?: return@repeat
+                props.remove(pick)
+                out[pick.index] = seat
+            }
+        }
+        return out
+    }
+}

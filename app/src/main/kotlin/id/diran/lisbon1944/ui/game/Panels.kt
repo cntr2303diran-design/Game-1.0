@@ -1,6 +1,14 @@
 package id.diran.lisbon1944.ui.game
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.diran.lisbon1944.R
 import id.diran.lisbon1944.engine.content.GameContent
-import id.diran.lisbon1944.engine.model.EvidenceType
-import id.diran.lisbon1944.engine.model.Holder
+import id.diran.lisbon1944.engine.model.Faction
+import id.diran.lisbon1944.engine.model.TurnPhase
 import id.diran.lisbon1944.session.Lang
 import id.diran.lisbon1944.session.LogKind
 import id.diran.lisbon1944.session.LogLine
@@ -41,7 +49,7 @@ import id.diran.lisbon1944.ui.common.PipMeter
 import id.diran.lisbon1944.ui.common.SectionTitle
 import id.diran.lisbon1944.ui.theme.LisbonColors
 
-/** Bilah atas: giliran siapa, uang, Intel, Kecurigaan, Jam Perang. */
+/** Bilah atas: avatar faksi aktif, escudo, Intel, Kecurigaan, fase giliran (stepper), Jam Perang. */
 @Composable
 fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Modifier) {
     val v = ui.view
@@ -49,32 +57,84 @@ fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Mod
     val b = content.balance
     val turnName = ui.playerNames[v.currentPlayer.value].orEmpty()
     val factions = seatFactions(v)
+    val turnFaction = factions[v.currentPlayer.value] ?: me.faction
     Column(modifier.fillMaxWidth().background(LisbonColors.Ink).padding(horizontal = 10.dp, vertical = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Dot(Palette.faction(content, factions[v.currentPlayer.value] ?: me.faction), 10)
-            Spacer(Modifier.width(6.dp))
-            Text(
-                stringResource(R.string.hud_turn, turnName, v.roundNumber),
-                color = LisbonColors.OldPaper,
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-            )
+            FactionBadge(content, turnFaction, 30)
+            Spacer(Modifier.width(8.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.hud_turn, turnName, v.roundNumber),
+                    color = LisbonColors.OldPaper,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    maxLines = 1,
+                )
+                PhaseStepper(v.phase)
+            }
             Text(stringResource(R.string.hud_war_clock, v.warStep), color = LisbonColors.StreetLamp, fontSize = 12.sp)
         }
+        Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Dot(Palette.faction(content, me.faction), 10)
             Spacer(Modifier.width(6.dp))
-            Text("${me.name} · ${names.money(me.money)}", color = LisbonColors.OldPaper, fontSize = 12.sp, modifier = Modifier.weight(1f), maxLines = 1)
-            Text(stringResource(R.string.hud_intel, me.intel), color = LisbonColors.StreetLamp, fontSize = 12.sp)
+            Text(me.name, color = LisbonColors.OldPaper, fontSize = 12.sp, maxLines = 1, modifier = Modifier.weight(1f))
+            Text(names.money(me.money), color = LisbonColors.StreetLamp, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(10.dp))
+            Text(stringResource(R.string.hud_intel, me.intel), color = LisbonColors.OldPaper, fontSize = 12.sp)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.hud_suspicion), color = LisbonColors.PaperShade, fontSize = 11.sp)
-            Spacer(Modifier.width(3.dp))
-            PipMeter(me.suspicion, b.suspicion.limit, LisbonColors.FolderRed, pip = 6)
+            PipMeter(me.suspicion, b.suspicion.limit, LisbonColors.FolderRed, pip = 6, modifier = Modifier.semantics {
+                contentDescription = "Suspicion ${me.suspicion}/${b.suspicion.limit}"
+            })
         }
         ui.log.lastOrNull()?.let {
-            Text(it.text, color = LisbonColors.PaperShade, fontSize = 11.sp, maxLines = 1)
+            Text(it.text, color = LisbonColors.PaperMuted, fontSize = 11.sp, maxLines = 1)
+        }
+    }
+}
+
+/** Lencana faksi orisinal: medali bulat warna aksen dengan inisial organisasi. */
+@Composable
+fun FactionBadge(content: GameContent, f: Faction, size: Int) {
+    val color = Palette.faction(content, f)
+    val org = content.faction(f).organization
+    Box(
+        Modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(Brush.radialGradient(listOf(color, color.copy(alpha = 0.6f), LisbonColors.Ink)))
+            .border(2.dp, LisbonColors.StreetLamp, CircleShape)
+            .semantics { contentDescription = org },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(org.take(4), color = LisbonColors.OldPaper, fontSize = (size / 3.2).sp, fontWeight = FontWeight.Black, maxLines = 1)
+    }
+}
+
+@Composable
+private fun PhaseStepper(phase: TurnPhase) {
+    val steps = listOf(
+        TurnPhase.MOVE to stringResource(R.string.phase_move),
+        TurnPhase.TILE_ACTION to stringResource(R.string.phase_action),
+        TurnPhase.INVESTIGATE to stringResource(R.string.phase_investigate),
+        TurnPhase.BUSINESS to stringResource(R.string.phase_business),
+    )
+    val idx = steps.indexOfFirst { it.first == phase }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        steps.forEachIndexed { i, (_, label) ->
+            val active = i == idx
+            val done = idx >= 0 && i < idx
+            Text(
+                label,
+                fontSize = 10.sp,
+                color = when {
+                    active -> LisbonColors.StreetLamp
+                    done -> LisbonColors.PaperMuted
+                    else -> LisbonColors.PaperMuted.copy(alpha = 0.55f)
+                },
+                fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+            )
+            if (i < steps.lastIndex) Text(" › ", fontSize = 10.sp, color = LisbonColors.PaperMuted)
         }
     }
 }
@@ -149,60 +209,6 @@ fun PlayersPanel(ui: GameUi, content: GameContent, names: Names) {
     }
 }
 
-/** Buku catatan detektif: status tiap kartu Bukti menurut pengetahuan pemain. */
-@Composable
-fun NotebookPanel(ui: GameUi, content: GameContent, names: Names) {
-    val v = ui.view
-    val facts = v.knowledge.groupBy { it.cardId }
-    LazyColumn(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        item {
-            Text(stringResource(R.string.notes_hint), style = MaterialTheme.typography.bodyMedium, color = LisbonColors.PaperShade)
-        }
-        v.revealedEnvelope?.let { env ->
-            item {
-                PaperCard(Modifier.fillMaxWidth(), accent = LisbonColors.FolderRed) {
-                    SectionTitle(stringResource(R.string.notes_envelope))
-                    Text(env.cards.joinToString(" · ") { names.card(it) }, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-        for (type in EvidenceType.entries) {
-            val cards = content.evidenceOfType(type)
-            val unknown = cards.count { facts[it.id].isNullOrEmpty() }
-            item(key = type.name) {
-                PaperCard(Modifier.fillMaxWidth(), accent = Palette.evidence(type)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(names.type(type).uppercase(), color = Palette.evidence(type), fontWeight = FontWeight.Black, modifier = Modifier.weight(1f))
-                        Text(stringResource(R.string.notes_unknown, unknown), fontSize = 12.sp, color = LisbonColors.InkSoft)
-                    }
-                    cards.forEach { card ->
-                        val known = facts[card.id].orEmpty()
-                        val holder = known.firstOrNull()?.holder
-                        val (label, color) = when {
-                            card.id in v.me.hand -> stringResource(R.string.notes_mine) to LisbonColors.Olive
-                            holder is Holder.Player -> (ui.playerNames[holder.id.value] ?: "?") to LisbonColors.TagusBlue
-                            holder is Holder.Embassy -> stringResource(R.string.notes_embassy) to LisbonColors.TagusBlue
-                            holder is Holder.Envelope -> stringResource(R.string.notes_in_envelope) to LisbonColors.FolderRed
-                            else -> "—" to LisbonColors.FolderRed
-                        }
-                        val struck = holder != null && holder !is Holder.Envelope || card.id in v.me.hand
-                        Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                (if (struck) "✓ " else "◻ ") + names.card(card.id),
-                                modifier = Modifier.weight(1f),
-                                color = if (struck) LisbonColors.InkSoft.copy(alpha = 0.7f) else LisbonColors.Ink,
-                                fontWeight = if (struck) FontWeight.Normal else FontWeight.Bold,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            Text(label, color = color, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 /** Kota: Front aktif, Misi, Operasi, Taktik di tangan, kartu simpanan. */
 @Composable
 fun CityPanel(ui: GameUi, content: GameContent, names: Names) {
@@ -219,6 +225,27 @@ fun CityPanel(ui: GameUi, content: GameContent, names: Names) {
                 Spacer(Modifier.height(4.dp))
                 PipMeter(v.warStep, 12, LisbonColors.FolderRed)
                 v.passesToNextStep?.let { Text(stringResource(R.string.hud_passes, it), style = MaterialTheme.typography.bodyMedium, color = LisbonColors.InkSoft) }
+            }
+        }
+        item {
+            PaperCard(Modifier.fillMaxWidth(), accent = LisbonColors.TagusBlue) {
+                SectionTitle(stringResource(R.string.cards_hand), color = LisbonColors.TagusBlue)
+                if (v.me.hand.isEmpty()) Text("—")
+                v.me.hand.forEach { c ->
+                    val card = runCatching { content.evidence(c) }.getOrNull()
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+                        card?.let { Dot(Palette.evidence(it.type), 10) }
+                        Spacer(Modifier.width(6.dp))
+                        Column {
+                            Text(names.card(c), fontWeight = FontWeight.Bold)
+                            card?.let { Text(if (names.lang == Lang.EN) it.blurbEn else it.blurb, style = MaterialTheme.typography.bodySmall, color = LisbonColors.InkMuted) }
+                        }
+                    }
+                }
+                if (v.embassyCards.isNotEmpty()) {
+                    SectionTitle(stringResource(R.string.notes_embassy))
+                    Text(v.embassyCards.joinToString(" · ") { names.card(it) }, style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
         v.me.missionId?.let { m ->

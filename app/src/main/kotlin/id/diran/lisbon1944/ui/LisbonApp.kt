@@ -15,7 +15,9 @@ import id.diran.lisbon1944.R
 import id.diran.lisbon1944.ui.common.SecondaryButton
 import id.diran.lisbon1944.ui.dossier.ContentDossierScreen
 import id.diran.lisbon1944.ui.game.GameScreen
+import id.diran.lisbon1944.ui.screens.ArchiveScreen
 import id.diran.lisbon1944.ui.screens.EndScreen
+import id.diran.lisbon1944.ui.screens.HowToScreen
 import id.diran.lisbon1944.ui.screens.LoadScreen
 import id.diran.lisbon1944.ui.screens.MenuScreen
 import id.diran.lisbon1944.ui.screens.SettingsScreen
@@ -49,6 +51,14 @@ fun LisbonApp(vm: AppViewModel) {
                     Modifier.align(Alignment.BottomCenter).safeDrawingPadding().padding(16.dp).width(200.dp),
                 )
             }
+        }
+        Screen.ARCHIVE -> {
+            BackHandler { vm.go(Screen.MENU) }
+            ArchiveScreen(vm)
+        }
+        Screen.HOW_TO -> {
+            BackHandler { vm.go(Screen.MENU) }
+            HowToScreen(vm)
         }
         Screen.GAME -> GameScreen(vm)
         Screen.END -> {

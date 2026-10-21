@@ -6,7 +6,24 @@ import java.io.File
 
 enum class Speed(val delayMs: Long) { SLOW(900), NORMAL(380), FAST(120), INSTANT(0) }
 
-data class Settings(val speed: Speed = Speed.NORMAL, val showSecretsInLog: Boolean = true)
+enum class AppLanguage(val tag: String?) { SYSTEM(null), ID("id"), EN("en") }
+
+data class Settings(
+    val speed: Speed = Speed.NORMAL,
+    val showSecretsInLog: Boolean = true,
+    val music: Boolean = true,
+    val sfx: Boolean = true,
+    val musicVolume: Float = 0.45f,
+    val sfxVolume: Float = 0.8f,
+    val vibration: Boolean = true,
+    /** 1.0–2.0 (100–200%). */
+    val textScale: Float = 1f,
+    val colorBlind: Boolean = false,
+    val showPossibilities: Boolean = true,
+    val reduceMotion: Boolean = false,
+    val language: AppLanguage = AppLanguage.SYSTEM,
+    val tutorialSeen: Boolean = false,
+)
 
 /** Ringkasan slot: meta + kapan disimpan. */
 data class SlotInfo(val slot: Int, val meta: SaveMeta, val savedAt: Long)
@@ -64,7 +81,7 @@ class SaveStore(private val context: Context) {
         }.getOrNull()
     }
 
-    fun slots(): List<SlotInfo?> = (1..SLOTS).map(::info)
+    fun slots(): List<SlotInfo?> = (1..SaveSlots.SLOTS).map(::info)
 
     /** Slot kosong pertama, atau slot terlama bila semua terisi. */
     fun freeSlot(): Int {
@@ -73,16 +90,53 @@ class SaveStore(private val context: Context) {
         return all.filterNotNull().minByOrNull { it.savedAt }?.slot ?: 1
     }
 
-    fun loadSettings(): Settings = Settings(
-        speed = runCatching { Speed.valueOf(prefs.getString("speed", Speed.NORMAL.name)!!) }.getOrDefault(Speed.NORMAL),
-        showSecretsInLog = prefs.getBoolean("secrets", true),
-    )
+    fun loadSettings(): Settings {
+        val p = prefs
+        val d = Settings()
+        return Settings(
+            speed = runCatching { Speed.valueOf(p.getString("speed", d.speed.name)!!) }.getOrDefault(d.speed),
+            showSecretsInLog = p.getBoolean("secrets", d.showSecretsInLog),
+            music = p.getBoolean("music", d.music),
+            sfx = p.getBoolean("sfx", d.sfx),
+            musicVolume = p.getFloat("musicVolume", d.musicVolume),
+            sfxVolume = p.getFloat("sfxVolume", d.sfxVolume),
+            vibration = p.getBoolean("vibration", d.vibration),
+            textScale = p.getFloat("textScale", d.textScale).coerceIn(1f, 2f),
+            colorBlind = p.getBoolean("colorBlind", d.colorBlind),
+            showPossibilities = p.getBoolean("possibilities", d.showPossibilities),
+            reduceMotion = p.getBoolean("reduceMotion", d.reduceMotion),
+            language = runCatching { AppLanguage.valueOf(p.getString("language", d.language.name)!!) }.getOrDefault(d.language),
+            tutorialSeen = p.getBoolean("tutorialSeen", d.tutorialSeen),
+        )
+    }
 
     fun saveSettings(s: Settings) {
-        prefs.edit().putString("speed", s.speed.name).putBoolean("secrets", s.showSecretsInLog).apply()
+        prefs.edit()
+            .putString("speed", s.speed.name)
+            .putBoolean("secrets", s.showSecretsInLog)
+            .putBoolean("music", s.music)
+            .putBoolean("sfx", s.sfx)
+            .putFloat("musicVolume", s.musicVolume)
+            .putFloat("sfxVolume", s.sfxVolume)
+            .putBoolean("vibration", s.vibration)
+            .putFloat("textScale", s.textScale)
+            .putBoolean("colorBlind", s.colorBlind)
+            .putBoolean("possibilities", s.showPossibilities)
+            .putBoolean("reduceMotion", s.reduceMotion)
+            .putString("language", s.language.name)
+            .putBoolean("tutorialSeen", s.tutorialSeen)
+            .apply()
     }
 
+    /** Bahasa yang dipilih — dibaca MainActivity sebelum Activity dibuat (static agar bisa dipakai di attachBaseContext). */
     companion object {
-        const val SLOTS = 3
+        fun language(context: Context): AppLanguage =
+            runCatching {
+                AppLanguage.valueOf(context.getSharedPreferences("lisbon1944", Context.MODE_PRIVATE).getString("language", "SYSTEM")!!)
+            }.getOrDefault(AppLanguage.SYSTEM)
     }
+}
+
+object SaveSlots {
+    const val SLOTS = 3
 }

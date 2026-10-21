@@ -47,6 +47,7 @@ import id.diran.lisbon1944.session.Choices
 import id.diran.lisbon1944.session.Names
 import id.diran.lisbon1944.ui.GameUi
 import id.diran.lisbon1944.ui.common.KeyValue
+import id.diran.lisbon1944.ui.common.LisbonDialog
 import id.diran.lisbon1944.ui.common.PaperCard
 import id.diran.lisbon1944.ui.common.Palette
 import id.diran.lisbon1944.ui.common.PrimaryButton
@@ -437,27 +438,26 @@ private fun AccusePanel(ctx: DecisionCtx, cost: Int) {
 private fun AccuseConfirm(ctx: DecisionCtx, action: Action.Accuse?, onDismiss: () -> Unit) {
     if (action == null) return
     var second by remember(action) { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (second) stringResource(R.string.accuse_confirm_2) else stringResource(R.string.accuse_confirm_1)) },
-        text = {
-            Column {
-                Text(listOf(action.suspect, action.location, action.item).joinToString(" · ") { ctx.names.card(it) }, fontWeight = FontWeight.Bold)
-                Text(stringResource(R.string.accuse_warning), color = LisbonColors.FolderRed)
+    LisbonDialog(
+        title = if (second) stringResource(R.string.accuse_confirm_2) else stringResource(R.string.accuse_confirm_1),
+        onDismiss = onDismiss,
+        confirmText = if (second) stringResource(R.string.accuse_final) else stringResource(R.string.accuse_sure),
+        onConfirm = {
+            if (second) {
+                onDismiss()
+                ctx.act(action)
+            } else {
+                second = true
             }
         },
-        confirmButton = {
-            TextButton(onClick = {
-                if (second) {
-                    onDismiss()
-                    ctx.act(action)
-                } else {
-                    second = true
-                }
-            }) { Text(if (second) stringResource(R.string.accuse_final) else stringResource(R.string.accuse_sure)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
-    )
+        dismissText = stringResource(R.string.cancel),
+        danger = true,
+    ) {
+        Column {
+            Text(listOf(action.suspect, action.location, action.item).joinToString(" · ") { ctx.names.card(it) }, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.accuse_warning), color = LisbonColors.FolderRed)
+        }
+    }
 }
 
 @Composable
@@ -544,16 +544,16 @@ private fun RaiseFundsPanel(ctx: DecisionCtx, d: PendingDecision.RaiseFunds) {
         Choices.first<Action.DeclareBankruptcy>(ctx.legal)?.let { SecondaryButton(stringResource(R.string.dec_bankrupt), { confirm = true }, Modifier.padding(top = 8.dp)) }
     }
     if (confirm) {
-        AlertDialog(
-            onDismissRequest = { confirm = false },
-            title = { Text(stringResource(R.string.dec_bankrupt_confirm)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirm = false
-                    Choices.first<Action.DeclareBankruptcy>(ctx.legal)?.let(ctx.act)
-                }) { Text(stringResource(R.string.dec_bankrupt)) }
+        LisbonDialog(
+            title = stringResource(R.string.dec_bankrupt_confirm),
+            onDismiss = { confirm = false },
+            confirmText = stringResource(R.string.dec_bankrupt),
+            onConfirm = {
+                confirm = false
+                Choices.first<Action.DeclareBankruptcy>(ctx.legal)?.let(ctx.act)
             },
-            dismissButton = { TextButton(onClick = { confirm = false }) { Text(stringResource(R.string.cancel)) } },
+            dismissText = stringResource(R.string.cancel),
+            danger = true,
         )
     }
 }

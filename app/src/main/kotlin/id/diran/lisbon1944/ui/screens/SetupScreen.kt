@@ -34,10 +34,11 @@ import id.diran.lisbon1944.engine.model.Faction
 import id.diran.lisbon1944.engine.model.GameConfig
 import id.diran.lisbon1944.engine.model.GameMode
 import id.diran.lisbon1944.engine.model.PlayerSetup
+import id.diran.lisbon1944.session.CampaignPreset
 import id.diran.lisbon1944.session.Lang
 import id.diran.lisbon1944.ui.AppViewModel
 import id.diran.lisbon1944.ui.Screen
-import id.diran.lisbon1944.ui.common.Dot
+import id.diran.lisbon1944.ui.game.FactionBadge
 import id.diran.lisbon1944.ui.common.PaperCard
 import id.diran.lisbon1944.ui.common.Palette
 import id.diran.lisbon1944.ui.common.PrimaryButton
@@ -91,12 +92,14 @@ fun SetupScreen(vm: AppViewModel) {
                     GameMode.STANDARD to stringResource(R.string.mode_standard),
                     GameMode.QUICK to stringResource(R.string.mode_quick),
                     GameMode.FAMILY to stringResource(R.string.mode_family),
+                    GameMode.CAMPAIGN to stringResource(R.string.mode_campaign),
                 )
-                WrapGrid(modes, 3) { (gm, label), m -> ToggleTag(label, mode == gm, { mode = gm }, m) }
+                WrapGrid(modes, 2) { (gm, label), m -> ToggleTag(label, mode == gm, { mode = gm }, m) }
                 Text(
                     when (mode) {
                         GameMode.QUICK -> stringResource(R.string.mode_quick_hint)
                         GameMode.FAMILY -> stringResource(R.string.mode_family_hint)
+                        GameMode.CAMPAIGN -> stringResource(R.string.mode_campaign_hint)
                         else -> stringResource(R.string.mode_standard_hint)
                     },
                     style = MaterialTheme.typography.bodyMedium,
@@ -117,7 +120,7 @@ fun SetupScreen(vm: AppViewModel) {
                 val accent = Palette.faction(content, seat.faction)
                 PaperCard(Modifier.fillMaxWidth(), accent = accent) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Dot(accent, 14)
+                        FactionBadge(content, seat.faction, 34)
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.setup_seat, i + 1), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                         Text(names.factionShort(seat.faction), color = accent, fontWeight = FontWeight.Bold)
@@ -152,6 +155,8 @@ fun SetupScreen(vm: AppViewModel) {
                             val free = def.id !in taken
                             PaperCard(Modifier.fillMaxWidth().padding(vertical = 3.dp), accent = Palette.faction(content, def.id)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
+                                    FactionBadge(content, def.id, 40)
+                                    Spacer(Modifier.width(8.dp))
                                     Column(Modifier.weight(1f)) {
                                         Text("${def.organization} — ${names.faction(def.id)}", fontWeight = FontWeight.Bold)
                                         Text(if (vm.lang == Lang.EN) def.abilityTextEn else def.abilityText, style = MaterialTheme.typography.bodyMedium)
@@ -183,6 +188,7 @@ fun SetupScreen(vm: AppViewModel) {
                 Text(stringResource(R.string.setup_seed_hint), style = MaterialTheme.typography.bodyMedium, color = LisbonColors.InkSoft)
             }
 
+            val seed = remember(seedText) { seedText.toLongOrNull() ?: Random.nextLong(1, 1_000_000_000) }
             val config = GameConfig(
                 players = seats.mapIndexed { i, s ->
                     PlayerSetup(
@@ -195,13 +201,14 @@ fun SetupScreen(vm: AppViewModel) {
                 balance = content.balance,
                 mode = mode,
                 doubleAgentVariant = doubleAgent && seats.size >= 5,
+                presetOwnership = if (mode == GameMode.CAMPAIGN) CampaignPreset.deal(content, seats.size, seed) else emptyMap(),
             )
             val problems = config.validate()
             problems.firstOrNull()?.let { Text(it, color = LisbonColors.FolderRed) }
             if (seats.none { it.human }) Text(stringResource(R.string.setup_spectate), color = LisbonColors.StreetLamp)
             PrimaryButton(
                 stringResource(R.string.setup_start),
-                { vm.newGame(config, seedText.toLongOrNull() ?: Random.nextLong(1, 1_000_000_000)) },
+                { vm.newGame(config, seed) },
                 enabled = problems.isEmpty() && !vm.busy,
             )
             SecondaryButton(stringResource(R.string.back), { vm.go(Screen.MENU) })

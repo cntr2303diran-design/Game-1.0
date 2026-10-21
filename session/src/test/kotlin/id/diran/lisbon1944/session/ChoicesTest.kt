@@ -63,3 +63,28 @@ class ChoicesTest {
         assertTrue(sawSuggest && sawBusiness)
     }
 }
+
+class CampaignPresetTest {
+    private val content = ContentLoader.loadDefault()
+
+    @Test
+    fun everySeatGetsTwoPropertiesFromDifferentDistrictsAndGameRuns() {
+        for (n in 3..6) {
+            val preset = CampaignPreset.deal(content, n, 99)
+            assertEquals(n * 2, preset.size)
+            for (seat in 0 until n) {
+                val ds = preset.filterValues { it == seat }.keys.map { t -> content.properties.first { it.index == t }.district }
+                assertEquals(2, ds.toSet().size)
+            }
+            val config = GameConfig(
+                players = (0 until n).map { PlayerSetup("B$it", Faction.entries[it], isBot = true, botLevel = BotLevel.EASY) },
+                balance = content.balance,
+                mode = id.diran.lisbon1944.engine.model.GameMode.CAMPAIGN,
+                presetOwnership = preset,
+            )
+            assertTrue(config.validate().isEmpty())
+            val s = GameEngine(content).newGame(config, 5)
+            assertEquals(n * 2, s.ownership.size)
+        }
+    }
+}

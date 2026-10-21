@@ -106,7 +106,7 @@ class FullGameUiTest {
             }
             if (!tabsVisited) {
                 // Render setiap tab sekali, lalu kembali ke tab Aksi.
-                for (label in listOf("Agents", "Notes", "City", "Log", "Act")) {
+                for (label in listOf("Agents", "Notes", "Deeds", "Cards", "Log", "Act")) {
                     val nodes = rule.onAllNodesWithText(label, substring = true)
                     if (nodes.fetchSemanticsNodes().isNotEmpty()) nodes[0].performClick()
                     rule.waitForIdle()

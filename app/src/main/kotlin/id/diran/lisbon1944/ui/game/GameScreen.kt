@@ -2,6 +2,7 @@ package id.diran.lisbon1944.ui.game
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,10 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,21 +28,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import id.diran.lisbon1944.R
 import id.diran.lisbon1944.engine.model.PendingDecision
+import id.diran.lisbon1944.session.Cue
+import id.diran.lisbon1944.session.Sfx
 import id.diran.lisbon1944.ui.AppViewModel
 import id.diran.lisbon1944.ui.GameUi
-import id.diran.lisbon1944.ui.common.Palette
+import id.diran.lisbon1944.ui.common.LisbonDialog
 import id.diran.lisbon1944.ui.common.PrimaryButton
 import id.diran.lisbon1944.ui.common.SecondaryButton
 import id.diran.lisbon1944.ui.common.Stamp
 import id.diran.lisbon1944.ui.common.ToggleTag
 import id.diran.lisbon1944.ui.screens.Backdrop
+import id.diran.lisbon1944.ui.screens.ErrorDialog
 import id.diran.lisbon1944.ui.theme.LisbonColors
 
-private enum class Tab { ACTION, PLAYERS, NOTES, CITY, LOG }
+private enum class Tab { ACTION, PLAYERS, NOTES, PROPS, CARDS, LOG }
 
 @Composable
 fun GameScreen(vm: AppViewModel) {
@@ -55,20 +59,30 @@ fun GameScreen(vm: AppViewModel) {
         Backdrop { Text(stringResource(R.string.dossier_loading), color = LisbonColors.OldPaper, modifier = Modifier.padding(24.dp)) }
         return
     }
-    if (ui.needsPrivacy) {
-        PrivacyScreen(ui, onReady = vm::reveal)
-    } else {
-        GameLayout(vm, ui)
+    Box(Modifier.fillMaxSize()) {
+        if (ui.needsPrivacy) {
+            PrivacyScreen(ui, onReady = vm::reveal)
+        } else {
+            GameLayout(vm, ui)
+        }
+        if (vm.introPending) {
+            IntroOverlay(ui, content, names, onDone = vm::introDone, sound = vm::uiSound)
+        } else if (!ui.needsPrivacy) {
+            CueLayer(vm.cues.firstOrNull(), names, { seat -> seat?.let { ui.playerNames[it] } ?: "" }, vm::consumeCue)
+        }
     }
-    id.diran.lisbon1944.ui.screens.ErrorDialog(vm)
+    ErrorDialog(vm)
     if (quit) {
-        AlertDialog(
-            onDismissRequest = { quit = false },
-            title = { Text(stringResource(R.string.quit_title)) },
-            text = { Text(stringResource(R.string.quit_text)) },
-            confirmButton = { TextButton(onClick = { quit = false; vm.quitToMenu() }) { Text(stringResource(R.string.quit_yes)) } },
-            dismissButton = { TextButton(onClick = { quit = false }) { Text(stringResource(R.string.cancel)) } },
-        )
+        LisbonDialog(
+            title = stringResource(R.string.quit_title),
+            onDismiss = { quit = false },
+            confirmText = stringResource(R.string.quit_yes),
+            onConfirm = {
+                quit = false
+                vm.quitToMenu()
+            },
+            dismissText = stringResource(R.string.cancel),
+        ) { Text(stringResource(R.string.quit_text)) }
     }
 }
 
@@ -86,6 +100,11 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
         else -> setOf(ui.view.me.position)
     }
     val myTurnBadge = ui.view.myDecision != null && ui.legal.isNotEmpty()
+    // Getaran papan saat Razia/penangkapan.
+    val head = vm.cues.firstOrNull()
+    val shakeKey = if (head is Cue.Stamp && head.shake) head.hashCode() else 0
+    @Suppress("UNUSED_VARIABLE") val notesVersion = vm.notesVersion
+    val notes = NotesAccess(vm.marks(), vm::setMark, vm::setNote)
 
     Column(Modifier.fillMaxSize().background(LisbonColors.Ink).safeDrawingPadding()) {
         Hud(ui, content, names)
@@ -93,25 +112,30 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             val landscape = maxWidth > maxHeight
             val panel: @Composable (Modifier) -> Unit = { m ->
                 Column(m.background(LisbonColors.InkSoft)) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
+                    vm.tutorial?.let { t -> if (!t.dismissed) TutorialCoach(vm, ui) }
+                    Row(Modifier.fillMaxWidth().padding(6.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                         val tabs = listOf(
                             Tab.ACTION to stringResource(R.string.tab_action) + if (myTurnBadge) " •" else "",
                             Tab.PLAYERS to stringResource(R.string.tab_players),
                             Tab.NOTES to stringResource(R.string.tab_notes),
-                            Tab.CITY to stringResource(R.string.tab_city),
+                            Tab.PROPS to stringResource(R.string.tab_props),
+                            Tab.CARDS to stringResource(R.string.tab_city),
                             Tab.LOG to stringResource(R.string.tab_log),
                         )
-                        tabs.forEach { (t, label) -> ToggleTag(label, tab == t, { tab = t }, Modifier.weight(1f)) }
+                        tabs.forEach { (t, label) ->
+                            ToggleTag(label, tab == t, {
+                                tab = t
+                                vm.uiSound(Sfx.CARD)
+                            }, Modifier.weight(1f))
+                        }
                     }
                     Box(Modifier.fillMaxSize()) {
                         when (tab) {
                             Tab.ACTION -> DecisionPanel(ctx, onSkipBots = vm::skipBots)
                             Tab.PLAYERS -> PlayersPanel(ui, content, names)
-                            Tab.NOTES -> NotebookPanel(ui, content, names)
-                            Tab.CITY -> CityPanel(ui, content, names)
+                            Tab.NOTES -> NotebookPanel(ui, content, names, notes)
+                            Tab.PROPS -> PropertiesPanel(ctx)
+                            Tab.CARDS -> CityPanel(ui, content, names)
                             Tab.LOG -> LogPanel(ui.log)
                         }
                     }
@@ -119,23 +143,67 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
             }
             if (landscape) {
                 Row(Modifier.fillMaxSize()) {
-                    BoardView(ui.view, content, names, Modifier.fillMaxHeight(), highlight)
+                    BoardView(ui.view, content, names, Modifier.fillMaxHeight(), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxHeight())
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    BoardView(ui.view, content, names, Modifier.fillMaxWidth(), highlight)
+                    BoardView(ui.view, content, names, Modifier.fillMaxWidth(), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxWidth())
                 }
             }
         }
     }
-    if (ui.isOver && !vm.endSeen) {
-        AlertDialog(
-            onDismissRequest = vm::showEnd,
-            title = { Text(stringResource(R.string.end_title)) },
-            confirmButton = { TextButton(onClick = vm::showEnd) { Text(stringResource(R.string.end_show)) } },
+    if (ui.isOver && !vm.endSeen && vm.cues.isEmpty()) {
+        LisbonDialog(
+            title = stringResource(R.string.end_title),
+            onDismiss = vm::showEnd,
+            confirmText = stringResource(R.string.end_show),
+            onConfirm = vm::showEnd,
         )
+    }
+    val t = vm.tutorial
+    if (t != null && t.finished && !t.dismissed) {
+        LisbonDialog(
+            title = stringResource(R.string.tut_done_title),
+            onDismiss = vm::dismissTutorial,
+            confirmText = stringResource(R.string.tut_keep_playing),
+            onConfirm = vm::dismissTutorial,
+            dismissText = stringResource(R.string.tut_to_menu),
+            onDismissClick = {
+                vm.dismissTutorial()
+                vm.quitToMenu()
+            },
+        ) { Text(stringResource(R.string.tut_done_text)) }
+    }
+}
+
+/** Gelembung pelatih tutorial — menjelaskan keputusan yang sedang dihadapi pemain. */
+@Composable
+private fun TutorialCoach(vm: AppViewModel, ui: GameUi) {
+    val kind = ui.view.myDecision?.let { it::class.simpleName } ?: "Waiting"
+    val textRes = when (kind) {
+        "AwaitRoll" -> R.string.tut_roll
+        "BuyOrAuction" -> R.string.tut_buy
+        "AuctionBid" -> R.string.tut_auction
+        "RentChoice" -> R.string.tut_rent
+        "SuggestionOffer" -> R.string.tut_suggest
+        "RevealForSuggestion" -> R.string.tut_reveal
+        "BusinessPhase" -> R.string.tut_business
+        "Waiting" -> R.string.tut_waiting
+        else -> R.string.tut_other
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
+            .border(2.dp, LisbonColors.StreetLamp, RoundedCornerShape(6.dp))
+            .background(LisbonColors.OldPaper, RoundedCornerShape(6.dp))
+            .padding(10.dp),
+    ) {
+        Text("☞ " + stringResource(R.string.tut_title), fontWeight = FontWeight.Bold, color = LisbonColors.FolderRed)
+        Text(stringResource(textRes), style = MaterialTheme.typography.bodyMedium, color = LisbonColors.Ink)
+        SecondaryButton(stringResource(R.string.tut_hide), vm::dismissTutorial, Modifier.padding(top = 6.dp))
     }
 }
 
@@ -151,13 +219,12 @@ fun PrivacyScreen(ui: GameUi, onReady: () -> Unit) {
         ) {
             Stamp(stringResource(R.string.stamp_secret))
             Spacer(Modifier.height(24.dp))
-            Text(stringResource(R.string.privacy_pass_to), color = LisbonColors.PaperShade, style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.privacy_pass_to), color = LisbonColors.PaperMuted, style = MaterialTheme.typography.bodyLarge)
             Text(name, color = LisbonColors.OldPaper, style = MaterialTheme.typography.displayLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(12.dp))
-            Text(stringResource(R.string.privacy_hint), color = LisbonColors.PaperShade, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.privacy_hint), color = LisbonColors.PaperMuted, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(32.dp))
             PrimaryButton(stringResource(R.string.privacy_ready), onReady, Modifier.width(260.dp))
         }
     }
 }
-
