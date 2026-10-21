@@ -150,6 +150,19 @@ class ScreenshotTest {
     }
 
     @Test
+    fun renderLauncherIcon() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        for ((res, name) in listOf(id.diran.lisbon1944.R.mipmap.ic_launcher to "00-icon", id.diran.lisbon1944.R.drawable.ic_launcher_foreground to "00-icon-foreground", id.diran.lisbon1944.R.drawable.ic_splash to "00-splash-icon")) {
+            val d = androidx.core.content.ContextCompat.getDrawable(app, res)!!
+            val bmp = Bitmap.createBitmap(432, 432, Bitmap.Config.ARGB_8888)
+            if (name == "00-splash-icon") Canvas(bmp).drawColor(android.graphics.Color.parseColor("#14110F"))
+            d.setBounds(0, 0, 432, 432)
+            d.draw(Canvas(bmp))
+            FileOutputStream(File(dir, "$name.png")).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
+    @Test
     fun captureAccessibilityVariants() {
         start(Settings(speed = Speed.INSTANT, colorBlind = true, textScale = 2f))
         vm.skipSplash()

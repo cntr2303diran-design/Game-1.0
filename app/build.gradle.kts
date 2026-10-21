@@ -15,19 +15,36 @@ android {
         applicationId = "id.diran.lisbon1944"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 10
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Kunci rilis dari variabel lingkungan (CI: secret base64 didekode ke berkas). Tanpa kunci → kunci debug,
+    // agar APK rilis tetap bisa dipasang untuk pengujian.
+    val keystorePath = System.getenv("LISBON_KEYSTORE_FILE")
+    signingConfigs {
+        if (keystorePath != null && file(keystorePath).exists()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("LISBON_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("LISBON_KEY_ALIAS")
+                keyPassword = System.getenv("LISBON_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Tahap 7 menambahkan signing config rilis; sementara pakai kunci debug agar APK bisa dipasang.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
+
+    // CI menjalankan uji instrumentasi pada build rilis (R8) dengan -PtestBuildType=release.
+    testBuildType = (project.findProperty("testBuildType") as String?) ?: "debug"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -58,6 +75,7 @@ dependencies {
     implementation(project(":session"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -80,8 +98,7 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
 
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.uiautomator)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso)
 }

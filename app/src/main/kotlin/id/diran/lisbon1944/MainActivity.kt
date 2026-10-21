@@ -6,7 +6,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.ViewModelProvider
 import id.diran.lisbon1944.ui.AppViewModel
 import id.diran.lisbon1944.ui.LisbonApp
 import id.diran.lisbon1944.ui.SaveStore
@@ -32,11 +33,14 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val vm = ViewModelProvider(this)[AppViewModel::class.java]
+        vmRef = vm
+        // Splash sistem tetap tampil sampai konten JSON selesai dimuat & divalidasi.
+        splash.setKeepOnScreenCondition { !vm.ready }
         enableEdgeToEdge()
         setContent {
-            val vm: AppViewModel = viewModel()
-            vmRef = vm
             val s = vm.settings
             LisbonTheme(
                 textScale = s.textScale,

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import id.diran.lisbon1944.bot.Bots
 import id.diran.lisbon1944.bot.deduction.DeductionInput
@@ -75,7 +76,11 @@ data class GameUi(
 /** Tutorial: satu giliran terpandu melawan dua bot Mudah. */
 data class TutorialState(val seen: Set<String> = emptySet(), val finished: Boolean = false, val dismissed: Boolean = false)
 
-class AppViewModel(app: Application) : AndroidViewModel(app) {
+/**
+ * [handle] menyimpan slot permainan aktif: bila Android mematikan proses di tengah permainan, ViewModel baru
+ * memuat ulang slot itu dan pemain kembali tepat di keputusan terakhir (BAGIAN 12.1).
+ */
+class AppViewModel(app: Application, private val handle: SavedStateHandle = SavedStateHandle()) : AndroidViewModel(app) {
     private val store = SaveStore(app)
     private val archiveStore = ArchiveStore(app)
     private val notesStore = NotesStore(app)
@@ -143,6 +148,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }.onSuccess { content = it }.onFailure { loadError = it.message ?: it.toString() }
             archive = withContext(Dispatchers.IO) { archiveStore.all() }
+            // Pulih setelah proses dimatikan: langsung kembali ke permainan yang sedang berjalan.
+            val resume = handle.get<Int>(KEY_SLOT)
+            if (resume != null && content != null && store.read(resume) != null) {
+                loadSlot(resume)
+                return@launch
+            }
             val wait = 2600 - (System.currentTimeMillis() - started)
             if (wait > 0) delay(wait)
             if (screen == Screen.SPLASH) screen = Screen.MENU
@@ -196,6 +207,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             cues.clear()
             tutorial = if (asTutorial) TutorialState() else null
             slot = store.freeSlot()
+            handle[KEY_SLOT] = slot
             busy = false
             introPending = intro && !settings.reduceMotion && settings.speed != Speed.INSTANT
             publish(emptyList())
@@ -259,6 +271,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 introPending = false
                 cues.clear()
                 slot = n
+                handle[KEY_SLOT] = n
                 publish(emptyList())
                 screen = if (it.isOver) Screen.END else Screen.GAME
                 pump()
@@ -324,6 +337,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             session = null
             ui = null
             tutorial = null
+            handle.remove<Int>(KEY_SLOT)
             cues.clear()
             go(Screen.MENU)
         }
@@ -527,6 +541,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Pesan pelanggaran aturan bila aksi tidak sah (dipakai penyusun Tawaran Dagang), null bila sah. */
     fun check(action: Action): String? = session?.check(action)?.message
+
+    /** Untuk layar splash sistem: tahan sampai konten siap. */
+    val ready: Boolean get() = content != null || loadError != null
+
+    companion object {
+        const val KEY_SLOT = "active_slot"
+    }
 
     fun actionText(): ActionText? {
         val n = names ?: return null

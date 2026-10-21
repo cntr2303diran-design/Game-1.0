@@ -150,4 +150,24 @@ class FullGameUiTest {
         cells[0].performScrollTo().performClick()
         waitFor(5_000, "tanda ✓") { vm.marks().values.any { it == "✓" } }
     }
+
+    @Test
+    fun processDeathResumesTheRunningGame() {
+        val vm = setUp()
+        val handle = androidx.lifecycle.SavedStateHandle()
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val first = AppViewModel(app, handle)
+        waitFor(60_000, "konten vm pertama") { first.content != null }
+        first.newGame(config(first, humans = 1, n = 3), seed = 77, intro = false)
+        waitFor(60_000, "giliran manusia") { first.ui?.let { !it.isBotTurn && it.view.myDecision != null } == true }
+        val slot = handle.get<Int>(AppViewModel.KEY_SLOT)
+        assertNotNull("slot aktif tersimpan di SavedStateHandle", slot)
+        val round = first.ui!!.view.roundNumber
+        // "Proses mati": ViewModel baru dengan SavedStateHandle yang dipulihkan sistem.
+        val revived = AppViewModel(app, androidx.lifecycle.SavedStateHandle(mapOf(AppViewModel.KEY_SLOT to slot)))
+        waitFor(60_000, "pulih ke permainan") { revived.screen == Screen.GAME && revived.ui != null }
+        assertEquals(round, revived.ui!!.view.roundNumber)
+        assertNotNull(revived.ui!!.view.myDecision)
+        assertTrue(vm.content != null)
+    }
 }

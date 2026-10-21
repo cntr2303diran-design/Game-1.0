@@ -18,3 +18,6 @@
 
 # Pustaka JVM yang dikompilasi untuk Java 17 (string concat dinamis).
 -dontwarn java.lang.invoke.StringConcatFactory
+
+# ViewModel dibuat lewat refleksi oleh SavedStateViewModelFactory (Application, SavedStateHandle).
+-keep class id.diran.lisbon1944.ui.AppViewModel { <init>(...); }

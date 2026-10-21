@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lapisan monokrom untuk ikon bertema Android 13+. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M25,36L83,36L83,75L25,75Z M28,40L28,72L80,72L80,40L54,60Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M54,52a7,7 0,1 1,0 14a7,7 0,1 1,0 -14z" />
+</vector>

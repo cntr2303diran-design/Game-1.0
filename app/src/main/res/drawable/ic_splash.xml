@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ikon layar splash Android 12+: amplop yang sama, tanpa latar (lingkaran 160dp disediakan sistem). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#B3261E" android:pathData="M25,36L83,36L83,75L25,75Z" />
+    <path android:strokeColor="#7A1812" android:strokeWidth="1.6" android:pathData="M25,75L48,55M83,75L60,55" />
+    <path android:fillColor="#8F1D17" android:pathData="M25,36L54,59L83,36Z" />
+    <path android:fillColor="#E0A526" android:pathData="M54,51a8,8 0,1 1,0 16a8,8 0,1 1,0 -16z" />
+    <path android:fillColor="#14110F" android:pathData="M54,55.2L55.1,58L58,58.1L55.7,59.9L56.5,62.7L54,61.1L51.5,62.7L52.3,59.9L50,58.1L52.9,58Z" />
+    <group android:rotation="-14" android:pivotX="54" android:pivotY="69">
+        <path android:strokeColor="#EFE6D2" android:strokeWidth="1.4" android:pathData="M35,65L73,65L73,73L35,73Z" />
+        <path android:strokeColor="#EFE6D2" android:strokeWidth="2.2" android:pathData="M38,69h4M44,69h4M50,69h4M56,69h4M62,69h4M68,69h2" />
+    </group>
+</vector>
