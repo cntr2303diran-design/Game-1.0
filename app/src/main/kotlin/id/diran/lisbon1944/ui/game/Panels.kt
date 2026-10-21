@@ -9,6 +9,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,26 +73,29 @@ fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Mod
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                PhaseStepper(v.phase)
+                Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
+                    PhaseStepper(v.phase)
+                    Text("  ·  " + stringResource(R.string.hud_war_clock, v.warStep), color = LisbonColors.StreetLamp, fontSize = 11.sp, maxLines = 1, softWrap = false)
+                }
             }
-            Text(stringResource(R.string.hud_war_clock, v.warStep), color = LisbonColors.StreetLamp, fontSize = 12.sp)
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Dot(Palette.faction(content, me.faction), 10)
             Spacer(Modifier.width(6.dp))
-            Text(me.name, color = LisbonColors.OldPaper, fontSize = 12.sp, maxLines = 1, modifier = Modifier.weight(1f))
-            Text(names.money(me.money), color = LisbonColors.StreetLamp, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(10.dp))
-            Text(stringResource(R.string.hud_intel, me.intel), color = LisbonColors.OldPaper, fontSize = 12.sp)
+            Text(me.name, color = LisbonColors.OldPaper, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Text(names.money(me.money), color = LisbonColors.StreetLamp, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
             Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.hud_intel, me.intel), color = LisbonColors.OldPaper, fontSize = 12.sp, maxLines = 1, softWrap = false)
+            Spacer(Modifier.width(6.dp))
             PipMeter(me.suspicion, b.suspicion.limit, LisbonColors.FolderRed, pip = 6, modifier = Modifier.semantics {
                 contentDescription = "Suspicion ${me.suspicion}/${b.suspicion.limit}"
             })
         }
         ui.log.lastOrNull()?.let {
-            Text(it.text, color = LisbonColors.PaperMuted, fontSize = 11.sp, maxLines = 1)
+            Text(it.text, color = LisbonColors.PaperMuted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -107,7 +114,8 @@ fun FactionBadge(content: GameContent, f: Faction, size: Int) {
             .semantics { contentDescription = org },
         contentAlignment = Alignment.Center,
     ) {
-        Text(org.take(4), color = LisbonColors.OldPaper, fontSize = (size / 3.2).sp, fontWeight = FontWeight.Black, maxLines = 1)
+        // Ukuran tetap (tidak ikut skala teks) agar inisial muat di medali.
+        Text(org.take(4), color = Palette.onColor(color), fontSize = with(LocalDensity.current) { (size / 3.4).dp.toSp() }, fontWeight = FontWeight.Black, maxLines = 1, softWrap = false)
     }
 }
 
@@ -133,8 +141,10 @@ private fun PhaseStepper(phase: TurnPhase) {
                     else -> LisbonColors.PaperMuted.copy(alpha = 0.55f)
                 },
                 fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                softWrap = false,
             )
-            if (i < steps.lastIndex) Text(" › ", fontSize = 10.sp, color = LisbonColors.PaperMuted)
+            if (i < steps.lastIndex) Text(" › ", fontSize = 10.sp, color = LisbonColors.PaperMuted, maxLines = 1, softWrap = false)
         }
     }
 }

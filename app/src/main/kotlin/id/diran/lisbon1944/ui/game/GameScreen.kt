@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -109,11 +114,17 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
     Column(Modifier.fillMaxSize().background(LisbonColors.Ink).safeDrawingPadding()) {
         Hud(ui, content, names)
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val landscape = maxWidth > maxHeight
+            // Orientasi layar sebenarnya (bukan sisa ruang — HUD bisa tinggi saat teks 200%).
+            val cfg = LocalConfiguration.current
+            val landscape = cfg.screenWidthDp > cfg.screenHeightDp
+            val bigText = LocalDensity.current.fontScale > 1.15f
             val panel: @Composable (Modifier) -> Unit = { m ->
                 Column(m.background(LisbonColors.InkSoft)) {
                     vm.tutorial?.let { t -> if (!t.dismissed) TutorialCoach(vm, ui) }
-                    Row(Modifier.fillMaxWidth().padding(6.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().then(if (bigText) Modifier.horizontalScroll(rememberScrollState()) else Modifier).padding(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
                         val tabs = listOf(
                             Tab.ACTION to stringResource(R.string.tab_action) + if (myTurnBadge) " •" else "",
                             Tab.PLAYERS to stringResource(R.string.tab_players),
@@ -126,7 +137,7 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
                             ToggleTag(label, tab == t, {
                                 tab = t
                                 vm.uiSound(Sfx.CARD)
-                            }, Modifier.weight(1f))
+                            }, if (bigText) Modifier else Modifier.weight(1f), dense = true)
                         }
                     }
                     Box(Modifier.fillMaxSize()) {
@@ -147,8 +158,9 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
                     panel(Modifier.weight(1f).fillMaxHeight())
                 }
             } else {
-                Column(Modifier.fillMaxSize()) {
-                    BoardView(ui.view, content, names, Modifier.fillMaxWidth(), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
+                Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Saat teks besar, papan dibatasi agar panel aksi tetap punya ruang.
+                    BoardView(ui.view, content, names, Modifier.fillMaxWidth().heightIn(max = maxHeight * 0.55f), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxWidth())
                 }
             }

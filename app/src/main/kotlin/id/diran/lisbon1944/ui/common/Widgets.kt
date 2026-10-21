@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,6 +74,9 @@ object Palette {
         val hex = content?.faction(f)?.accentColor ?: return LisbonColors.StreetLamp
         return runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(LisbonColors.StreetLamp)
     }
+
+    /** Warna teks yang terbaca di atas [bg] (kontras ≥ 4.5:1 untuk palet ini). */
+    fun onColor(bg: Color): Color = if (bg.luminance() > 0.42f) LisbonColors.Ink else LisbonColors.OldPaper
 
     fun evidence(t: EvidenceType): Color = when (t) {
         EvidenceType.SUSPECT -> Color(0xFF6B2D2A)
@@ -215,6 +219,7 @@ fun ToggleTag(
     accent: Color = LisbonColors.FolderRed,
     enabled: Boolean = true,
     sub: String? = null,
+    dense: Boolean = false,
 ) {
     val bg = when {
         selected -> accent
@@ -231,11 +236,11 @@ fun ToggleTag(
             .border(1.dp, if (selected) accent else LisbonColors.InkSoft.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
             .clickable(enabled = enabled, onClick = onClick)
             .semantics { this.selected = isSelected; role = Role.Button }
-            .padding(horizontal = 10.dp, vertical = 8.dp),
+            .padding(horizontal = if (dense) 4.dp else 10.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(text, color = fg, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = 3, textAlign = TextAlign.Center)
+        Text(text, color = fg, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal, maxLines = if (dense) 1 else 3, softWrap = !dense, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         if (sub != null) Text(sub, color = fg.copy(alpha = 0.75f), fontSize = 10.sp, maxLines = 1)
     }
 }

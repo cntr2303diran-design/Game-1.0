@@ -170,4 +170,29 @@ class ScreenshotTest {
         waitFor(60_000, "giliran manusia") { vm.ui?.let { !it.isBotTurn && it.view.myDecision != null } == true }
         shot("41-game-colorblind-text200")
     }
+
+    @Test
+    @Config(qualifiers = "id-rID-w891dp-h411dp-xxhdpi")
+    fun captureLandscapeIndonesian() {
+        start()
+        vm.skipSplash()
+        waitFor(10_000, "menu") { vm.screen == Screen.MENU }
+        shot("50-menu-id-landscape")
+        val content = vm.content!!
+        vm.newGame(
+            GameConfig(
+                players = listOf(
+                    PlayerSetup("Agen Lima", Faction.SPANISH_SMUGGLER),
+                    PlayerSetup("Bot A", Faction.ABWEHR_DEFECTOR, isBot = true, botLevel = BotLevel.EASY),
+                    PlayerSetup("Bot B", Faction.PORTUGAL_TRADER, isBot = true, botLevel = BotLevel.EASY),
+                    PlayerSetup("Bot C", Faction.SWISS_JOURNALIST, isBot = true, botLevel = BotLevel.EASY),
+                ),
+                balance = content.balance,
+            ),
+            seed = 12,
+        )
+        waitFor(60_000, "giliran manusia") { vm.ui?.let { !it.isBotTurn && it.view.myDecision != null } == true }
+        shot("51-game-id-landscape")
+        vm.go(Screen.HOW_TO); idle(); shot("52-how-to-id")
+    }
 }

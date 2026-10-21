@@ -27,6 +27,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.Density
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -141,6 +143,24 @@ fun BoardView(
     onPawnStep: () -> Unit = {},
     onTileTap: ((Int) -> Unit)? = null,
 ) {
+    // Teks petak tidak ikut skala teks (petak sudah kecil) — pemain memperbesar papan dengan cubitan.
+    val d = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(d.density, 1f)) {
+        BoardViewInner(view, content, names, modifier, highlight, shakeKey, onPawnStep, onTileTap)
+    }
+}
+
+@Composable
+private fun BoardViewInner(
+    view: PlayerView,
+    content: GameContent,
+    names: Names,
+    modifier: Modifier = Modifier,
+    highlight: Set<Int> = emptySet(),
+    shakeKey: Int = 0,
+    onPawnStep: () -> Unit = {},
+    onTileTap: ((Int) -> Unit)? = null,
+) {
     val prefs = LocalUiPrefs.current
     var scale by remember { mutableFloatStateOf(1f) }
     var manualPan by remember { mutableStateOf(Offset.Zero) }
@@ -224,7 +244,7 @@ fun BoardView(
                 BoardCenter(view, content, names, selected, factions, onClear = { selected = null })
             }
         }
-        Row(Modifier.align(Alignment.TopEnd).padding(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.align(Alignment.TopEnd).padding(top = cell + 6.dp, end = cell + 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (scale > 1.01f) {
                 MiniChip(if (follow) "◎" else "○", stringResource(R.string.board_follow)) { follow = !follow }
                 MiniChip("⤢", stringResource(R.string.board_reset)) {

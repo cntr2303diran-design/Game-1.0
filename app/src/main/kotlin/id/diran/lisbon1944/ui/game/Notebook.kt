@@ -257,7 +257,7 @@ private fun HeaderCell(label: String, color: androidx.compose.ui.graphics.Color)
         Modifier.size(width = CELL.dp, height = 36.dp).background(color).padding(2.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, fontSize = 9.sp, lineHeight = 10.sp, color = LisbonColors.OldPaper, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
+        Text(label, fontSize = 9.sp, lineHeight = 10.sp, color = Palette.onColor(color), maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
     }
 }
 

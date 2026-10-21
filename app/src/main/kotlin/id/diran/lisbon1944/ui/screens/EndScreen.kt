@@ -118,24 +118,24 @@ fun EndScreen(vm: AppViewModel) {
                     Row(Modifier.horizontalScroll(rememberScrollState())) {
                         Column {
                             val cols = listOf(
-                                R.string.end_col_cash, R.string.end_col_property, R.string.end_col_buildings, R.string.end_col_clues,
+                                R.string.end_col_cash, R.string.end_col_assets, R.string.end_col_clues,
                                 R.string.end_col_mission, R.string.end_col_prestige, R.string.end_col_total,
                             )
                             Row {
-                                Text(stringResource(R.string.end_col_player), Modifier.width(110.dp), fontSize = 11.sp, color = LisbonColors.InkMuted)
-                                cols.forEach { Text(stringResource(it), Modifier.width(62.dp), fontSize = 11.sp, color = LisbonColors.InkMuted, textAlign = TextAlign.End) }
+                                Text(stringResource(R.string.end_col_player), Modifier.width(96.dp), fontSize = 10.sp, color = LisbonColors.InkMuted)
+                                cols.forEach { Text(stringResource(it), Modifier.width(COL.dp), fontSize = 10.sp, color = LisbonColors.InkMuted, textAlign = TextAlign.End, maxLines = 1) }
                             }
                             scores.sortedByDescending { it.total }.forEach { s ->
                                 Row(Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Row(Modifier.width(110.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Row(Modifier.width(96.dp), verticalAlignment = Alignment.CenterVertically) {
                                         factions[s.player.value]?.let { FactionBadge(content, it, 20) }
                                         Spacer(Modifier.width(4.dp))
                                         Text((ui.playerNames[s.player.value] ?: "?") + if (s.burned) " ✗" else "", fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
                                     }
-                                    listOf(s.cash, s.property, s.buildings, s.clues, s.mission, s.prestige).forEach {
-                                        Text("$it", Modifier.width(62.dp), fontSize = 12.sp, textAlign = TextAlign.End)
+                                    listOf(s.cash, s.property + s.buildings, s.clues, s.mission, s.prestige).forEach {
+                                        Text("$it", Modifier.width(COL.dp), fontSize = 12.sp, textAlign = TextAlign.End)
                                     }
-                                    Text("${s.total}", Modifier.width(62.dp), fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.End, color = LisbonColors.FolderRed)
+                                    Text("${s.total}", Modifier.width(COL.dp), fontSize = 13.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.End, color = LisbonColors.FolderRed)
                                 }
                             }
                         }
@@ -178,6 +178,8 @@ fun EndScreen(vm: AppViewModel) {
         }
     }
 }
+
+private const val COL = 44
 
 /** Amplop merah dibuka; tiga kartu dibalik satu per satu. */
 @Composable
