@@ -28,7 +28,7 @@ import org.robolectric.annotation.Config
  * Kursi manusia "dimainkan" oleh bot lewat ViewModel, sehingga setiap panel keputusan ikut dirender.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [34], qualifiers = "w411dp-h891dp-xxhdpi")
 class FullGameUiTest {
     @get:Rule
     val rule = createComposeRule()
@@ -147,9 +147,7 @@ class FullGameUiTest {
         rule.waitForIdle()
         val cells = rule.onAllNodesWithContentDescription(": —", substring = true)
         assertTrue("sel catatan kosong harus ada", cells.fetchSemanticsNodes().isNotEmpty())
-        val desc = cells[0].fetchSemanticsNode().config.toString()
-        val before = vm.notesVersion
         cells[0].performScrollTo().performClick()
-        waitFor(5_000, "tanda ✓ (node=$desc, versi $before→${vm.notesVersion}, marks=${vm.marks()})") { vm.marks().values.any { it == "✓" } }
+        waitFor(5_000, "tanda ✓") { vm.marks().values.any { it == "✓" } }
     }
 }
