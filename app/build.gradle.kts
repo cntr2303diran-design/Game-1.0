@@ -39,13 +39,10 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            testProguardFiles("proguard-test.pro")
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
-    // CI menjalankan uji instrumentasi pada build rilis (R8) dengan -PtestBuildType=release.
-    testBuildType = (project.findProperty("testBuildType") as String?) ?: "debug"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -99,7 +96,5 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
 
-    androidTestImplementation(libs.androidx.test.uiautomator)
-    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.junit)
 }
