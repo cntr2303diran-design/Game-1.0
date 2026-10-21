@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
@@ -86,7 +87,7 @@ object Palette {
 }
 
 /** Pola distrik (garis, titik, kotak, …) agar distrik bisa dibedakan tanpa warna. */
-fun Modifier.districtPattern(d: District, color: Color): Modifier = drawBehind {
+fun Modifier.districtPattern(d: District, color: Color): Modifier = clipToBounds().drawBehind {
     val c = color.copy(alpha = 0.55f)
     val step = 4.dp.toPx()
     val w = size.width
