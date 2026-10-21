@@ -111,9 +111,8 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
     @Suppress("UNUSED_VARIABLE") val notesVersion = vm.notesVersion
     val notes = NotesAccess(vm.marks(), vm::setMark, vm::setNote)
 
-    Column(Modifier.fillMaxSize().background(LisbonColors.Ink).safeDrawingPadding()) {
-        Hud(ui, content, names)
-        BoxWithConstraints(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(LisbonColors.Ink).safeDrawingPadding()) {
+        run {
             // Orientasi layar sebenarnya (bukan sisa ruang — HUD bisa tinggi saat teks 200%).
             val cfg = LocalConfiguration.current
             val landscape = cfg.screenWidthDp > cfg.screenHeightDp
@@ -155,14 +154,19 @@ private fun GameLayout(vm: AppViewModel, ui: GameUi) {
                 }
             }
             if (landscape) {
+                // Lanskap: papan memakai seluruh tinggi layar dan ±62% lebarnya; HUD & panel di kolom kanan.
                 Row(Modifier.fillMaxSize()) {
-                    BoardView(ui.view, content, names, Modifier.fillMaxHeight(), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
-                    panel(Modifier.weight(1f).fillMaxHeight())
+                    BoardView(ui.view, content, names, Modifier.weight(0.62f).fillMaxHeight(), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
+                    Column(Modifier.weight(0.38f).fillMaxHeight()) {
+                        Hud(ui, content, names, compact = true)
+                        panel(Modifier.weight(1f).fillMaxWidth())
+                    }
                 }
             } else {
                 Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Saat teks besar, papan dibatasi agar panel aksi tetap punya ruang.
-                    BoardView(ui.view, content, names, Modifier.size(minOf(boxWidth, boxHeight * 0.6f)), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
+                    Hud(ui, content, names)
+                    // Potret: papan selebar layar; dibatasi tinggi agar panel aksi tetap punya ruang.
+                    BoardView(ui.view, content, names, Modifier.fillMaxWidth().height(minOf(boxWidth * 1.05f, boxHeight * (if (bigText) 0.45f else 0.55f))), highlight, shakeKey, onPawnStep = { vm.uiSound(Sfx.STEP) })
                     panel(Modifier.weight(1f).fillMaxWidth())
                 }
             }

@@ -50,12 +50,16 @@ import id.diran.lisbon1944.ui.common.KeyValue
 import id.diran.lisbon1944.ui.common.PaperCard
 import id.diran.lisbon1944.ui.common.Palette
 import id.diran.lisbon1944.ui.common.PipMeter
+import id.diran.lisbon1944.ui.common.Portrait
+import id.diran.lisbon1944.ui.common.Portraits
+import id.diran.lisbon1944.ui.common.lighten
+import androidx.compose.foundation.shape.RoundedCornerShape
 import id.diran.lisbon1944.ui.common.SectionTitle
 import id.diran.lisbon1944.ui.theme.LisbonColors
 
 /** Bilah atas: avatar faksi aktif, escudo, Intel, Kecurigaan, fase giliran (stepper), Jam Perang. */
 @Composable
-fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Modifier) {
+fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Modifier, compact: Boolean = false) {
     val v = ui.view
     val me = v.me
     val b = content.balance
@@ -64,7 +68,7 @@ fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Mod
     val turnFaction = factions[v.currentPlayer.value] ?: me.faction
     Column(modifier.fillMaxWidth().background(LisbonColors.Ink).padding(horizontal = 10.dp, vertical = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FactionBadge(content, turnFaction, 30)
+            FactionBadge(content, turnFaction, 40, highlight = true)
             Spacer(Modifier.width(8.dp))
             Column(Modifier.weight(1f)) {
                 Text(
@@ -83,7 +87,7 @@ fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Mod
         }
         Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Dot(Palette.faction(content, me.faction), 10)
+            FactionBadge(content, me.faction, 24)
             Spacer(Modifier.width(6.dp))
             Text(me.name, color = LisbonColors.OldPaper, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             Text(names.money(me.money), color = LisbonColors.StreetLamp, fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
@@ -94,28 +98,36 @@ fun Hud(ui: GameUi, content: GameContent, names: Names, modifier: Modifier = Mod
                 contentDescription = "Suspicion ${me.suspicion}/${b.suspicion.limit}"
             })
         }
-        ui.log.lastOrNull()?.let {
+        if (!compact) ui.log.lastOrNull()?.let {
             Text(it.text, color = LisbonColors.PaperMuted, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
 
-/** Lencana faksi orisinal: medali bulat warna aksen dengan inisial organisasi. */
+/** Potret agen faksi (digambar, desain orisinal) dengan bingkai warna faksi; label organisasi bila cukup besar. */
 @Composable
-fun FactionBadge(content: GameContent, f: Faction, size: Int) {
+fun FactionBadge(content: GameContent, f: Faction, size: Int, highlight: Boolean = false) {
     val color = Palette.faction(content, f)
     val org = content.faction(f).organization
-    Box(
-        Modifier
-            .size(size.dp)
-            .clip(CircleShape)
-            .background(Brush.radialGradient(listOf(color, color.copy(alpha = 0.6f), LisbonColors.Ink)))
-            .border(2.dp, LisbonColors.StreetLamp, CircleShape)
-            .semantics { contentDescription = org },
-        contentAlignment = Alignment.Center,
-    ) {
-        // Ukuran tetap (tidak ikut skala teks) agar inisial muat di medali.
-        Text(org.take(4), color = Palette.onColor(color), fontSize = with(LocalDensity.current) { (size / 3.4).dp.toSp() }, fontWeight = FontWeight.Black, maxLines = 1, softWrap = false)
+    Box(contentAlignment = Alignment.BottomCenter) {
+        Portrait(
+            Portraits.agent(f),
+            size.dp,
+            ring = if (highlight) LisbonColors.StreetLamp else color.lighten(0.25f),
+            ringWidth = if (size >= 40) 3.dp else 2.dp,
+            description = org,
+        )
+        if (size >= 44) {
+            Text(
+                org,
+                color = Palette.onColor(color),
+                fontSize = with(LocalDensity.current) { (size / 6.5).dp.toSp() },
+                fontWeight = FontWeight.Black,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.clip(RoundedCornerShape(3.dp)).background(color).padding(horizontal = 4.dp),
+            )
+        }
     }
 }
 
@@ -158,7 +170,7 @@ fun PlayersPanel(ui: GameUi, content: GameContent, names: Names) {
             val me = v.me
             PaperCard(Modifier.fillMaxWidth(), accent = Palette.faction(content, me.faction)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Dot(Palette.faction(content, me.faction), 12)
+                    FactionBadge(content, me.faction, 52, highlight = v.currentPlayer == me.id)
                     Spacer(Modifier.width(6.dp))
                     Text("${me.name} (${stringResource(R.string.players_you)}) — ${names.factionShort(me.faction)}", fontWeight = FontWeight.Bold)
                 }
@@ -185,7 +197,7 @@ fun PlayersPanel(ui: GameUi, content: GameContent, names: Names) {
             val color = Palette.faction(content, o.faction)
             PaperCard(Modifier.fillMaxWidth(), accent = color) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Dot(color, 12)
+                    FactionBadge(content, o.faction, 52, highlight = o.id == v.currentPlayer)
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "${o.name} — ${names.factionShort(o.faction)}" + if (o.isBot) " · BOT" else "",

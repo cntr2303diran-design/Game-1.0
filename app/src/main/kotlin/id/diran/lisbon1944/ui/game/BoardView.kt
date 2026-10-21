@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,6 +74,8 @@ import id.diran.lisbon1944.session.BoardGeometry
 import id.diran.lisbon1944.session.Names
 import id.diran.lisbon1944.session.RentTable
 import id.diran.lisbon1944.ui.common.Palette
+import id.diran.lisbon1944.ui.common.Portrait
+import id.diran.lisbon1944.ui.common.Portraits
 import id.diran.lisbon1944.ui.common.districtPattern
 import id.diran.lisbon1944.ui.theme.LisbonColors
 import id.diran.lisbon1944.ui.theme.LocalUiPrefs
@@ -181,7 +185,6 @@ private fun BoardViewInner(
 
     BoxWithConstraints(
         modifier
-            .aspectRatio(1f)
             .clipToBounds()
             .background(Brush.radialGradient(listOf(LisbonColors.TagusBlue, Color(0xFF1B2E3F))))
             .pointerInput(Unit) {
@@ -189,29 +192,35 @@ private fun BoardViewInner(
                     val s = (scale * zoom).coerceIn(1f, 3.2f)
                     scale = s
                     if (p != Offset.Zero) follow = false
-                    val limit = size.width * (s - 1f) / 2f
-                    manualPan = Offset((manualPan.x + p.x).coerceIn(-limit, limit), (manualPan.y + p.y).coerceIn(-limit, limit))
+                    val lx = size.width * (s - 1f) / 2f
+                    val ly = size.height * (s - 1f) / 2f
+                    manualPan = Offset((manualPan.x + p.x).coerceIn(-lx, lx), (manualPan.y + p.y).coerceIn(-ly, ly))
                 }
             },
     ) {
-        val side = if (maxWidth < maxHeight) maxWidth else maxHeight
-        val cell: Dp = side / BoardGeometry.GRID
-        val sidePx = with(LocalDensity.current) { side.toPx() }
+        // Papan mengisi seluruh ruang yang diberikan: petak boleh persegi panjang (lebih lebar di lanskap).
+        val boardW = maxWidth
+        val boardH = maxHeight
+        val cellW: Dp = boardW / BoardGeometry.GRID
+        val cellH: Dp = boardH / BoardGeometry.GRID
+        val density = LocalDensity.current
+        val wPx = with(density) { boardW.toPx() }
+        val hPx = with(density) { boardH.toPx() }
         // Kamera mengikuti pion aktif saat diperbesar.
         val active = shownPos[view.currentPlayer.value] ?: view.me.position
         val ac = BoardGeometry.cell(active)
-        val cellPx = sidePx / BoardGeometry.GRID
-        val limit = sidePx * (scale - 1f) / 2f
+        val lx = wPx * (scale - 1f) / 2f
+        val ly = hPx * (scale - 1f) / 2f
         val followPan = Offset(
-            (-((ac.col + 0.5f) * cellPx - sidePx / 2f) * scale).coerceIn(-limit, limit),
-            (-((ac.row + 0.5f) * cellPx - sidePx / 2f) * scale).coerceIn(-limit, limit),
+            (-((ac.col + 0.5f) * wPx / BoardGeometry.GRID - wPx / 2f) * scale).coerceIn(-lx, lx),
+            (-((ac.row + 0.5f) * hPx / BoardGeometry.GRID - hPx / 2f) * scale).coerceIn(-ly, ly),
         )
         val animatedFollow by animateOffsetAsState(followPan, tween(400), label = "camera")
         val pan = if (follow && scale > 1.01f) animatedFollow else manualPan
 
         Box(
             Modifier
-                .size(side)
+                .size(boardW, boardH)
                 .offset { IntOffset(shake.value.roundToInt(), 0) }
                 .graphicsLayer(scaleX = scale, scaleY = scale, translationX = pan.x, translationY = pan.y),
         ) {
@@ -226,9 +235,11 @@ private fun BoardViewInner(
                     pawns = positions[i].orEmpty(),
                     highlighted = i in highlight || i == selected,
                     colorBlind = prefs.colorBlind,
+                    cellW = cellW,
+                    cellH = cellH,
                     modifier = Modifier
-                        .offset(x = cell * c.col, y = cell * c.row)
-                        .size(cell),
+                        .offset(x = cellW * c.col, y = cellH * c.row)
+                        .size(cellW, cellH),
                     onClick = {
                         selected = if (selected == i) null else i
                         onTileTap?.invoke(i)
@@ -237,14 +248,14 @@ private fun BoardViewInner(
             }
             Box(
                 Modifier
-                    .offset(x = cell, y = cell)
-                    .size(cell * 9)
+                    .offset(x = cellW, y = cellH)
+                    .size(cellW * 9, cellH * 9)
                     .padding(4.dp),
             ) {
-                BoardCenter(view, content, names, selected, factions, onClear = { selected = null })
+                BoardCenter(view, content, names, selected, factions, wide = cellW > cellH * 1.15f, onClear = { selected = null })
             }
         }
-        Row(Modifier.align(Alignment.TopEnd).padding(top = cell + 6.dp, end = cell + 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.align(Alignment.TopEnd).padding(top = cellH + 6.dp, end = cellW + 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (scale > 1.01f) {
                 MiniChip(if (follow) "◎" else "○", stringResource(R.string.board_follow)) { follow = !follow }
                 MiniChip("⤢", stringResource(R.string.board_reset)) {
@@ -282,9 +293,18 @@ private fun TileBox(
     pawns: List<Int>,
     highlighted: Boolean,
     colorBlind: Boolean,
+    cellW: Dp,
+    cellH: Dp,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
+    // Ukuran teks & pion mengikuti ukuran petak (papan besar = teks besar).
+    val unit = minOf(cellW.value, cellH.value * 1.25f)
+    val nameSp = (unit / 6.2f).coerceIn(5.5f, 12f).sp
+    val glyphSp = (unit / 3.6f).coerceIn(9f, 20f).sp
+    val smallSp = (unit / 7.5f).coerceIn(5f, 10f).sp
+    val stripH = (cellH.value / 7f).coerceIn(5f, 10f).dp
+    val pawnDp = (minOf(cellW.value, cellH.value) * 0.5f).coerceIn(10f, 30f).dp
     val own = view.ownership[tile.index]
     val sealed = view.sealedTiles.containsKey(tile.index)
     val ownerName = own?.let { o -> if (o.ownerId == view.me.id) view.me.name else view.opponents.firstOrNull { it.id == o.ownerId }?.name }
@@ -312,24 +332,24 @@ private fun TileBox(
                 is PropertyTile -> Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(if (colorBlind) 8.dp else 6.dp)
+                        .height(if (colorBlind) stripH + 2.dp else stripH)
                         .background(Palette.district(tile.district))
                         .then(if (colorBlind) Modifier.districtPattern(tile.district, LisbonColors.OldPaper) else Modifier),
                 ) {
                     if (colorBlind) Text(Palette.districtIcon(tile.district), fontSize = 6.sp, lineHeight = 6.sp, color = LisbonColors.OldPaper, modifier = Modifier.align(Alignment.Center))
                 }
-                is EscapeRouteTile -> Box(Modifier.fillMaxWidth().height(6.dp).background(LisbonColors.TagusBlue))
+                is EscapeRouteTile -> Box(Modifier.fillMaxWidth().height(stripH).background(LisbonColors.TagusBlue))
                 is SpecialTile -> Unit
             }
             if (tile is SpecialTile) {
-                Text(specialGlyph(tile.kind), fontSize = 11.sp, color = LisbonColors.FolderRed, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text(specialGlyph(tile.kind), fontSize = glyphSp, lineHeight = glyphSp, color = LisbonColors.FolderRed, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             } else if (tile is EscapeRouteTile) {
-                Text("⛴", fontSize = 9.sp, color = LisbonColors.TagusBlue, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text("⛴", fontSize = glyphSp * 0.8f, lineHeight = glyphSp * 0.8f, color = LisbonColors.TagusBlue, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }
             Text(
                 names.tile(tile.index),
-                fontSize = 6.sp,
-                lineHeight = 7.sp,
+                fontSize = nameSp,
+                lineHeight = nameSp * 1.12f,
                 color = LisbonColors.Ink,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -343,14 +363,14 @@ private fun TileBox(
                     own.level > 0 -> "⌂".repeat(own.level)
                     else -> "⚑"
                 }
-                Box(Modifier.fillMaxWidth().height(8.dp).background(ownerColor ?: LisbonColors.Ink)) {
-                    Text(marks, fontSize = 6.sp, lineHeight = 7.sp, color = LisbonColors.OldPaper, modifier = Modifier.align(Alignment.Center))
+                Box(Modifier.fillMaxWidth().height(stripH + 3.dp).background(ownerColor ?: LisbonColors.Ink)) {
+                    Text(marks, fontSize = smallSp, lineHeight = smallSp, color = Palette.onColor(ownerColor ?: LisbonColors.Ink), modifier = Modifier.align(Alignment.Center))
                 }
             } else if (tile is PropertyTile || tile is EscapeRouteTile) {
                 Text(
                     names.money((tile as? PropertyTile)?.price ?: (tile as EscapeRouteTile).price).removeSuffix(" esc"),
-                    fontSize = 5.sp,
-                    lineHeight = 6.sp,
+                    fontSize = smallSp,
+                    lineHeight = smallSp,
                     color = LisbonColors.InkMuted,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -371,24 +391,23 @@ private fun TileBox(
         if (view.patrolPos == tile.index) PawnToken("P", LisbonColors.Ink, Modifier.align(Alignment.CenterStart))
         if (view.contactPos == tile.index) PawnToken("K", LisbonColors.Olive, Modifier.align(Alignment.CenterEnd))
         if (pawns.isNotEmpty()) {
-            Row(Modifier.align(Alignment.Center).padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(1.dp)) {
-                pawns.forEach { seat ->
-                    val color = Palette.faction(content, factions[seat] ?: Faction.MI6)
+            // Pion = potret agen; bertumpuk sedikit bila beberapa pemain di petak yang sama.
+            val step = pawnDp * (if (pawns.size > 2) 0.55f else 0.8f)
+            Box(Modifier.align(Alignment.Center).padding(top = stripH), contentAlignment = Alignment.Center) {
+                pawns.forEachIndexed { k, seat ->
+                    val f = factions[seat] ?: Faction.MI6
                     val isTurn = seat == view.currentPlayer.value
-                    Box(
-                        Modifier
-                            .size(if (isTurn) 12.dp else 9.dp)
-                            .then(if (isTurn) Modifier.background(Brush.radialGradient(listOf(LisbonColors.StreetLamp.copy(alpha = 0.7f), Color.Transparent)), CircleShape) else Modifier)
-                            .padding(if (isTurn) 1.5.dp else 0.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .border(1.dp, if (seat == view.me.id.value) LisbonColors.StreetLamp else LisbonColors.OldPaper, CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (LocalUiPrefs.current.colorBlind) {
-                            Text(factions[seat]?.name?.take(1).orEmpty(), fontSize = 5.sp, lineHeight = 5.sp, color = LisbonColors.OldPaper)
-                        }
-                    }
+                    Portrait(
+                        Portraits.agent(f),
+                        if (isTurn) pawnDp * 1.15f else pawnDp,
+                        ring = when {
+                            isTurn -> LisbonColors.StreetLamp
+                            seat == view.me.id.value -> LisbonColors.OldPaper
+                            else -> Palette.faction(content, f)
+                        },
+                        ringWidth = if (isTurn) 2.dp else 1.5.dp,
+                        modifier = Modifier.offset(x = step * (k - (pawns.size - 1) / 2f)),
+                    )
                 }
             }
         }
@@ -399,11 +418,11 @@ private fun TileBox(
 private fun PawnToken(label: String, color: Color, modifier: Modifier) {
     Box(
         modifier
-            .size(10.dp)
+            .size(13.dp)
             .clip(RoundedCornerShape(2.dp))
             .background(color),
         contentAlignment = Alignment.Center,
-    ) { Text(label, fontSize = 6.sp, lineHeight = 6.sp, color = LisbonColors.OldPaper, fontWeight = FontWeight.Bold) }
+    ) { Text(label, fontSize = 7.sp, lineHeight = 7.sp, color = LisbonColors.OldPaper, fontWeight = FontWeight.Bold) }
 }
 
 @Composable
@@ -413,45 +432,115 @@ private fun BoardCenter(
     names: Names,
     selected: Int?,
     factions: Map<Int, Faction>,
+    wide: Boolean,
     onClear: () -> Unit,
 ) {
-    Column(
+    Box(
         Modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(4.dp))
-            .background(LisbonColors.Ink.copy(alpha = 0.35f))
-            .verticalScroll(rememberScrollState())
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .background(LisbonColors.Ink.copy(alpha = 0.35f)),
     ) {
         if (selected != null) {
-            TileDetail(selected, view, content, names, factions, onClear)
-            return@Column
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(8.dp)) {
+                TileDetail(selected, view, content, names, factions, onClear)
+            }
+            return@Box
         }
-        val front = runCatching { content.front(view.activeFront) }.getOrNull()
-        Text(stringResource(R.string.title_main), color = LisbonColors.OldPaper, fontFamily = PosterFamily, fontWeight = FontWeight.Black, fontSize = 15.sp, letterSpacing = 3.sp)
-        Text(stringResource(R.string.hud_war_clock, view.warStep), color = LisbonColors.StreetLamp, fontSize = 11.sp)
-        WarTrack(view.warStep)
-        if (front != null) {
-            Spacer(Modifier.height(4.dp))
+        if (wide) {
+            Row(Modifier.fillMaxSize().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+                    CenterWarInfo(view, content, names)
+                }
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Roster(view, content, names, factions)
+                    Spacer(Modifier.height(6.dp))
+                    Piles(view, names)
+                }
+            }
+        } else {
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(3.dp)).background(LisbonColors.OldPaper).padding(6.dp),
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(front.month.uppercase(), color = LisbonColors.FolderRed, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                Text(names.front(front.id.value), color = LisbonColors.Ink, fontSize = 11.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2)
-                Text(names.frontText(front.id.value), color = LisbonColors.InkMuted, fontSize = 8.sp, lineHeight = 10.sp, textAlign = TextAlign.Center, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                CenterWarInfo(view, content, names)
+                Spacer(Modifier.height(6.dp))
+                Roster(view, content, names, factions)
+                Spacer(Modifier.height(6.dp))
+                Piles(view, names)
             }
         }
-        view.passesToNextStep?.let {
-            Text(stringResource(R.string.hud_passes, it), color = LisbonColors.PaperMuted, fontSize = 9.sp, textAlign = TextAlign.Center)
-        }
+    }
+}
+
+@Composable
+private fun CenterWarInfo(view: PlayerView, content: GameContent, names: Names) {
+    val front = runCatching { content.front(view.activeFront) }.getOrNull()
+    Text(stringResource(R.string.title_main), color = LisbonColors.OldPaper, fontFamily = PosterFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 3.sp)
+    Text(stringResource(R.string.hud_war_clock, view.warStep), color = LisbonColors.StreetLamp, fontSize = 12.sp)
+    WarTrack(view.warStep)
+    if (front != null) {
         Spacer(Modifier.height(4.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            DeckPile("⌗", view.cipherDeckSize, LisbonColors.Olive)
-            DeckPile("✉", view.telegramDeckSize, LisbonColors.TagusBlue)
-            VaultBadge(view.casinoVault, names)
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(3.dp)).background(LisbonColors.OldPaper).padding(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(front.month.uppercase(), color = LisbonColors.FolderRed, fontSize = 10.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
+            Text(names.front(front.id.value), color = LisbonColors.Ink, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2)
+            Text(names.frontText(front.id.value), color = LisbonColors.InkMuted, fontSize = 10.sp, lineHeight = 12.sp, textAlign = TextAlign.Center, maxLines = 4, overflow = TextOverflow.Ellipsis)
         }
+    }
+    view.passesToNextStep?.let {
+        Text(stringResource(R.string.hud_passes, it), color = LisbonColors.PaperMuted, fontSize = 10.sp, textAlign = TextAlign.Center)
+    }
+}
+
+/** Daftar agen di tengah papan: potret, nama, uang; giliran aktif disorot. */
+@Composable
+private fun Roster(view: PlayerView, content: GameContent, names: Names, factions: Map<Int, Faction>) {
+    data class Row4(val seat: Int, val name: String, val money: Int, val out: Boolean)
+    val rows = listOf(Row4(view.me.id.value, view.me.name, view.me.money, view.me.bankrupt)) +
+        view.opponents.map { Row4(it.id.value, it.name, it.money, it.bankrupt) }
+    Column(verticalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.fillMaxWidth()) {
+        rows.sortedBy { it.seat }.forEach { r ->
+            val f = factions[r.seat] ?: Faction.MI6
+            val turn = r.seat == view.currentPlayer.value
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(if (turn) LisbonColors.StreetLamp.copy(alpha = 0.25f) else LisbonColors.Ink.copy(alpha = 0.35f))
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Portrait(Portraits.agent(f), 28.dp, ring = if (turn) LisbonColors.StreetLamp else Palette.faction(content, f), ringWidth = 2.dp)
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    r.name + if (r.seat == view.me.id.value) " ★" else "",
+                    color = if (r.out) LisbonColors.PaperMuted else LisbonColors.OldPaper,
+                    fontSize = 12.sp,
+                    fontWeight = if (turn) FontWeight.Bold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    if (r.out) "✗" else names.money(r.money).removeSuffix(" esc"),
+                    color = LisbonColors.StreetLamp,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Piles(view: PlayerView, names: Names) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        DeckPile("⌗", view.cipherDeckSize, LisbonColors.Olive)
+        DeckPile("✉", view.telegramDeckSize, LisbonColors.TagusBlue)
+        VaultBadge(view.casinoVault, names)
     }
 }
 

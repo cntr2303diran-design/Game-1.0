@@ -45,7 +45,10 @@ import id.diran.lisbon1944.session.Lang
 import id.diran.lisbon1944.session.LogKind
 import id.diran.lisbon1944.session.Names
 import id.diran.lisbon1944.ui.GameUi
+import id.diran.lisbon1944.ui.common.EvidenceThumb
 import id.diran.lisbon1944.ui.common.LisbonDialog
+import id.diran.lisbon1944.ui.common.Portrait
+import id.diran.lisbon1944.ui.common.Portraits
 import id.diran.lisbon1944.ui.common.PaperCard
 import id.diran.lisbon1944.ui.common.Palette
 import id.diran.lisbon1944.ui.common.SectionTitle
@@ -132,9 +135,9 @@ private fun NotebookGrid(ui: GameUi, content: GameContent, names: Names, notes: 
             Column {
                 // Kepala kolom.
                 Row {
-                    Box(Modifier.width(LABEL_W.dp).height(36.dp))
+                    Box(Modifier.width((LABEL_W + CELL).dp).height(36.dp))
                     seats.forEach { s ->
-                        HeaderCell(ui.playerNames[s] ?: "P${s + 1}", Palette.faction(content, seatFactions(v)[s] ?: v.me.faction))
+                        HeaderCell(ui.playerNames[s] ?: "P${s + 1}", Palette.faction(content, seatFactions(v)[s] ?: v.me.faction), seatFactions(v)[s])
                     }
                     HeaderCell("✉", LisbonColors.FolderRed)
                     if (poss != null) HeaderCell("%", LisbonColors.StreetLamp)
@@ -155,6 +158,9 @@ private fun NotebookGrid(ui: GameUi, content: GameContent, names: Names, notes: 
                         val embassy = holder is Holder.Embassy || card.id in v.embassyCards
                         val note = notes.marks["${card.id.value}|note"]
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(CELL.dp).background(LisbonColors.OldPaper), contentAlignment = Alignment.Center) {
+                                EvidenceThumb(content, card.id, 36.dp)
+                            }
                             Column(
                                 Modifier
                                     .width(LABEL_W.dp)
@@ -252,11 +258,15 @@ private fun sourceGlyph(s: KnowledgeSource): String = when (s) {
 }
 
 @Composable
-private fun HeaderCell(label: String, color: androidx.compose.ui.graphics.Color) {
+private fun HeaderCell(label: String, color: androidx.compose.ui.graphics.Color, faction: id.diran.lisbon1944.engine.model.Faction? = null) {
     Box(
         Modifier.size(width = CELL.dp, height = 36.dp).background(color).padding(2.dp),
         contentAlignment = Alignment.Center,
     ) {
+        if (faction != null) {
+            Portrait(Portraits.agent(faction), 34.dp, ring = color, ringWidth = 1.dp, modifier = Modifier.align(Alignment.Center))
+            return@Box
+        }
         Text(label, fontSize = 9.sp, lineHeight = 10.sp, color = Palette.onColor(color), maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold)
     }
 }

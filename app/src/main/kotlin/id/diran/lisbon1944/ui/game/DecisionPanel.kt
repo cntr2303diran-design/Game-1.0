@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -46,6 +47,7 @@ import id.diran.lisbon1944.session.ActionText
 import id.diran.lisbon1944.session.Choices
 import id.diran.lisbon1944.session.Names
 import id.diran.lisbon1944.ui.GameUi
+import id.diran.lisbon1944.ui.common.EvidenceThumb
 import id.diran.lisbon1944.ui.common.KeyValue
 import id.diran.lisbon1944.ui.common.LisbonDialog
 import id.diran.lisbon1944.ui.common.PaperCard
@@ -286,7 +288,11 @@ private fun RentPanel(ctx: DecisionCtx, d: PendingDecision.RentChoice) {
 @Composable
 private fun EvidenceButton(ctx: DecisionCtx, card: CardId, modifier: Modifier, selected: Boolean = false, onClick: () -> Unit) {
     val type = runCatching { ctx.content.evidence(card).type }.getOrDefault(EvidenceType.ITEM)
-    ToggleTag(ctx.names.card(card), selected, onClick, modifier, accent = Palette.evidence(type), sub = ctx.names.type(type))
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        EvidenceThumb(ctx.content, card, 40.dp)
+        Spacer(Modifier.width(4.dp))
+        ToggleTag(ctx.names.card(card), selected, onClick, Modifier.weight(1f), accent = Palette.evidence(type), sub = ctx.names.type(type))
+    }
 }
 
 @Composable
@@ -322,13 +328,17 @@ private fun PickGroup(ctx: DecisionCtx, title: String, cards: List<CardId>, isSe
     SectionTitle(title)
     WrapGrid(cards, 2) { c, m ->
         val type = runCatching { ctx.content.evidence(c).type }.getOrDefault(EvidenceType.ITEM)
-        ToggleTag(
-            (if (knownElsewhere(ctx.view, c)) "✓ " else "") + ctx.names.card(c),
-            isSel(c),
-            { toggle(c) },
-            m,
-            accent = Palette.evidence(type),
-        )
+        Row(m, verticalAlignment = Alignment.CenterVertically) {
+            EvidenceThumb(ctx.content, c, 40.dp)
+            Spacer(Modifier.width(4.dp))
+            ToggleTag(
+                (if (knownElsewhere(ctx.view, c)) "✓ " else "") + ctx.names.card(c),
+                isSel(c),
+                { toggle(c) },
+                Modifier.weight(1f),
+                accent = Palette.evidence(type),
+            )
+        }
     }
 }
 

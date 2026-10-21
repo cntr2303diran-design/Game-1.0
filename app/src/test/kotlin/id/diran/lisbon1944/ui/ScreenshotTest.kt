@@ -25,6 +25,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import java.io.FileOutputStream
 
 /**
@@ -147,6 +150,31 @@ class ScreenshotTest {
         shot("30-end")
         vm.go(Screen.ARCHIVE); idle(); shot("31-archive")
         assertTrue(vm.archive.isNotEmpty())
+    }
+
+    @Test
+    fun renderPortraitGallery() {
+        rule.setContent {
+            androidx.compose.foundation.layout.Column(
+                androidx.compose.ui.Modifier.background(id.diran.lisbon1944.ui.theme.LisbonColors.Ink).padding(12.dp),
+            ) {
+                val agents = id.diran.lisbon1944.engine.model.Faction.entries
+                for (row in agents.chunked(4)) {
+                    androidx.compose.foundation.layout.Row {
+                        row.forEach { f ->
+                            id.diran.lisbon1944.ui.common.Portrait(id.diran.lisbon1944.ui.common.Portraits.agent(f), 92.dp, androidx.compose.ui.Modifier.padding(4.dp))
+                        }
+                    }
+                }
+                androidx.compose.foundation.layout.Row {
+                    for (k in 1..6) {
+                        val spec = id.diran.lisbon1944.ui.common.Portraits.suspect(id.diran.lisbon1944.engine.model.CardId("S$k"))!!
+                        id.diran.lisbon1944.ui.common.Portrait(spec, 60.dp, androidx.compose.ui.Modifier.padding(3.dp))
+                    }
+                }
+            }
+        }
+        shot("00-portraits")
     }
 
     @Test
