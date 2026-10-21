@@ -74,6 +74,8 @@ engine/src/main/resources/content/
 
 ## Unduh & pasang
 
+**Unduh APK terbaru:** https://github.com/cntr2303diran-design/Game-1.0/releases/latest/download/Lisbon1944.apk
+
 Setiap push ke `main` menghasilkan dua APK di tab **Actions** (build terbaru → *Artifacts*):
 
 - `lisbon1944-release-apk` — APK rilis (R8). Tanpa kunci rilis di secret repo, APK ditandatangani kunci debug
